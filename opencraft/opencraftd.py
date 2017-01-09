@@ -44,25 +44,41 @@ GAME_DIFF_HARD     = 3
 
 MAX_ENTS = 999999
 
+CHATMODE_ENABLED = 0
+CHATMODE_CMDONLY = 1
+CHATMODE_HIDDEN  = 2
+
 class PlayerData:
-   def __init__(self,display_name=None,player_uuid=None,game_mode=0,dimension=0,difficulty=0):
+   def __init__(self,display_name=None,player_uuid=None,game_mode=0,dimension=0,difficulty=0,view_dist=4,chatmode=0):
        self.display_name = display_name
        self.uuid         = player_uuid
        self.game_mode    = game_mode
        self.dimension    = dimension
        self.difficulty   = difficulty
        self.ent_id       = 0
+       self.view_dist    = view_dist
+       self.chatmode     = chatmode
+       self.cur_pos      = (0.0,0.0,0.0) # this should be replaced ASAP
+       self.cur_yaw      = 0.0
+       self.cur_pitch    = 0.0
+       self.pending_tps  = set()
    def get_entity_id(self):
        if self.ent_id == 0:
           self.ent_id = random.randint(0,MAX_ENTS)
        return self.ent_id
 
 class GameState:
-   def __init__(self,global_mode=GAME_MODE_CREATIVE,global_difficulty=GAME_DIFF_PEACEFUL):
+   def __init__(self,global_mode=GAME_MODE_CREATIVE,global_difficulty=GAME_DIFF_PEACEFUL,spawn_pos=(128.0,63.0,128.0)):
        self.global_mode       = global_mode
        self.global_difficulty = global_difficulty
        self.players           = set()
        self.existing_ent_ids  = set()
+       self.spawn_pos         = spawn_pos
+       self.dimensions        = {}
+   def get_chunk_data(self,dimension,chunk_x,chunk_z):
+       """Returns chunk data for the specified chunk
+       """
+       pass
    def add_player(self,player):
        """Add a new player to the game state
 
@@ -77,8 +93,42 @@ class GameState:
              player.ent_id = 0
        self.existing_ent_ids.add(player.get_entity_id())
        self.players.add(player)
+       player.cur_pos = self.spawn_pos
 
 class OpenCraftProtocol(ServerProtocol):
+   def pack_pos(self,pos_x,pos_y,pos_z):
+       val = (int(pos_x)  & 0x3FFFFFF) << 38
+       val |= (int(pos_y) & 0xFFF) << 26
+       val |= (int(pos_z) & 0x3FFFFFF)
+       return self.buff_type.pack('Q',val)
+   def encode_chunk(self,chunk_data):
+       """Encodes a chunk into a packet-ready format
+       """
+       pass
+   def packet_client_settings(self,buff):
+       locale         = buff.unpack_string()
+       view_distance  = buff.unpack('b')
+       chat_mode      = buff.unpack_varint()
+       chat_colors    = buff.unpack('?')
+       displayed_skin = buff.unpack('B')
+       main_hand      = buff.unpack_varint()
+
+       self.player_data.view_dist = view_distance
+   def send_poslook(self):
+       pos_x,pos_y,pos_z = self.player_data.cur_pos
+       yaw               = self.player_data.cur_yaw
+       pitch             = self.player_data.cur_pitch
+       tp_id             = random.randint(1,9999999)
+       self.player_data.pending_tps.add(tp_id)
+       self.send_packet("player_position_and_look",self.buff_type.pack('d',pos_x)+
+                                                   self.buff_type.pack('d',pos_y)+
+                                                   self.buff_type.pack('d',pos_z)+
+                                                   self.buff_type.pack('f',yaw)+
+                                                   self.buff_type.pack('f',pitch)+
+                                                   self.buff_type.pack('b',0)+
+                                                   self.buff_type.pack_varint(tp_id))
+   def packet_teleport_confirm(self,buff):
+       self.player_data.pending_tps.discard(buff.unpack_varint())
    def player_joined(self):
        ServerProtocol.player_joined(self)
        self.factory.logger.info('%s has joined' % self.display_name)
@@ -95,6 +145,8 @@ class OpenCraftProtocol(ServerProtocol):
                                     self.buff_type.pack('B',100)+
                                     self.buff_type.pack_string('default')+
                                     self.buff_type.pack('?',True))
+       self.send_packet("spawn_position",self.pack_pos(*self.factory.game_state.spawn_pos))
+       self.send_poslook()
 
 class OpenCraftFactory(ServerFactory):
    protocol    = OpenCraftProtocol
