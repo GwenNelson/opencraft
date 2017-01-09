@@ -30,6 +30,12 @@ DIMENSION_END = 0x01
 def mapshort2id(data):
     return data >> 4, data & 0x0F
 
+def gen_heightmap(w,h):
+    retval = {}
+    for x in xrange(w):
+        for z in xrange(h):
+            retval[(x,z)] = 63
+    return retval
 
 class BlockEntityData(object):
     def __init__(self, nbt):

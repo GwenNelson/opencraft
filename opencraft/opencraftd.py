@@ -66,8 +66,8 @@ class PlayerData:
        self.cur_pitch    = 0.0
        self.pending_tps  = set()
    def get_cur_chunk(self):
-       rx,chunk_x = divmod(int(floor(self.cur_pos[0])),16)
-       rz,chunk_z = divmod(int(floor(self.cur_pos[2])),16)
+       chunk_x,rx = divmod(int(floor(self.cur_pos[0])),16)
+       chunk_z,rz = divmod(int(floor(self.cur_pos[2])),16)
        return (chunk_x,chunk_z)
    def get_entity_id(self):
        if self.ent_id == 0:
@@ -81,14 +81,40 @@ class GameState:
        self.players           = set()
        self.existing_ent_ids  = set()
        self.spawn_pos         = spawn_pos
-       self.dimensions        = {}
        self.logger            = logger
-   def setup_map(self):
-       self.logger.info('Creating default map...')
+   def setup_map(self,chunk_w=4,chunk_h=4):
+       self.logger.info('Creating map of size %sX%s chunks:',str(chunk_w),str(chunk_h))
 
-       self.logger.info('Created spawn chunk')
-       self.logger.debug('%s',str(self.dimensions[GAME_DIMENSION_OVERWORLD].columns.keys()))
+       self.logger.info(' [+] Generating blank chunk columns')
+       self.chunk_columns={}
 
+       for x in xrange(chunk_w):
+           for z in xrange(chunk_h):
+               self.chunk_columns[(x,z)] = {}
+               for y in xrange(16):
+                   self.chunk_columns[(x,z)][y] = {}
+                   for rx in xrange(16):
+                       for ry in xrange(16):
+                           for rz in xrange(16):
+                               self.chunk_columns[(x,z)][y][(rx,ry,rz)] = (0,0,[]) # block id, block damage value - air by default
+       
+       
+       
+       self.logger.info(' [+] Generating heightmap for %sX%s blocks',str(chunk_w*16),str(chunk_h*16))
+       height_map = smpmap.gen_heightmap(chunk_w*16,chunk_h*16)
+
+       self.logger.info(' [+] Building dirt for %sX%s blocks',str(chunk_w*16),str(chunk_h*16))
+       max_x = chunk_w*16
+       max_z = chunk_h*16
+       for x in xrange(max_x):
+           for z in xrange(max_z):
+               chunk_x,rx = divmod(x,16)
+               chunk_z,rz = divmod(z,16)
+               for y in xrange(height_map[(x,z)]):
+                   chunk_y,ry = divmod(y,16)
+                   self.chunk_columns[(chunk_x,chunk_z)][chunk_y][(rx,ry,rz)] = (3,0,[]) # dirt
+
+       self.logger.info('Generated map!')
    def add_player(self,player):
        """Add a new player to the game state
 
@@ -105,12 +131,57 @@ class GameState:
        self.players.add(player)
        player.cur_pos = self.spawn_pos
 
+def get_section_data():
+    # this is insane
+    fd = open('/dev/urandom','rb')
+    retval = fd.read(4096)
+    fd.close()
+    return retval
+
+def get_light_data():
+    fd = open('/dev/urandom','rb')
+    retval = fd.read(16*16*8)
+    fd.close()
+    return retval
+
 class OpenCraftProtocol(ServerProtocol):
    def pack_pos(self,pos_x,pos_y,pos_z):
        val = (int(pos_x)  & 0x3FFFFFF) << 38
        val |= (int(pos_y) & 0xFFF) << 26
        val |= (int(pos_z) & 0x3FFFFFF)
        return self.buff_type.pack('Q',val)
+   def gen_chunk_data(self,chunk_x,chunk_z):
+       self.logger.info('Generate chunk_data packet for %sX%s',str(chunk_x),str(chunk_z))
+       retval  = ''
+       retval += self.buff_type.pack('i',chunk_x)
+       retval += self.buff_type.pack('i',chunk_z)
+       retval += self.buff_type.pack('?',True)      # ground up
+       retval += self.buff_type.pack_varint(65535)  # mask
+
+       chunk_sections = ''
+       for chunk_y in xrange(16):
+           chunk_sections += self.buff_type.pack('b',13) # 13 bits per block
+           chunk_sections += self.buff_type.pack_varint(0)         # pal length of 0
+           chunk_sections += self.buff_type.pack_varint(4096)      # 4096 bytes for the block data
+           chunk_sections += get_section_data()             # placeholder for block data
+           chunk_sections += get_light_data()               # placeholder for light data
+
+       retval += self.buff_type.pack_varint(len(chunk_sections))
+       retval += chunk_sections
+
+       retval += self.buff_type.pack_varint(0) # no entities
+
+       return retval
+   def send_chunk_column(self,chunk_x,chunk_z):
+       if not self.factory.chunk_data.has_key((chunk_x,chunk_z)):
+          self.factory.chunk_data[(chunk_x,chunk_z)] = self.gen_chunk_data(chunk_x,chunk_z)
+       self.send_packet("chunk_data",self.factory.chunk_data[(chunk_x,chunk_z)])
+   def packet_player_look(self,buff):
+       new_yaw   = buff.unpack('f')
+       new_pitch = buff.unpack('f')
+       try_jump  = buff.unpack('?')
+       self.player_data.cur_yaw   = new_yaw
+       self.player_data.cur_pitch = new_pitch
    def packet_client_settings(self,buff):
        locale         = buff.unpack_string()
        view_distance  = buff.unpack('b')
@@ -118,22 +189,19 @@ class OpenCraftProtocol(ServerProtocol):
        chat_colors    = buff.unpack('?')
        displayed_skin = buff.unpack('B')
        main_hand      = buff.unpack_varint()
-
        self.player_data.view_dist = view_distance
-   def send_chunk_column(self,chunk_x,chunk_z):
-       
-   def send_poslook(self):
+       start_chunk = self.player_data.get_cur_chunk()
+       self.send_chunk_column(*start_chunk)
+   def send_poslook(self,tp_id=0):
        pos_x,pos_y,pos_z = self.player_data.cur_pos
        yaw               = self.player_data.cur_yaw
        pitch             = self.player_data.cur_pitch
-       tp_id             = random.randint(1,9999999)
-       self.player_data.pending_tps.add(tp_id)
        self.send_packet("player_position_and_look",self.buff_type.pack('d',pos_x)+
                                                    self.buff_type.pack('d',pos_y)+
                                                    self.buff_type.pack('d',pos_z)+
                                                    self.buff_type.pack('f',yaw)+
                                                    self.buff_type.pack('f',pitch)+
-                                                   self.buff_type.pack('b',0)+
+                                                   self.buff_type.pack('B',0)+
                                                    self.buff_type.pack_varint(tp_id))
    def packet_player_position_and_look(self,buff):
        new_x     = buff.unpack('d')
@@ -146,7 +214,12 @@ class OpenCraftProtocol(ServerProtocol):
        self.player_data.cur_pos   = (new_x,new_y,new_z)
        self.player_data.cur_yaw   = new_yaw
        self.player_data.cur_pitch = new_pitch
-       self.send_poslook()
+   def packet_player_position(self,buff):
+       new_x = buff.unpack('d')
+       new_y = buff.unpack('d')
+       new_z = buff.unpack('d')
+       try_jump = buff.unpack('?')
+       self.player_data.cur_pos = (new_x,new_y,new_z)
    def packet_teleport_confirm(self,buff):
        self.player_data.pending_tps.discard(buff.unpack_varint())
    def player_joined(self):
@@ -167,14 +240,17 @@ class OpenCraftProtocol(ServerProtocol):
                                     self.buff_type.pack('?',True))
        self.send_packet("spawn_position",self.pack_pos(*self.factory.game_state.spawn_pos))
        start_chunk = self.player_data.get_cur_chunk()
-       self.send_chunk_column(start_chunk[0],start_chunk[1])
-#       self.send_poslook()
+       for x in xrange(start_chunk[0]-1,start_chunk[0]+2):
+           for y in xrange(start_chunk[1]-1,start_chunk[1]+2):
+               self.send_chunk_column(x,y)
+       self.send_poslook(tp_id=random.randint(1000,999999))
 
 class OpenCraftFactory(ServerFactory):
    protocol    = OpenCraftProtocol
    motd        = 'OpenCraft server'
    online_mode = False
    log_level   = logging.DEBUG
+   chunk_data  = {}
 
 class OpenCraftServer(base_daemon.BaseDaemon):
    def run(self):
