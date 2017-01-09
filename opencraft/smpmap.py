@@ -172,6 +172,12 @@ class ChunkColumn(object):
         self.chunks = [None] * 16
         self.biome = BiomeData()
 
+    def pack(self):
+        chunk_data = [None] * 16
+        for chunk in xrange(16):
+            if not (self.chunks[chunk] is None):
+               print chunk
+
     def unpack(self, buff, mask, skylight=True, continuous=True):
         # In the protocol, each section is packed sequentially (i.e. attributes
         # pertaining to the same chunk are *not* grouped)

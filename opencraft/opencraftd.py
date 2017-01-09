@@ -83,20 +83,12 @@ class GameState:
        self.spawn_pos         = spawn_pos
        self.dimensions        = {}
        self.logger            = logger
-   def gen_chunk(self,dimension,chunk_x,chunk_z):
-       self.logger.info('Generating chunks around: [%s,%s]',str(chunk_x*16),str(chunk_z*16))
-       for rx in xrange(-32,32):
-           for ry in xrange(-16,16):
-               for rz in xrange(-32,32):
-                   self.dimensions[dimension].set_block(pos_or_x=rx+chunk_x,y=ry*16,z=rz+chunk_z,block_id=0,meta=0)
-   def get_chunk_data(self,dimension,chunk_x,chunk_z):
-       """Returns chunk data for the specified chunk
-       """
-       if not self.dimensions.has_key(dimension): self.dimensions[dimension] = smpmap.Dimension(dimension)
-       if not self.dimensions[dimension].columns.has_key((chunk_x,chunk_z)):
-          self.gen_chunk(dimension,chunk_x,chunk_z)
-       print self.dimensions[dimension].columns.keys()
-       return self.dimensions[dimension].columns[(chunk_x,chunk_z)]
+   def setup_map(self):
+       self.logger.info('Creating default map...')
+
+       self.logger.info('Created spawn chunk')
+       self.logger.debug('%s',str(self.dimensions[GAME_DIMENSION_OVERWORLD].columns.keys()))
+
    def add_player(self,player):
        """Add a new player to the game state
 
@@ -119,10 +111,6 @@ class OpenCraftProtocol(ServerProtocol):
        val |= (int(pos_y) & 0xFFF) << 26
        val |= (int(pos_z) & 0x3FFFFFF)
        return self.buff_type.pack('Q',val)
-   def encode_chunk(self,chunk_data):
-       """Encodes a chunk into a packet-ready format
-       """
-       pass
    def packet_client_settings(self,buff):
        locale         = buff.unpack_string()
        view_distance  = buff.unpack('b')
@@ -132,6 +120,8 @@ class OpenCraftProtocol(ServerProtocol):
        main_hand      = buff.unpack_varint()
 
        self.player_data.view_dist = view_distance
+   def send_chunk_column(self,chunk_x,chunk_z):
+       
    def send_poslook(self):
        pos_x,pos_y,pos_z = self.player_data.cur_pos
        yaw               = self.player_data.cur_yaw
@@ -177,7 +167,7 @@ class OpenCraftProtocol(ServerProtocol):
                                     self.buff_type.pack('?',True))
        self.send_packet("spawn_position",self.pack_pos(*self.factory.game_state.spawn_pos))
        start_chunk = self.player_data.get_cur_chunk()
-       chunk_data  = self.factory.game_state.get_chunk_data(self.player_data.dimension,start_chunk[0],start_chunk[1])
+       self.send_chunk_column(start_chunk[0],start_chunk[1])
 #       self.send_poslook()
 
 class OpenCraftFactory(ServerFactory):
@@ -192,6 +182,7 @@ class OpenCraftServer(base_daemon.BaseDaemon):
        proto_factory            = OpenCraftFactory()
        proto_factory.logger     = self.logger
        proto_factory.game_state = GameState(logger=self.logger)
+       proto_factory.game_state.setup_map()
        proto_factory.listen('0.0.0.0',25565)
        reactor.run()
 
