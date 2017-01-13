@@ -26,6 +26,7 @@
 #include <bbuff.h>
 
 #include <packet_handlers.h>
+#include <jsoncpp/json/value.h>
 
 void handle_handshake(void* client, int32_t packlen) {
      opencraft_client_connection* client_conn = (opencraft_client_connection*)client;
@@ -44,6 +45,7 @@ void handle_handshake(void* client, int32_t packlen) {
 }
 
 void handle_status_request(void* client, int32_t packlen) {
+     opencraft_client_connection* client_conn = (opencraft_client_connection*)client;
      LOG(debug) << "Got a status request";
 }
 

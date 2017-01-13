@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.0)
 
 project("opencraftd")
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 set (CMAKE_CXX_STANDARD 11)
 
 include(CheckCXXCompilerFlag)
@@ -17,9 +18,10 @@ endif()
 
 ADD_DEFINITIONS(-DBOOST_LOG_DYN_LINK)
 find_package(Boost 1.55 REQUIRED COMPONENTS system program_options thread log log_setup)
+find_package(jsoncpp REQUIRED)
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS} ${JSONCPP_INCLUDE_DIRS})
 
 add_executable(opencraftd utils.cpp bbuff.cpp packet_handlers.cpp opencraft_client_connection.cpp opencraft_server.cpp main.cpp)
 
-target_link_libraries(opencraftd pthread ${Boost_LIBRARIES})
+target_link_libraries(opencraftd pthread ${Boost_LIBRARIES} ${JSONCPP_LIBRARIES})
