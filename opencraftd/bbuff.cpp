@@ -40,14 +40,24 @@ bound_buffer::bound_buffer(unsigned char* data, size_t len) {
     write(data,len);
 }
 
-unsigned char* bound_buffer::read(size_t len) {
+unsigned char* bound_buffer::peek(size_t len) {
     return &(_data[_cursor]);
+}
+
+unsigned char* bound_buffer::read(size_t len) {
+    unsigned char* retval = peek(len);
     _cursor += len;
+    return retval;
+}
+
+size_t bound_buffer::size() {
+    return _data.size();
 }
 
 int32_t bound_buffer::read_varint(int max_bits) {
-    unsigned char *intbuf = read(max_bits / 8);
+    unsigned char *intbuf = peek(max_bits / 8);
     int32_t        retval = parse_var_int(intbuf, max_bits/8);
+    _cursor += varint_size(retval);
     return retval;
 }
 

@@ -32,7 +32,9 @@ class bound_buffer {
       bound_buffer();
       bound_buffer(unsigned char* data, size_t len);
       unsigned char* read(size_t len);
+      unsigned char* peek(size_t len);
       int32_t read_varint(int max_bits);
+      size_t size();
       void write(unsigned char* data, size_t len);
    private:
       std::vector <unsigned char> _data;

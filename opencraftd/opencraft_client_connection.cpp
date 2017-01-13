@@ -56,36 +56,23 @@ void opencraft_client_connection::do_packet_read() {
      // basically if we don't have enough bytes to parse a packet, it returns
 
      LOG(debug) << "do_packet_read start";
-     int32_t packlen = recv_buf.read_varint(21);
-     LOG(debug) << "Got a packet of size " << packlen;
-/*     if(pending_recv.size() <= 4)  {
-        LOG(debug) << "not enough bytes! Only got " << pending_recv.size();
-        return; // not enough bytes yet
-     }
+     if(recv_buf.size() <= 4) return;
 
+     // peek at the packet length, and return if we don't have the full packet in buffer yet
      int max_bits = 21;
-     if(cur_proto_mode == PLAY) max_bits=32;
-     int32_t packlen = parse_var_int(&(pending_recv[0]),(max_bits/8));
-     int packlen_len = varint_size(packlen);
-     LOG(debug) << "Got a packet coming of size " << packlen;
+     if(cur_proto_mode == PLAY) max_bits = 32;
+     int32_t packlen = parse_var_int(recv_buf.peek(max_bits/8),max_bits/8);
+     if(recv_buf.size() < packlen) return;
+
+     packlen = recv_buf.read_varint(max_bits);
+     LOG(debug) << "Got a packet of size " << packlen;
      
-     if(pending_recv.size() >= packlen) {
-       LOG(debug) << "Reading in " << packlen << " bytes";
-       int packid_offset = packlen_len;
-       int32_t pack_id = parse_var_int(&(pending_recv[packid_offset]),4);
-       LOG(debug) << "Got a packet of ID " << pack_id << " in protocol mode " << cur_proto_mode;
-       int packid_len = varint_size(pack_id);
-       int packbody_offset = packid_offset + packid_len;
-
-       // now we build a packet and shove it off to an async handler
-       std::vector<unsigned char> new_pack;
-       int bodylen = packlen - packlen_len - packid_len;
-       new_pack.resize(bodylen);
-       new_pack.insert(new_pack.end(), pending_recv[packbody_offset], bodylen);
-       pending_recv.erase(pending_recv.begin(), pending_recv.begin() + packlen);
-
-     } else {
-       LOG(debug) << "Not enough bytes to read packet yet!";
-     }*/
+     int32_t pack_id = recv_buf.read_varint(32);
+     
+     LOG(debug) << "Packet ID " << pack_id << " received";
+     
+     unsigned char* pack_body = recv_buf.read(packlen-varint_size(pack_id));
+     
+     bound_buffer new_pack(pack_body,packlen-varint_size(pack_id));     
 
 }
