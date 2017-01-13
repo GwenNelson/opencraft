@@ -91,7 +91,7 @@ class PlayerData:
        return self.ent_id
 
 class GameState:
-   def __init__(self,global_mode=GAME_MODE_CREATIVE,global_difficulty=GAME_DIFF_PEACEFUL,spawn_pos=(16.0,34.0,16.0),logger=None):
+   def __init__(self,global_mode=GAME_MODE_CREATIVE,global_difficulty=GAME_DIFF_PEACEFUL,spawn_pos=(0.0,34.0,0.0),logger=None):
        self.global_mode       = global_mode
        self.global_difficulty = global_difficulty
        self.players           = set()
@@ -111,10 +111,10 @@ class GameState:
                    for chunk_y in xrange(2,16):
                        retval[chunk_y][(rx,ry,rz)] = (0,0) # air
        return retval
-   def setup_map(self,chunk_w=2,chunk_h=2):
+   def setup_map(self,chunk_w=1,chunk_h=1):
        self.logger.info('Loading %sX%s flat chunks:',str(chunk_w),str(chunk_h))
-       for x in xrange(chunk_w+1):
-           for z in xrange(chunk_h+1):
+       for x in xrange(chunk_w):
+           for z in xrange(chunk_h):
                self.chunk_columns[(x,z)] = self.load_chunk(x,z)
        self.logger.info('Chunks loaded!')
    def add_player(self,player):
@@ -239,11 +239,11 @@ class OpenCraftFactory(ServerFactory):
        retval += self.buff_type.pack('i',chunk_x)
        retval += self.buff_type.pack('i',chunk_z)
        retval += self.buff_type.pack('?',True)
-       retval += self.buff_type.pack('i',0x0000ffff) # mask
+       retval += self.buff_type.pack_varint(0x0000ffff) # mask
 
        sections = ''
        for chunk_y in xrange(16):
-           sections += self.buff_type.pack('b',13) # bits per entry
+           sections += self.buff_type.pack('B',13) # bits per entry
            sections += self.buff_type.pack('i',0)  # pal length == 0
 
            section_data = ''
@@ -255,11 +255,13 @@ class OpenCraftFactory(ServerFactory):
                    for rx in xrange(16):
                        section_bits.append(bitstring.BitArray(uint=section_block_data[(rx,ry,rz)][0],length=9))
                        section_bits.append(bitstring.BitArray(uint=section_block_data[(rx,ry,rz)][1],length=3))
-           section_data = section_bits.bytes
-           sections += self.buff_type.pack('i',len(section_data))
+           section_data  = section_bits.bytes
+           sections += self.buff_type.pack_varint(len(section_data)/8)
            sections += section_data
-       retval += self.buff_type.pack('i',len(sections))
+           sections += chr(0) * (16*16*8)
+       retval += self.buff_type.pack_varint(len(sections))
        retval += sections
+#       retval += (chr(0) * 256)
        return retval
 
 class OpenCraftServer(base_daemon.BaseDaemon):
