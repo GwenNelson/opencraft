@@ -41,9 +41,11 @@ void opencraft_client_connection::do_read() {
          [this](boost::system::error_code ec, std::size_t length) {
             LOG(debug) << "do_read callback with " << length << " bytes";
             if (!ec) {
+                mtx_.lock();
                 pending_recv.insert(pending_recv.end(), _data, _data+length);
                 do_packet_read();
                 do_read();
+                mtx_.unlock();
             }
          });
 }

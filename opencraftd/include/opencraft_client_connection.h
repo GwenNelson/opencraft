@@ -27,6 +27,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/asio.hpp>
+#include <boost/thread/mutex.hpp>
 
 #include <vector>
 
@@ -45,6 +46,7 @@ class opencraft_client_connection {
      void do_packet_read();
      opencraft_client_connection(boost::asio::io_service& io_service) : _socket(io_service) {}
    private:
+     boost::mutex mtx_;
      tcp::socket _socket;
      char _data[1024];
      proto_mode_t cur_proto_mode;
