@@ -29,6 +29,7 @@
 #include <version.h>
 
 #include <jsoncpp/json/value.h>
+#include <jsoncpp/json/writer.h>
 
 void handle_handshake(void* client, int32_t packlen) {
      opencraft_client_connection* client_conn = (opencraft_client_connection*)client;
@@ -49,9 +50,26 @@ void handle_handshake(void* client, int32_t packlen) {
 void handle_status_request(void* client, int32_t packlen) {
      opencraft_client_connection* client_conn = (opencraft_client_connection*)client;
      LOG(debug) << "Got a status request, building JSON";
+     
      Json::Value Version;
      Version["name"]     = OPENCRAFT_SHORT_VER;
      Version["protocol"] = DEFAULT_PROTO;
+     
+     Json::Value Players;
+     Players["online"]   = 0;   // TODO: fix this to actually count clients connected
+     Players["max"]      = 100; // TODO: make this a configurable variable
+
+     Json::Value Description;
+     Description["text"] = OPENCRAFT_LONG_VER;
+
+     Json::Value resp_val;
+     resp_val["version"]     = Version;
+     resp_val["players"]     = Players;
+     resp_val["description"] = Description;
+     
+     Json::FastWriter Writer;
+     std::string resp_str = Writer.write(resp_val);
+     LOG(debug) << "Status response JSON:\n" << resp_str;
 }
 
 void handle_login_start(void* client, int32_t packlen) {
