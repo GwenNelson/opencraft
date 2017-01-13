@@ -18,20 +18,14 @@
 // along with OpenCraft.  If not, see <http://www.gnu.org/licenses/>.
 //
 // DESCRIPTION:
-//     Common includes everything needs to use
+//     Misc utility functions
 //
 //-----------------------------------------------------------------------------
 
 #pragma once
 
-#include <boost/log/core.hpp>
-#include <boost/log/trivial.hpp>
+#include <unistd.h>
+#include <stdint.h>
 
-#define LOG BOOST_LOG_TRIVIAL
-
-typedef enum {HANDSHAKING=0,STATUS=1,LOGIN=2,PLAY=3} proto_mode_t;
-
-#include <packets.autogen.h>
-
-
-
+int32_t parse_var_int(unsigned char* buf, size_t buflen);
+int varint_size(int32_t input);

@@ -51,6 +51,7 @@ class opencraft_client_connection {
      opencraft_client_connection(boost::asio::io_service& io_service) : _socket(io_service) {}
      std::map<packet_id_t,packet_callback_t> packet_callbacks;
      proto_mode_t cur_proto_mode;
+     std::string username;
    private:
      boost::mutex mtx_;
      tcp::socket _socket;

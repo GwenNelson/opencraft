@@ -36,8 +36,8 @@
 void opencraft_client_connection::start() {
      LOG(info) << "Installing packet handlers";
 
-     packet_callbacks[packet_id_t(HANDSHAKING,PACKET_ID_HANDSHAKE)] = &handle_handshake;
-     packet_callbacks[packet_id_t(LOGIN,PACKET_ID_LOGIN_START)]     = &handle_login_start;
+     packet_callbacks[packet_id_t(HANDSHAKING,PACKET_ID_INIT_HANDSHAKE_UPSTREAM)]    = &handle_handshake;
+     packet_callbacks[packet_id_t(LOGIN,      PACKET_ID_LOGIN_LOGIN_START_UPSTREAM)] = &handle_login_start;
 
      LOG(info) << "Started connection handling!";
      cur_proto_mode = HANDSHAKING;

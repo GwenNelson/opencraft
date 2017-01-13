@@ -18,20 +18,19 @@
 // along with OpenCraft.  If not, see <http://www.gnu.org/licenses/>.
 //
 // DESCRIPTION:
-//     Common includes everything needs to use
+//     Packet handler functions - where the magic happens
 //
 //-----------------------------------------------------------------------------
 
 #pragma once
 
-#include <boost/log/core.hpp>
-#include <boost/log/trivial.hpp>
+#include <common.h>
+#include <bbuff.h>
 
-#define LOG BOOST_LOG_TRIVIAL
+#include <stdint.h>
 
-typedef enum {HANDSHAKING=0,STATUS=1,LOGIN=2,PLAY=3} proto_mode_t;
+#include <opencraft_client_connection.h>
 
-#include <packets.autogen.h>
+void handle_handshake(void* client,int32_t packlen); 
 
-
-
+void handle_login_start(void* client,int32_t packlen);
