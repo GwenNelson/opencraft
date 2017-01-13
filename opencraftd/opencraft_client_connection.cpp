@@ -45,6 +45,25 @@ void opencraft_client_connection::start() {
      do_read();
 }
 
+void opencraft_client_connection::send_packet(unsigned char* pack, int32_t id, int32_t len) {
+     mtx_.lock();
+      bound_buffer packbody;
+      packbody.write_varint(id);
+      packbody.write(pack, len);
+
+      bound_buffer rawpack;
+      int32_t packlen = packbody.size();
+      rawpack.write_varint(packlen);
+      rawpack.write(packbody.peek(packlen),packlen);
+
+      int32_t rawpack_len = rawpack.size();
+      LOG(debug) << "Transmitting packet ID " << id << " of raw size " << rawpack_len;
+
+      _socket.send(boost::asio::buffer(rawpack.peek(rawpack_len),rawpack_len));
+      LOG(debug) << "Transmitted packet!";
+     mtx_.unlock();
+}
+
 void opencraft_client_connection::do_read() {
      _socket.async_read_some(boost::asio::buffer(_data, 1024),
          [this](boost::system::error_code ec, std::size_t length) {

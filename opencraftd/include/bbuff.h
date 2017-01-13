@@ -40,6 +40,8 @@ class bound_buffer {
       std::string read_string();
       uint32_t size();
       void write(unsigned char* data, uint32_t len);
+      void write_varint(int32_t i);
+      void write_string(std::string s);
       void clear_backlog();
    private:
       std::vector <unsigned char> _data;

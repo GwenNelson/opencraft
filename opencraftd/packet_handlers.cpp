@@ -70,6 +70,12 @@ void handle_status_request(void* client, int32_t packlen) {
      Json::FastWriter Writer;
      std::string resp_str = Writer.write(resp_val);
      LOG(debug) << "Status response JSON:\n" << resp_str;
+
+     bound_buffer outpack;
+     outpack.write_string(resp_str);
+
+     LOG(debug) << "Sending pack status response packet";
+     client_conn->send_packet(outpack.peek(outpack.size()), PACKET_ID_STATUS_STATUS_RESPONSE_DOWNSTREAM, outpack.size());
 }
 
 void handle_login_start(void* client, int32_t packlen) {

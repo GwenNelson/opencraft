@@ -48,6 +48,7 @@ class opencraft_client_connection {
      tcp::socket& socket() { return _socket; }
      void do_read();
      void do_packet_read();
+     void send_packet(unsigned char* pack, int32_t id, int32_t len);
      opencraft_client_connection(boost::asio::io_service& io_service) : _socket(io_service) {}
      std::map<packet_id_t,packet_callback_t> packet_callbacks;
      proto_mode_t cur_proto_mode;

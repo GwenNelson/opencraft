@@ -93,6 +93,23 @@ int32_t bound_buffer::read_varint(int max_bits) {
     return retval;
 }
 
+void bound_buffer::write_varint(int32_t i) {
+     int len = varint_size(i);
+     unsigned char buf[4];
+     int offs = 0;
+     while((offs & -128) != 0) {
+        buf[offs++] = (i & 127) | 128;
+        i >>= 7;
+     }
+     buf[offs++] = i;
+     write(buf, len);
+}
+
+void bound_buffer::write_string(std::string s) {
+     write_varint((int32_t)s.size());
+     write((unsigned char*)s.c_str(),(int32_t)s.size());
+}
+
 void bound_buffer::write(unsigned char* data, uint32_t len) {
      int32_t new_len = _cur_size + len;
 
