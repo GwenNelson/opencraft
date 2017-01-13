@@ -46,7 +46,8 @@ void opencraft_client_connection::start() {
 }
 
 void opencraft_client_connection::send_packet(unsigned char* pack, int32_t id, int32_t len) {
-     mtx_.lock();
+     LOG(debug) << "send_packet start for ID " << id << " and size " << len;
+     send_mtx_.lock();
       bound_buffer packbody;
       packbody.write_varint(id);
       packbody.write(pack, len);
@@ -61,7 +62,7 @@ void opencraft_client_connection::send_packet(unsigned char* pack, int32_t id, i
 
       _socket.send(boost::asio::buffer(rawpack.peek(rawpack_len),rawpack_len));
       LOG(debug) << "Transmitted packet!";
-     mtx_.unlock();
+     send_mtx_.unlock();
 }
 
 void opencraft_client_connection::do_read() {

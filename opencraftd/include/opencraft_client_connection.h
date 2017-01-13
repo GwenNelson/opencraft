@@ -55,6 +55,7 @@ class opencraft_client_connection {
      std::string username;
    private:
      boost::mutex mtx_;
+     boost::mutex send_mtx_;
      tcp::socket _socket;
      unsigned char _data[1024];
 };
