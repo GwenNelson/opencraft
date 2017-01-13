@@ -44,7 +44,7 @@ void opencraft_client_connection::do_read() {
             if (!ec) {
                 mtx_.lock();
                 recv_buf.write(_data, length);
-                do_packet_read();
+                if(length >= 4) do_packet_read();
                 do_read();
                 mtx_.unlock();
             }
@@ -70,9 +70,11 @@ void opencraft_client_connection::do_packet_read() {
      int32_t pack_id = recv_buf.read_varint(32);
      
      LOG(debug) << "Packet ID " << pack_id << " received";
+
+     int32_t packbody_len = packlen-varint_size(pack_id);
      
-     unsigned char* pack_body = recv_buf.read(packlen-varint_size(pack_id));
-     
-     bound_buffer new_pack(pack_body,packlen-varint_size(pack_id));     
+     unsigned char* pack_body = recv_buf.read(packbody_len);
+
+     bound_buffer *new_pack = recv_buf.read_buf(packbody_len);
 
 }

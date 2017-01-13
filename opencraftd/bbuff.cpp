@@ -35,9 +35,15 @@ bound_buffer::bound_buffer() {
 }
 
 bound_buffer::bound_buffer(unsigned char* data, size_t len) {
-    _data.resize(len);
-    _cursor   = 0;
+    _data.resize(0);
+    _cursor = 0;
     write(data,len);
+}
+
+bound_buffer *bound_buffer::read_buf(size_t len) {
+    unsigned char *new_data = read(len);
+    bound_buffer *retval = new bound_buffer(new_data,len);
+    return retval;
 }
 
 unsigned char* bound_buffer::peek(size_t len) {
