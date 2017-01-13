@@ -35,6 +35,7 @@
 
 #include <boost/log/core.hpp>
 #include <boost/log/trivial.hpp>
+#include <boost/thread/thread.hpp>
 
 #include <boost/log/utility/setup/file.hpp>
 #include <boost/log/utility/setup/common_attributes.hpp>
@@ -47,8 +48,9 @@ using std::cout;
 using std::endl;
 using std::string;
 
-bool debug_mode  = false;
-bool daemon_mode = true;
+bool debug_mode   = false;
+bool daemon_mode  = true;
+int  thread_count = 0;
 
 namespace po      = boost::program_options;
 namespace logging = boost::log;
@@ -150,6 +152,13 @@ void startup_server() {
      LOG(info) << "Starting server...";
     
      boost::asio::io_service io_service;
+     boost::asio::io_service::work work(io_service);
+
+     LOG(info) << "Using " << thread_count << " worker threads";
+
+     boost::thread_group threads;
+     for (std::size_t i = 0; i < thread_count; ++i)
+         threads.create_thread(boost::bind(&boost::asio::io_service::run, &io_service));
 
      opencraft_server s(io_service, 25565);
      io_service.run();
@@ -166,6 +175,8 @@ int main(int argc, char **argv) {
     desc.add_options() ("help,h",       "display this help")
                        ("foreground,f", "don't daemonize")
                        ("debug,d",      "run in debug mode")
+                       ("workers,w",    po::value<int>()->default_value(4),
+                                        "how many worker threads to use")
                        ("logfile,l",    po::value<string>()->default_value("./opencraftd_%N.log"),
                                         "log to file")
                        ("pidfile,p",    po::value<string>()->default_value("~/.opencraftd.pid"),
@@ -195,6 +206,8 @@ int main(int argc, char **argv) {
     }
 
     configure_logging(vm["logfile"].as<string>());
+
+    thread_count = vm["workers"].as<int>();
 
     if(daemon_mode) {
        LOG(info) << "Daemonizing...";

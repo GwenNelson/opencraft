@@ -61,5 +61,16 @@ void opencraft_client_connection::do_packet_read() {
      int max_bits = 21;
      if(cur_proto_mode == PLAY) max_bits=32;
      int32_t packlen = parse_var_int(&(pending_recv[0]),(max_bits/8));
+     int packlen_len = varint_size(packlen);
      LOG(debug) << "Got a packet coming of size " << packlen;
+     
+     if(pending_recv.size() >= packlen) {
+       LOG(debug) << "Reading in " << packlen << " bytes";
+       int packid_offset = packlen_len;
+       int32_t pack_id = parse_var_int(&(pending_recv[packid_offset]),4);
+       LOG(debug) << "Got a packet of ID " << pack_id << " in protocol mode " << cur_proto_mode;
+     } else {
+       LOG(debug) << "Not enough bytes to read packet yet!";
+     }
+
 }

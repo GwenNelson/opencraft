@@ -25,6 +25,13 @@
 #include <unistd.h>
 #include <stdint.h>
 
+int varint_size(int32_t input) {
+	for (int32_t x = 1; x < 5; x++) {
+		if ((input & -1 << x * 7) == 0) return x;
+	}
+	return 5;
+}
+
 int32_t parse_var_int(unsigned char* buf, size_t buflen) {
         int32_t retval=0;
         int v2        =0;
