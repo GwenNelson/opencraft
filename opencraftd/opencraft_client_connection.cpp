@@ -18,40 +18,28 @@
 // along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 //
 // DESCRIPTION:
-//      OpenCraft server class
+//      OpenCraft client connection class - sends and receives packets
 //
 //-----------------------------------------------------------------------------
 
+#include <cstdlib>
+#include <memory>
+#include <utility>
+
 #include <common.h>
-#include <opencraft_server.h>
 #include <opencraft_client_connection.h>
 
-#include <boost/bind.hpp>
-#include <list>
-
-opencraft_server::opencraft_server(tcp::endpoint endpoint) {
-    this->listen_on = endpoint;
-    LOG(debug) << "Will listen on " << endpoint;
+void opencraft_client_connection::start() {
+     LOG(info) << "Started connection handling!";
+     do_read();
 }
 
-void opencraft_server::accept_handler(shared_ptr<tcp::socket> client_sock) {
-     LOG(info) << "Got a new connection from " << client_sock->remote_endpoint();
-     
-     opencraft_client_connection::pointer new_conn = opencraft_client_connection::create(this->io_service);
-
-     this->clients.insert(new_conn);
-     new_conn->start();
-}
-
-void opencraft_server::start_listening() {
-     tcp::acceptor _acceptor(this->io_service, this->listen_on);
-
-     shared_ptr<tcp::socket> sock(new tcp::socket(io_service));
-
-     _acceptor.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true));
-     _acceptor.listen();
-
-     _acceptor.async_accept(*sock, boost::bind(&opencraft_server::accept_handler,this,sock));
-
-     this->io_service.run();
+void opencraft_client_connection::do_read() {
+     auto self(shared_from_this());
+     _socket.async_read_some(boost::asio::buffer(_data, 1024),
+         [this, self](boost::system::error_code ec, std::size_t length) {
+            if (!ec) {
+                pending_recv.insert(pending_recv.end(), _data, _data+length);
+            }
+         });
 }
