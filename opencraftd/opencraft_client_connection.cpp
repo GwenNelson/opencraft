@@ -34,15 +34,15 @@
 void handle_handshake(void* client,int32_t packlen) {
      opencraft_client_connection* client_conn = (opencraft_client_connection*)client;
 
-     int32_t proto_ver          = client_conn->recv_buf.read_varint(32);
-     std::string server_addr    = client_conn->recv_buf.read_string();
-     unsigned short server_port = client_conn->recv_buf.read_ushort();
-     int32_t next_state         = client_conn->recv_buf.read_varint(32);
+     int32_t proto_ver       = client_conn->recv_buf.read_varint(32);
+     std::string server_addr = client_conn->recv_buf.read_string();
+     uint16_t server_port    = client_conn->recv_buf.read_ushort();
+     int32_t next_state      = client_conn->recv_buf.read_varint(32);
 
-     LOG(debug) << "Got handshake packet: \n" <<  
-                   "Protocol version: " << proto_ver   << "\n" <<
-                   "Server address: "   << server_addr << "\n" <<
-                   "Server port: "      << server_port << "\n" <<
+     LOG(debug) << "Got handshake packet: " <<  
+                   "Protocol version=" << proto_ver   << ", " <<
+                   "Server address="   << server_addr;
+     LOG(debug) << "Server port: "      << server_port << ", " <<
                    "Next state: "       << next_state;
 }
 

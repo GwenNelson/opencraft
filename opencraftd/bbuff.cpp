@@ -26,6 +26,7 @@
 #include <bbuff.h>
 #include <string.h>
 #include <utils.h>
+#include <arpa/inet.h>
 
 #include <vector>
 
@@ -56,10 +57,11 @@ bound_buffer *bound_buffer::read_buf(uint32_t len) {
     return retval;
 }
 
-unsigned short bound_buffer::read_ushort() {
+uint16_t bound_buffer::read_ushort() {
     unsigned char* s = read(2);
-    unsigned short *retval = (unsigned short*)s;
-    return *retval;
+    uint16_t *retval = (uint16_t*)s;
+    uint16_t ho_retval = ntohs(*retval);
+    return ho_retval;
 }
 
 std::string bound_buffer::read_string() {
