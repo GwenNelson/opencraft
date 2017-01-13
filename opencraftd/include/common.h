@@ -31,4 +31,6 @@
 
 typedef enum {HANDSHAKING=0,STATUS=1,LOGIN=2,PLAY=3} proto_mode_t;
 
-#define PACKET_ID_HANDSHAKE 0x00
+#define PACKET_ID_HANDSHAKE   0x00
+
+#define PACKET_ID_LOGIN_START 0x00

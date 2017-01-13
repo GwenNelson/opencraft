@@ -28,27 +28,17 @@
 
 #include <common.h>
 #include <opencraft_client_connection.h>
+#include <packet_handlers.h>
+
 #include <utils.h>
 #include <bbuff.h>
 
-void handle_handshake(void* client,int32_t packlen) {
-     opencraft_client_connection* client_conn = (opencraft_client_connection*)client;
-
-     int32_t proto_ver       = client_conn->recv_buf.read_varint(32);
-     std::string server_addr = client_conn->recv_buf.read_string();
-     uint16_t server_port    = client_conn->recv_buf.read_ushort();
-     int32_t next_state      = client_conn->recv_buf.read_varint(32);
-
-     LOG(debug) << "Got handshake packet: " <<  
-                   "Protocol version=" << proto_ver   << ", " <<
-                   "Server address="   << server_addr;
-     LOG(debug) << "Server port: "      << server_port << ", " <<
-                   "Next state: "       << next_state;
-}
-
 void opencraft_client_connection::start() {
      LOG(info) << "Installing packet handlers";
+
      packet_callbacks[packet_id_t(HANDSHAKING,PACKET_ID_HANDSHAKE)] = &handle_handshake;
+     packet_callbacks[packet_id_t(LOGIN,PACKET_ID_LOGIN_START)]     = &handle_login_start;
+
      LOG(info) << "Started connection handling!";
      cur_proto_mode = HANDSHAKING;
      do_read();

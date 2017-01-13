@@ -50,9 +50,9 @@ class opencraft_client_connection {
      void do_packet_read();
      opencraft_client_connection(boost::asio::io_service& io_service) : _socket(io_service) {}
      std::map<packet_id_t,packet_callback_t> packet_callbacks;
+     proto_mode_t cur_proto_mode;
    private:
      boost::mutex mtx_;
      tcp::socket _socket;
      unsigned char _data[1024];
-     proto_mode_t cur_proto_mode;
 };
