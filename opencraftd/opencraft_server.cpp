@@ -24,7 +24,10 @@
 
 #include <common.h>
 #include <opencraft_server.h>
+#include <opencraft_client_connection.h>
+
 #include <boost/bind.hpp>
+#include <list>
 
 opencraft_server::opencraft_server(tcp::endpoint endpoint) {
     this->listen_on = endpoint;
@@ -33,6 +36,10 @@ opencraft_server::opencraft_server(tcp::endpoint endpoint) {
 
 void opencraft_server::accept_handler(shared_ptr<tcp::socket> client_sock) {
      LOG(info) << "Got a new connection from " << client_sock->remote_endpoint();
+     
+     opencraft_client_connection::pointer new_conn = opencraft_client_connection::create(this->io_service);
+
+     this->clients.insert(new_conn);
 }
 
 void opencraft_server::start_listening() {
@@ -40,9 +47,7 @@ void opencraft_server::start_listening() {
 
      shared_ptr<tcp::socket> sock(new tcp::socket(io_service));
 
-//     _acceptor.open(this->listen_on.protocol());
      _acceptor.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true));
-//     _acceptor.bind(this->listen_on);
      _acceptor.listen();
 
      _acceptor.async_accept(*sock, boost::bind(&opencraft_server::accept_handler,this,sock));

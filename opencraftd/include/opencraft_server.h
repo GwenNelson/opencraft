@@ -27,13 +27,20 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/asio.hpp>
 
+#include <opencraft_client_connection.h>
+#include <set>
+#include <map>
+
 using boost::shared_ptr;
 using boost::asio::ip::tcp;
+using std::set;
+using std::map;
 
 class opencraft_server {
    public:
       opencraft_server(tcp::endpoint endpoint);
       void start_listening();
+      set <shared_ptr<opencraft_client_connection> > clients;
    private:
       void accept_handler(shared_ptr<tcp::socket> client_sock);
       tcp::endpoint            listen_on;
