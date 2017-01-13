@@ -41,6 +41,7 @@
 #include <boost/log/utility/setup/common_attributes.hpp>
 
 #include <common.h>
+#include <version.h>
 #include <opencraft_server.h>
 
 using std::cerr;
@@ -170,6 +171,7 @@ void shutdown_server() {
 
 int main(int argc, char **argv) {
     int i;
+    cout << OPENCRAFT_LONG_VER << endl << "Built on " << OPENCRAFT_BUILDDATE << endl;
     po::options_description desc("Options");
 
     desc.add_options() ("help,h",       "display this help")

@@ -26,6 +26,8 @@
 #include <bbuff.h>
 
 #include <packet_handlers.h>
+#include <version.h>
+
 #include <jsoncpp/json/value.h>
 
 void handle_handshake(void* client, int32_t packlen) {
@@ -46,7 +48,10 @@ void handle_handshake(void* client, int32_t packlen) {
 
 void handle_status_request(void* client, int32_t packlen) {
      opencraft_client_connection* client_conn = (opencraft_client_connection*)client;
-     LOG(debug) << "Got a status request";
+     LOG(debug) << "Got a status request, building JSON";
+     Json::Value Version;
+     Version["name"]     = OPENCRAFT_SHORT_VER;
+     Version["protocol"] = DEFAULT_PROTO;
 }
 
 void handle_login_start(void* client, int32_t packlen) {

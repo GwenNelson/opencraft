@@ -32,6 +32,6 @@
 typedef enum {HANDSHAKING=0,STATUS=1,LOGIN=2,PLAY=3} proto_mode_t;
 
 #include <packets.autogen.h>
-
+#include <version.h>
 
 
