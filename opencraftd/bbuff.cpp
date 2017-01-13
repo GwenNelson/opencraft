@@ -56,6 +56,12 @@ bound_buffer *bound_buffer::read_buf(uint32_t len) {
     return retval;
 }
 
+unsigned short bound_buffer::read_ushort() {
+    unsigned char* s = read(2);
+    unsigned short *retval = (unsigned short*)s;
+    return *retval;
+}
+
 std::string bound_buffer::read_string() {
     int32_t s_len    = read_varint(32);
     unsigned char* s = read(s_len);

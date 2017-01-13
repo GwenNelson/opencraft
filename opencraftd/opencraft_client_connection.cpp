@@ -31,13 +31,19 @@
 #include <utils.h>
 #include <bbuff.h>
 
-void handle_handshake(void* client) {
+void handle_handshake(void* client,int32_t packlen) {
      opencraft_client_connection* client_conn = (opencraft_client_connection*)client;
-     int32_t proto_ver = client_conn->recv_buf.read_varint(32);
-     std::string server_addr = client_conn->recv_buf.read_string();
+
+     int32_t proto_ver          = client_conn->recv_buf.read_varint(32);
+     std::string server_addr    = client_conn->recv_buf.read_string();
+     unsigned short server_port = client_conn->recv_buf.read_ushort();
+     int32_t next_state         = client_conn->recv_buf.read_varint(32);
 
      LOG(debug) << "Got handshake packet: \n" <<  
-                   "Protocol version: " << proto_ver << "\n" << "Server address: " << server_addr;
+                   "Protocol version: " << proto_ver   << "\n" <<
+                   "Server address: "   << server_addr << "\n" <<
+                   "Server port: "      << server_port << "\n" <<
+                   "Next state: "       << next_state;
 }
 
 void opencraft_client_connection::start() {
@@ -84,7 +90,7 @@ void opencraft_client_connection::do_packet_read() {
 
      if(packet_callbacks.find(packet_id_t(cur_proto_mode,pack_id)) == packet_callbacks.end()) {
      } else {
-       packet_callbacks[packet_id_t(cur_proto_mode,pack_id)]((void*)this);
+       packet_callbacks[packet_id_t(cur_proto_mode,pack_id)]((void*)this,packlen);
      }
      recv_buf.clear_backlog();
      

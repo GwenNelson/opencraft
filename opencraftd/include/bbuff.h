@@ -36,6 +36,7 @@ class bound_buffer {
       unsigned char* peek(uint32_t len);
       bound_buffer *read_buf(uint32_t len);
       int32_t read_varint(int max_bits);
+      unsigned short read_ushort();
       std::string read_string();
       uint32_t size();
       void write(unsigned char* data, uint32_t len);

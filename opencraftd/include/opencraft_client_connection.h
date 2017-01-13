@@ -38,7 +38,7 @@
 using boost::asio::ip::tcp;
 
 typedef std::tuple<proto_mode_t, int32_t> packet_id_t;
-typedef void (*packet_callback_t)(void* client);
+typedef void (*packet_callback_t)(void* client, int32_t packlen);
 
 class opencraft_client_connection {
    public:
