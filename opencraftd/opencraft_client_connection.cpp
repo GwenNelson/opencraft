@@ -71,6 +71,16 @@ void opencraft_client_connection::do_packet_read() {
        int packid_offset = packlen_len;
        int32_t pack_id = parse_var_int(&(pending_recv[packid_offset]),4);
        LOG(debug) << "Got a packet of ID " << pack_id << " in protocol mode " << cur_proto_mode;
+       int packid_len = varint_size(pack_id);
+       int packbody_offset = packid_offset + packid_len;
+
+       // now we build a packet and shove it off to an async handler
+       std::vector<unsigned char> new_pack;
+       int bodylen = packlen - packlen_len - packid_len;
+       new_pack.resize(bodylen);
+       new_pack.insert(new_pack.end(), pending_recv[packbody_offset], bodylen);
+       pending_recv.erase(pending_recv.begin(), pending_recv.begin() + packlen);
+
      } else {
        LOG(debug) << "Not enough bytes to read packet yet!";
      }
