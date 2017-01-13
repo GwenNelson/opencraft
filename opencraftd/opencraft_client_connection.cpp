@@ -89,7 +89,11 @@ void opencraft_client_connection::do_packet_read() {
      int max_bits = 21;
      if(cur_proto_mode == PLAY) max_bits = 32;
      int32_t packlen = parse_var_int(recv_buf.peek(max_bits/8),max_bits/8);
-     if(recv_buf.size() < packlen) return;
+     if(recv_buf.size() < packlen) {
+        LOG(debug) << "not enough bytes received!";
+        LOG(debug) << "need " << packlen << " bytes";
+        return;
+     }
 
      packlen = recv_buf.read_varint(max_bits);
      LOG(debug) << "Got a packet of size " << packlen;
