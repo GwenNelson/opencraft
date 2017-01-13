@@ -148,8 +148,11 @@ void configure_daemon_signals() {
 
 void startup_server() {
      LOG(info) << "Starting server...";
-     mc_server = new opencraft_server(tcp::endpoint(tcp::v4(), 25565));
-     mc_server->start_listening();
+    
+     boost::asio::io_service io_service;
+
+     opencraft_server s(io_service, 25565);
+     io_service.run();
 }
 
 void shutdown_server() {

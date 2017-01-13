@@ -37,14 +37,14 @@ void opencraft_client_connection::start() {
 }
 
 void opencraft_client_connection::do_read() {
-     auto self(shared_from_this());
      _socket.async_read_some(boost::asio::buffer(_data, 1024),
-         [this, self](boost::system::error_code ec, std::size_t length) {
-            LOG(debug) << "do_read callback";
+         [this](boost::system::error_code ec, std::size_t length) {
+            LOG(debug) << "do_read callback with " << length << " bytes";
             if (!ec) {
                 pending_recv.insert(pending_recv.end(), _data, _data+length);
+                do_packet_read();
                 do_read();
-            } 
+            }
          });
 }
 
@@ -61,4 +61,5 @@ void opencraft_client_connection::do_packet_read() {
      int max_bits = 21;
      if(cur_proto_mode == PLAY) max_bits=32;
      int32_t packlen = parse_var_int(&(pending_recv[0]),(max_bits/8));
+     LOG(debug) << "Got a packet coming of size " << packlen;
 }

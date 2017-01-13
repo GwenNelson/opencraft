@@ -32,21 +32,19 @@
 
 using boost::asio::ip::tcp;
 
-class opencraft_client_connection : public boost::enable_shared_from_this<opencraft_client_connection> {
+class opencraft_client_connection {
    public:
-     typedef boost::shared_ptr<opencraft_client_connection> pointer;
      typedef std::vector<unsigned char> net_buff_t;
 
      net_buff_t pending_recv;
      net_buff_t pending_send;
 
-     static pointer create(boost::asio::io_service& io_service) { return pointer(new opencraft_client_connection(io_service)); }
      void start();
      tcp::socket& socket() { return _socket; }
      void do_read();
      void do_packet_read();
-   private:
      opencraft_client_connection(boost::asio::io_service& io_service) : _socket(io_service) {}
+   private:
      tcp::socket _socket;
      char _data[1024];
      proto_mode_t cur_proto_mode;

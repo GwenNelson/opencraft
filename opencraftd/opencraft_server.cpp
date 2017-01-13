@@ -29,29 +29,20 @@
 #include <boost/bind.hpp>
 #include <list>
 
-opencraft_server::opencraft_server(tcp::endpoint endpoint) {
-    this->listen_on = endpoint;
-    LOG(debug) << "Will listen on " << endpoint;
+void opencraft_server::start_accept() {
+     opencraft_client_connection *new_conn = new opencraft_client_connection(io_service_);
+     acceptor_.async_accept(new_conn->socket(),
+        boost::bind(&opencraft_server::handle_accept, this, new_conn,
+          boost::asio::placeholders::error));
 }
 
-void opencraft_server::accept_handler(shared_ptr<tcp::socket> client_sock) {
-     LOG(info) << "Got a new connection from " << client_sock->remote_endpoint();
-     
-     opencraft_client_connection::pointer new_conn = opencraft_client_connection::create(this->io_service);
-
-     this->clients.insert(new_conn);
-     new_conn->start();
+void opencraft_server::handle_accept(opencraft_client_connection *new_conn,
+                                     const boost::system::error_code& error) {
+     if(!error) {
+        new_conn->start();
+     } else {
+        delete new_conn;
+     }
+     start_accept();
 }
 
-void opencraft_server::start_listening() {
-     tcp::acceptor _acceptor(this->io_service, this->listen_on);
-
-     shared_ptr<tcp::socket> sock(new tcp::socket(io_service));
-
-     _acceptor.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true));
-     _acceptor.listen();
-
-     _acceptor.async_accept(*sock, boost::bind(&opencraft_server::accept_handler,this,sock));
-
-     this->io_service.run();
-}

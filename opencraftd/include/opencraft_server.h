@@ -38,12 +38,16 @@ using std::map;
 
 class opencraft_server {
    public:
-      opencraft_server(tcp::endpoint endpoint);
-      void start_listening();
+      opencraft_server(boost::asio::io_service& io_service, short port) :
+        io_service_(io_service),
+        acceptor_(io_service, tcp::endpoint(tcp::v4(), port)) {
+          start_accept();
+        }
       set <shared_ptr<opencraft_client_connection> > clients;
    private:
-      void accept_handler(shared_ptr<tcp::socket> client_sock);
-      tcp::endpoint            listen_on;
-      boost::asio::io_service  io_service;
-      tcp::socket              *server_sock;
+      void start_accept();
+      void handle_accept(opencraft_client_connection *new_conn,
+                         const boost::system::error_code& error);
+      boost::asio::io_service& io_service_;
+      tcp::acceptor acceptor_;
 };
