@@ -28,9 +28,11 @@
 
 #include <common.h>
 #include <opencraft_client_connection.h>
+#include <utils.h>
 
 void opencraft_client_connection::start() {
      LOG(info) << "Started connection handling!";
+     cur_proto_mode = INIT;
      do_read();
 }
 
@@ -38,8 +40,25 @@ void opencraft_client_connection::do_read() {
      auto self(shared_from_this());
      _socket.async_read_some(boost::asio::buffer(_data, 1024),
          [this, self](boost::system::error_code ec, std::size_t length) {
+            LOG(debug) << "do_read callback";
             if (!ec) {
                 pending_recv.insert(pending_recv.end(), _data, _data+length);
-            }
+                do_read();
+            } 
          });
+}
+
+void opencraft_client_connection::do_packet_read() {
+     // this will attempt to read a packet if there is one
+     // basically if we don't have enough bytes to parse a packet, it returns
+
+     LOG(debug) << "do_packet_read start";
+     if(pending_recv.size() <= 4)  {
+        LOG(debug) << "not enough bytes! Only got " << pending_recv.size();
+        return; // not enough bytes yet
+     }
+
+     int max_bits = 21;
+     if(cur_proto_mode == PLAY) max_bits=32;
+     int32_t packlen = parse_var_int(&(pending_recv[0]),(max_bits/8));
 }

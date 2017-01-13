@@ -20,6 +20,6 @@ find_package(Boost 1.55 REQUIRED COMPONENTS system program_options thread log lo
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
 
-add_executable(opencraftd opencraft_client_connection.cpp opencraft_server.cpp main.cpp)
+add_executable(opencraftd utils.cpp opencraft_client_connection.cpp opencraft_server.cpp main.cpp)
 
 target_link_libraries(opencraftd pthread ${Boost_LIBRARIES})
