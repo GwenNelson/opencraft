@@ -29,4 +29,6 @@
 
 #define LOG BOOST_LOG_TRIVIAL
 
-typedef enum {INIT,HANDSHAKING,STATUS,PLAY} proto_mode_t;
+typedef enum {HANDSHAKING=0,STATUS=1,LOGIN=2,PLAY=3} proto_mode_t;
+
+#define PACKET_ID_HANDSHAKE 0x00

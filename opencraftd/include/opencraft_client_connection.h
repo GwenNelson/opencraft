@@ -30,10 +30,15 @@
 #include <boost/thread/mutex.hpp>
 
 #include <vector>
+#include <tuple>
+#include <map>
 
 #include <bbuff.h>
 
 using boost::asio::ip::tcp;
+
+typedef std::tuple<proto_mode_t, int32_t> packet_id_t;
+typedef void (*packet_callback_t)(void* client);
 
 class opencraft_client_connection {
    public:
@@ -44,6 +49,7 @@ class opencraft_client_connection {
      void do_read();
      void do_packet_read();
      opencraft_client_connection(boost::asio::io_service& io_service) : _socket(io_service) {}
+     std::map<packet_id_t,packet_callback_t> packet_callbacks;
    private:
      boost::mutex mtx_;
      tcp::socket _socket;

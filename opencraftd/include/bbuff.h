@@ -26,19 +26,22 @@
 
 #include <unistd.h>
 #include <vector>
+#include <string>
 
 class bound_buffer {
    public:
       bound_buffer();
-      bound_buffer(unsigned char* data, size_t len);
-      unsigned char* read(size_t len);
-      unsigned char* peek(size_t len);
-      bound_buffer *read_buf(size_t len);
+      bound_buffer(unsigned char* data, uint32_t len);
+      unsigned char* read(uint32_t len);
+      unsigned char* peek(uint32_t len);
+      bound_buffer *read_buf(uint32_t len);
       int32_t read_varint(int max_bits);
-      size_t size();
-      void write(unsigned char* data, size_t len);
+      std::string read_string();
+      uint32_t size();
+      void write(unsigned char* data, uint32_t len);
+      void clear_backlog();
    private:
       std::vector <unsigned char> _data;
-      int            _cursor;
-      size_t         _cur_size;
+      unsigned int     _cursor;
+      uint32_t         _cur_size;
 };

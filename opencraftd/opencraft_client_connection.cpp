@@ -31,9 +31,20 @@
 #include <utils.h>
 #include <bbuff.h>
 
+void handle_handshake(void* client) {
+     opencraft_client_connection* client_conn = (opencraft_client_connection*)client;
+     int32_t proto_ver = client_conn->recv_buf.read_varint(32);
+     std::string server_addr = client_conn->recv_buf.read_string();
+
+     LOG(debug) << "Got handshake packet: \n" <<  
+                   "Protocol version: " << proto_ver << "\n" << "Server address: " << server_addr;
+}
+
 void opencraft_client_connection::start() {
+     LOG(info) << "Installing packet handlers";
+     packet_callbacks[packet_id_t(HANDSHAKING,PACKET_ID_HANDSHAKE)] = &handle_handshake;
      LOG(info) << "Started connection handling!";
-     cur_proto_mode = INIT;
+     cur_proto_mode = HANDSHAKING;
      do_read();
 }
 
@@ -71,10 +82,10 @@ void opencraft_client_connection::do_packet_read() {
      
      LOG(debug) << "Packet ID " << pack_id << " received";
 
-     int32_t packbody_len = packlen-varint_size(pack_id);
+     if(packet_callbacks.find(packet_id_t(cur_proto_mode,pack_id)) == packet_callbacks.end()) {
+     } else {
+       packet_callbacks[packet_id_t(cur_proto_mode,pack_id)]((void*)this);
+     }
+     recv_buf.clear_backlog();
      
-     unsigned char* pack_body = recv_buf.read(packbody_len);
-
-     bound_buffer *new_pack = recv_buf.read_buf(packbody_len);
-
 }

@@ -32,32 +32,48 @@
 bound_buffer::bound_buffer() {
     _data.resize(0);
     _cursor   = 0;
+    _cur_size = 0;
 }
 
-bound_buffer::bound_buffer(unsigned char* data, size_t len) {
+bound_buffer::bound_buffer(unsigned char* data, uint32_t len) {
     _data.resize(0);
     _cursor = 0;
     write(data,len);
 }
 
-bound_buffer *bound_buffer::read_buf(size_t len) {
-    unsigned char *new_data = read(len);
-    bound_buffer *retval = new bound_buffer(new_data,len);
+void bound_buffer::clear_backlog() {
+     if(_cursor == _data.size()) {
+       _data.clear();
+       _data.resize(0);
+       _cursor = 0;
+     }
+}
+
+bound_buffer *bound_buffer::read_buf(uint32_t len) {
+    bound_buffer *retval = new bound_buffer();
+    retval->write(&(_data[_cursor]),len);
+    _cursor += len;
     return retval;
 }
 
-unsigned char* bound_buffer::peek(size_t len) {
+std::string bound_buffer::read_string() {
+    int32_t s_len    = read_varint(32);
+    unsigned char* s = read(s_len);
+    return std::string((const char*)s);
+}
+
+unsigned char* bound_buffer::peek(uint32_t len) {
     return &(_data[_cursor]);
 }
 
-unsigned char* bound_buffer::read(size_t len) {
+unsigned char* bound_buffer::read(uint32_t len) {
     unsigned char* retval = peek(len);
     _cursor += len;
     return retval;
 }
 
-size_t bound_buffer::size() {
-    return _data.size();
+uint32_t bound_buffer::size() {
+    return _data.size() - _cursor;
 }
 
 int32_t bound_buffer::read_varint(int max_bits) {
@@ -67,13 +83,14 @@ int32_t bound_buffer::read_varint(int max_bits) {
     return retval;
 }
 
-void bound_buffer::write(unsigned char* data, size_t len) {
-     size_t new_len = _cur_size + len;
+void bound_buffer::write(unsigned char* data, uint32_t len) {
+     int32_t new_len = _cur_size + len;
 
      for(int i=0; i<len; i++) {
        _data.push_back(data[i]);
      }
      _data.resize(new_len);
+     _cur_size = new_len;
 }
 
 
