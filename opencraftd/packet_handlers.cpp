@@ -43,10 +43,14 @@ void handle_handshake(void* client, int32_t packlen) {
      client_conn->cur_proto_mode = (proto_mode_t)next_state;
 }
 
+void handle_status_request(void* client, int32_t packlen) {
+     LOG(debug) << "Got a status request";
+}
+
 void handle_login_start(void* client, int32_t packlen) {
      opencraft_client_connection* client_conn = (opencraft_client_connection*)client;
 
-     std::string username = client_conn->recv_buf.read_string();
+     std::string username  = client_conn->recv_buf.read_string();
      client_conn->username = username;
      LOG(debug) << "Got login start for user " << username;
 }
