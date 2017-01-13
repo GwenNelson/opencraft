@@ -59,7 +59,9 @@ bound_buffer *bound_buffer::read_buf(uint32_t len) {
 std::string bound_buffer::read_string() {
     int32_t s_len    = read_varint(32);
     unsigned char* s = read(s_len);
-    return std::string((const char*)s);
+    std::string retval = std::string((const char*)s);
+    retval[s_len] = 0;
+    return retval;
 }
 
 unsigned char* bound_buffer::peek(uint32_t len) {
