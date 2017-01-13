@@ -29,3 +29,4 @@
 
 int32_t parse_var_int(unsigned char* buf, size_t buflen);
 int varint_size(int32_t input);
+void hexdump(unsigned char *buffer, unsigned long index, unsigned long width);

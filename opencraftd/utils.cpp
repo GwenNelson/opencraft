@@ -24,6 +24,9 @@
 
 #include <unistd.h>
 #include <stdint.h>
+#include <stdio.h>
+
+#include <common.h>
 
 int varint_size(int32_t input) {
 	for (int32_t x = 1; x < 5; x++) {
@@ -45,4 +48,19 @@ int32_t parse_var_int(unsigned char* buf, size_t buflen) {
         return retval;
 }
 
-
+void hexdump(unsigned char *buffer, unsigned long index, unsigned long width) {
+  unsigned long i;
+  for (i=0;i<index;i++)
+	{
+	printf("%02x ",buffer[i]);
+	}
+  for (unsigned long spacer=index;spacer<width;spacer++)
+	printf("	");
+  printf(": ");
+  for (i=0;i<index;i++)
+	{
+	if (buffer[i] < 32) printf(".");
+	else printf("%c",buffer[i]);
+	}
+  printf("\n");
+}

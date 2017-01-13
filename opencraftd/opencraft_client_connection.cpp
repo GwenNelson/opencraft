@@ -52,7 +52,7 @@ void opencraft_client_connection::do_read() {
             if (!ec) {
                 mtx_.lock();
                 recv_buf.write(_data, length);
-                if(length >= 4) do_packet_read();
+                if(length >= 1) do_packet_read();
                 do_read();
                 mtx_.unlock();
             }
@@ -64,7 +64,6 @@ void opencraft_client_connection::do_packet_read() {
      // basically if we don't have enough bytes to parse a packet, it returns
 
      LOG(debug) << "do_packet_read start";
-     if(recv_buf.size() <= 4) return;
 
      // peek at the packet length, and return if we don't have the full packet in buffer yet
      int max_bits = 21;
