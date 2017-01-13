@@ -31,14 +31,13 @@
 
 #include <vector>
 
+#include <bbuff.h>
+
 using boost::asio::ip::tcp;
 
 class opencraft_client_connection {
    public:
-     typedef std::vector<unsigned char> net_buff_t;
-
-     net_buff_t pending_recv;
-     net_buff_t pending_send;
+     bound_buffer recv_buf;
 
      void start();
      tcp::socket& socket() { return _socket; }
@@ -48,6 +47,6 @@ class opencraft_client_connection {
    private:
      boost::mutex mtx_;
      tcp::socket _socket;
-     char _data[1024];
+     unsigned char _data[1024];
      proto_mode_t cur_proto_mode;
 };

@@ -25,24 +25,39 @@
 #include <common.h>
 #include <bbuff.h>
 #include <string.h>
+#include <utils.h>
+
+#include <vector>
+
+bound_buffer::bound_buffer() {
+    _data.resize(0);
+    _cursor   = 0;
+}
 
 bound_buffer::bound_buffer(unsigned char* data, size_t len) {
-    _data = (unsigned char*)calloc(len+1024,sizeof(unsigned char)); // always allocate an extra 1kb or so
-    _cur_size = len;
+    _data.resize(len);
     _cursor   = 0;
-    memmove((void*)_data, (const void*)data, len);
+    write(data,len);
 }
 
 unsigned char* bound_buffer::read(size_t len) {
-    // it is up to the caller to free() the return value
-    unsigned char* retval = (unsigned char*)calloc(len,sizeof(unsigned char));
-    memmove((void*)retval, ((const void*)&(_data[_cursor])), len);
+    return &(_data[_cursor]);
+    _cursor += len;
+}
+
+int32_t bound_buffer::read_varint(int max_bits) {
+    unsigned char *intbuf = read(max_bits / 8);
+    int32_t        retval = parse_var_int(intbuf, max_bits/8);
+    return retval;
 }
 
 void bound_buffer::write(unsigned char* data, size_t len) {
      size_t new_len = _cur_size + len;
-     _data = (unsigned char*)realloc((void*)_data,new_len);
-     memmove((void*)(&(_data[_cursor])), (const void*)data, len);
+
+     for(int i=0; i<len; i++) {
+       _data.push_back(data[i]);
+     }
+     _data.resize(new_len);
 }
 
 

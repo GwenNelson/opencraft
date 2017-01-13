@@ -29,6 +29,7 @@
 #include <common.h>
 #include <opencraft_client_connection.h>
 #include <utils.h>
+#include <bbuff.h>
 
 void opencraft_client_connection::start() {
      LOG(info) << "Started connection handling!";
@@ -42,7 +43,7 @@ void opencraft_client_connection::do_read() {
             LOG(debug) << "do_read callback with " << length << " bytes";
             if (!ec) {
                 mtx_.lock();
-                pending_recv.insert(pending_recv.end(), _data, _data+length);
+                recv_buf.write(_data, length);
                 do_packet_read();
                 do_read();
                 mtx_.unlock();
@@ -55,7 +56,9 @@ void opencraft_client_connection::do_packet_read() {
      // basically if we don't have enough bytes to parse a packet, it returns
 
      LOG(debug) << "do_packet_read start";
-     if(pending_recv.size() <= 4)  {
+     int32_t packlen = recv_buf.read_varint(21);
+     LOG(debug) << "Got a packet of size " << packlen;
+/*     if(pending_recv.size() <= 4)  {
         LOG(debug) << "not enough bytes! Only got " << pending_recv.size();
         return; // not enough bytes yet
      }
@@ -83,6 +86,6 @@ void opencraft_client_connection::do_packet_read() {
 
      } else {
        LOG(debug) << "Not enough bytes to read packet yet!";
-     }
+     }*/
 
 }
