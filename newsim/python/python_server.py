@@ -25,7 +25,6 @@ from math import floor
 
 import logging
 
-import smpmap
 import bitstring
 
 from twisted.internet import reactor
