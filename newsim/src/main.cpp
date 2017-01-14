@@ -47,10 +47,12 @@ void shutdown_server();
 void startup_server();
 
 void configure_logging(std::string logfile, bool debug_mode) {
-     logging::add_file_log(logging::keywords::file_name = logfile,
-                           logging::keywords::rotation_size = 10 * 1024 * 1024,
-                           logging::keywords::time_based_rotation = logging::sinks::file::rotation_at_time_point(0, 0, 0),
-                           logging::keywords::format = "[%TimeStamp%]: %Message%"); 
+     if(!debug_mode) {
+       logging::add_file_log(logging::keywords::file_name = logfile,
+                             logging::keywords::rotation_size = 10 * 1024 * 1024,
+                             logging::keywords::time_based_rotation = logging::sinks::file::rotation_at_time_point(0, 0, 0),
+                             logging::keywords::format = "[%TimeStamp%]: %Message%");
+     }
      if(debug_mode) {
         logging::core::get()->set_filter(logging::trivial::severity >= logging::trivial::debug);
      } else {
@@ -111,16 +113,6 @@ int main(int argc, char **argv) {
 
     opencraft_daemon daemon(debug_mode, daemon_mode, thread_count, pidfile, install_root);
     daemon.run();
-
-    /*if(daemon_mode) {
-       LOG(info) << "Daemonizing...";
-       write_pidfile(vm["pidfile"].as<string>());
-       setup_daemon();
-       configure_daemon_stdio();
-       configure_daemon_signals();
-    }
-
-    startup_server();*/
     for(;;);
     return 0;
 }
