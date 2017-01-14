@@ -25,6 +25,9 @@ from math import floor
 import boost_log
 logger = boost_log.logger()
 
+from cpp_events import cpp_events
+cpp_dispatcher = cpp_events()
+
 from twisted.internet import reactor
 from quarry.net.server import ServerFactory, ServerProtocol
 
