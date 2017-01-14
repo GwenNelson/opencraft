@@ -32,7 +32,7 @@ using namespace boost::python;
 
 struct cpp_events {
    void on_packet(int32_t event_id, std::string packet) {
-        LOG(debug) << "Got packet event ID " << packet_id << " of size " << packet.size();
+        LOG(debug) << "Got packet event ID " << event_id << " of size " << packet.size();
    }
 };
 

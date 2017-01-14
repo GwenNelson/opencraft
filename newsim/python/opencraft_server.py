@@ -22,6 +22,7 @@ import sys
 import random
 from math import floor
 
+import event_types
 import boost_log
 logger = boost_log.logger()
 
@@ -62,6 +63,11 @@ class OpenCraftProtocol(ServerProtocol):
    def player_left(self):
        self.in_game = False
        logger.info(str('%s has left' % self.display_name))
+   def packet_received(self, buff, name):
+       ServerProtocol.packet_received(self,buff,name)
+       event_id = event_types.event_ids['on_packet_%s' % name]
+       cpp_dispatcher.on_packet(event_id,str(buff.read()))
+
 
 class OpenCraftFactory(ServerFactory):
    protocol    = OpenCraftProtocol
