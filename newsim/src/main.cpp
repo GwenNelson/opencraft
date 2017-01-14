@@ -41,15 +41,17 @@
 #include <boost/log/utility/setup/common_attributes.hpp>
 
 #include <common.h>
+#include <python_server.h>
 
 using std::cerr;
 using std::cout;
 using std::endl;
 using std::string;
 
-bool debug_mode   = false;
-bool daemon_mode  = true;
-int  thread_count = 0;
+bool        debug_mode   = false;
+bool        daemon_mode  = true;
+int         thread_count = 0;
+std::string install_root = "";
 
 namespace po      = boost::program_options;
 namespace logging = boost::log;
@@ -154,11 +156,19 @@ void startup_server() {
 
      LOG(info) << "Using " << thread_count << " worker threads";
 
+     // start the pool worker threads
      boost::thread_group threads;
      for (std::size_t i = 0; i < thread_count; ++i)
          threads.create_thread(boost::bind(&boost::asio::io_service::run, &io_service));
 
-     io_service.run();
+
+     // start the python thread
+     std::string mainpy_path = install_root + std::string("/python/python_server.py");
+     char* mainpy_path_      = (char*)mainpy_path.c_str();
+     LOG(info) << "Starting " << mainpy_path;
+     threads.create_thread(boost::bind(&init_python,mainpy_path_));
+
+     io_service.run(); // after this we never return
 }
 
 void shutdown_server() {
@@ -177,6 +187,8 @@ int main(int argc, char **argv) {
                                         "how many worker threads to use in the main threadpool")
                        ("logfile,l",    po::value<string>()->default_value("./opencraftd.log.%N"),
                                         "log to file")
+                       ("root,r",       po::value<string>()->default_value("."),
+                                        "path to install root")
                        ("pidfile,p",    po::value<string>()->default_value("~/.opencraftd.pid"),
                                         "path to the PID file for daemon");
 
@@ -206,6 +218,8 @@ int main(int argc, char **argv) {
     configure_logging(vm["logfile"].as<string>());
 
     thread_count = vm["workers"].as<int>();
+
+    install_root = vm["root"].as<string>();
 
     if(daemon_mode) {
        LOG(info) << "Daemonizing...";

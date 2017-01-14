@@ -1,2 +1,22 @@
 Why is this called newsim?
 Nostalgia and second life, that's why
+
+How to build it:
+ 1. mkdir -p build
+ 2. cd build
+ 3. cmake ..
+ 4. make
+
+How to run it:
+ 1. cd build/
+ 2. ./newsim -r..
+
+For usage options:
+ 1. cd build/
+ 2. ./newsim -h
+
+For debugging and no daemon:
+ 1. cd build/
+ 2. ./newsim -r.. -fd
+
+The -r option is needed to point to the install root - which in a real system will eventually be something like /usr/local/share/opencraft or whatever, but while developing it's just the source root.
