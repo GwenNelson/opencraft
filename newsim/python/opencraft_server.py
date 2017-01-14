@@ -68,7 +68,7 @@ class OpenCraftProtocol(ServerProtocol):
        ServerProtocol.packet_received(self,buff,name)
        buff.restore()
        event_id = event_types.event_ids['on_packet_%s' % name]
-       cpp_dispatcher.on_packet(event_id,str(buff.read()))
+       cpp_dispatcher.on_packet(self,event_id,str(buff.read()))
 
 
 class OpenCraftFactory(ServerFactory):
@@ -79,7 +79,7 @@ class OpenCraftFactory(ServerFactory):
 class OpenCraftServer:
    def run(self):
        logger.debug('Starting server...')
-       proto_factory            = OpenCraftFactory()
+       proto_factory = OpenCraftFactory()
        logger.info('Server ready!')
        proto_factory.listen('0.0.0.0',25565)
        reactor.run()
