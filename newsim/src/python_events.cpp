@@ -31,8 +31,8 @@
 using namespace boost::python;
 
 struct cpp_events {
-   void on_packet(int32_t packet_id, std::string packet) {
-        LOG(debug) << "Got packet ID " << packet_id << " of size " << packet.size();
+   void on_packet(int32_t event_id, std::string packet) {
+        LOG(debug) << "Got packet event ID " << packet_id << " of size " << packet.size();
    }
 };
 

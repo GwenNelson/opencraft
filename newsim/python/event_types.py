@@ -27,8 +27,9 @@ DEFAULT_PROTO    = 315 # update this if the protocol changes
 
 EVENT_ID = 0 # we increment this each time an event is added, making the event IDs unique
 
-event_ids   = {}
-event_names = {}
+event_ids      = {}
+event_names    = {}
+packets_events = {} # maps packet IDs to event IDs that should be used for that particular packet
 
 def add_event(event_name):
     global event_ids
@@ -37,14 +38,15 @@ def add_event(event_name):
     event_ids[event_name] = EVENT_ID
     event_names[EVENT_ID] = event_name
     EVENT_ID += 1
+    return EVENT_ID-1
 
 # the server sends on_packet_ events for every packet
 # on_packet_ events have these params: (client_conn, packet, packet_len)
 # data types depend which side we're on, on the python side the "packet" param is a bound buffer and packet_len isn't there
 # on the C++ side packet is an unsigned char* and packet_len is a size_t
 for k,v in packets.packet_names.items():
-    if k[0]==315:
-       add_event('on_packet_%s' % v)
+    if k[0]==DEFAULT_PROTO:
+       packets_events[k[3]] = add_event('on_packet_%s' % v)
 
 # these events are used in various places, params are listed next to them
 add_event('on_connect')      # (new_client_conn) sent by server class
