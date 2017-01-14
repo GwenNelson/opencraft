@@ -64,7 +64,9 @@ class OpenCraftProtocol(ServerProtocol):
        self.in_game = False
        logger.info(str('%s has left' % self.display_name))
    def packet_received(self, buff, name):
+       buff.save()
        ServerProtocol.packet_received(self,buff,name)
+       buff.restore()
        event_id = event_types.event_ids['on_packet_%s' % name]
        cpp_dispatcher.on_packet(event_id,str(buff.read()))
 
