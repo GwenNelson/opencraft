@@ -219,7 +219,7 @@ class OpenCraftProtocol(ServerProtocol):
                                     self.buff_type.pack('B',self.player_data.difficulty)+
                                     self.buff_type.pack('B',100)+
                                     self.buff_type.pack_string('default')+
-                                    self.buff_type.pack('?',True))
+                                    self.buff_type.pack('?',False))
        self.send_packet("spawn_position",self.pack_pos(*self.factory.game_state.spawn_pos))
        start_chunk = self.player_data.get_cur_chunk()
        self.logger.info('Spawn chunk is %s',str(start_chunk))
@@ -244,24 +244,38 @@ class OpenCraftFactory(ServerFactory):
        sections = ''
        for chunk_y in xrange(16):
            sections += self.buff_type.pack('B',13) # bits per entry
-           sections += self.buff_type.pack('i',0)  # pal length == 0
+           sections += self.buff_type.pack_varint(0)  # pal length == 0
 
            section_data = ''
-           temp_long    = 0
            section_block_data = self.game_state.chunk_columns[(chunk_x,chunk_z)][chunk_y]
            section_bits = bitstring.BitArray()
            for ry in xrange(16):
                for rz in xrange(16):
                    for rx in xrange(16):
                        section_bits.append(bitstring.BitArray(uint=section_block_data[(rx,ry,rz)][0],length=9))
-                       section_bits.append(bitstring.BitArray(uint=section_block_data[(rx,ry,rz)][1],length=3))
-           section_data  = section_bits.bytes
-           sections += self.buff_type.pack_varint(len(section_data)/8)
-           sections += section_data
-           sections += chr(0) * (16*16*8)
+                       section_bits.append(bitstring.BitArray(uint=section_block_data[(rx,ry,rz)][1],length=4))
+
+           # These two reverses put the bits in the order MC expects
+           for r in xrange(len(section_bits) / 13):
+              section_bits.reverse(r * 13, (r + 1) * 13)
+           for r in xrange(len(section_bits) / 64):
+              section_bits.reverse(r * 64, (r + 1) * 64)
+
+           section_data = section_bits.bytes
+
+           sections += self.buff_type.pack_varint(len(section_data) / 8) # data array length in longs
+           sections += section_data  # data array
+
+           sections += chr(0) * (16*16*8) # block light
+           sections += chr(0) * (16*16*8) # sky light - absent in nether and end
+
+       sections += chr(127) * 256 # Biomes - 127 = void
+
        retval += self.buff_type.pack_varint(len(sections))
        retval += sections
-#       retval += (chr(0) * 256)
+
+       retval += self.buff_type.pack_varint(0)  #num block entities
+
        return retval
 
 class OpenCraftServer(base_daemon.BaseDaemon):
