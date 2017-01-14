@@ -23,7 +23,8 @@ import sys
 import random
 from math import floor
 
-import logging
+import boost_log
+logger = boost_log.logger()
 
 import bitstring
 
@@ -110,11 +111,11 @@ class GameState:
                        retval[chunk_y][(rx,ry,rz)] = (0,0) # air
        return retval
    def setup_map(self,chunk_w=4,chunk_h=4):
-       self.logger.info('Loading %sX%s flat chunks:',str(chunk_w),str(chunk_h))
+       logger.info('Loading %sX%s flat chunks:' % (str(chunk_w),str(chunk_h)))
        for x in xrange(chunk_w):
            for z in xrange(chunk_h):
                self.chunk_columns[(x,z)] = self.load_chunk(x,z)
-       self.logger.info('Chunks loaded!')
+       logger.info('Chunks loaded!')
    def add_player(self,player):
        """Add a new player to the game state
 
@@ -220,7 +221,7 @@ class OpenCraftProtocol(ServerProtocol):
                                     self.buff_type.pack('?',False))
        self.send_packet("spawn_position",self.pack_pos(*self.factory.game_state.spawn_pos))
        start_chunk = self.player_data.get_cur_chunk()
-       self.logger.info('Spawn chunk is %s',str(start_chunk))
+       self.logger.info('Spawn chunk is %s' % str(start_chunk))
        self.send_chunk_column(*start_chunk)
        for column in self.factory.chunk_data.keys():
            self.send_chunk_column(*column)
@@ -231,10 +232,9 @@ class OpenCraftFactory(ServerFactory):
    protocol    = OpenCraftProtocol
    motd        = 'OpenCraft server'
    online_mode = False
-   log_level   = logging.DEBUG
    chunk_data  = {}
    def gen_chunk_data(self,chunk_x,chunk_z):
-       self.logger.info('Generate chunk_data packet for %sX%s',str(chunk_x),str(chunk_z))
+       logger.info('Generate chunk_data packet for %sX%s' % (str(chunk_x),str(chunk_z)))
        retval  = ''
        retval += self.buff_type.pack('i',chunk_x)
        retval += self.buff_type.pack('i',chunk_z)
@@ -280,16 +280,14 @@ class OpenCraftFactory(ServerFactory):
 
 class OpenCraftServer:
    def run(self):
-       self.logger = logging.getLogger("")
-       self.logger.setLevel(logging.DEBUG)
-       self.logger.debug('Starting server...')
+       logger.debug('Starting server...')
        proto_factory            = OpenCraftFactory()
-       proto_factory.logger     = self.logger
-       proto_factory.game_state = GameState(logger=self.logger)
+       proto_factory.logger     = logger
+       proto_factory.game_state = GameState(logger=logger)
        proto_factory.game_state.setup_map()
        for k in proto_factory.game_state.chunk_columns.keys():
            proto_factory.chunk_data[k] = proto_factory.gen_chunk_data(*k)
-       self.logger.info('Server ready!')
+       logger.info('Server ready!')
        proto_factory.listen('0.0.0.0',25565)
        reactor.run()
 
