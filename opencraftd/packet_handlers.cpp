@@ -78,6 +78,10 @@ void handle_status_request(void* client, int32_t packlen) {
      client_conn->send_packet(outpack.peek(outpack.size()), PACKET_ID_STATUS_STATUS_RESPONSE_DOWNSTREAM, outpack.size());
 }
 
+void handle_status_ping(void* client, int32_t packlen) {
+     LOG(debug) << "Got a status ping";
+}
+
 void handle_login_start(void* client, int32_t packlen) {
      opencraft_client_connection* client_conn = (opencraft_client_connection*)client;
 

@@ -225,7 +225,7 @@ class OpenCraftProtocol(ServerProtocol):
        self.logger.info('Spawn chunk is %s',str(start_chunk))
        self.send_chunk_column(*start_chunk)
        self.send_poslook(tp_id=random.randint(1000,999999))
-       self.tasks.add_loop(1.0/20.0,self.client_tick)
+#       self.tasks.add_loop(1.0/20.0,self.client_tick)
 
 class OpenCraftFactory(ServerFactory):
    protocol    = OpenCraftProtocol

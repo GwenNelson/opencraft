@@ -39,6 +39,7 @@ void opencraft_client_connection::start() {
      packet_callbacks[packet_id_t(HANDSHAKING,PACKET_ID_INIT_HANDSHAKE_UPSTREAM)]        = &handle_handshake;
      packet_callbacks[packet_id_t(LOGIN,      PACKET_ID_LOGIN_LOGIN_START_UPSTREAM)]     = &handle_login_start;
      packet_callbacks[packet_id_t(STATUS,     PACKET_ID_STATUS_STATUS_REQUEST_UPSTREAM)] = &handle_status_request;
+     packet_callbacks[packet_id_t(STATUS,     PACKET_ID_STATUS_STATUS_PING_UPSTREAM)]    = &handle_status_ping;
 
      LOG(info) << "Started connection handling!";
      cur_proto_mode = HANDSHAKING;
@@ -85,14 +86,23 @@ void opencraft_client_connection::do_packet_read() {
 
      LOG(debug) << "do_packet_read start";
 
+
+     int    max_bits = 21;
+     int32_t packlen = 0;
      // peek at the packet length, and return if we don't have the full packet in buffer yet
-     int max_bits = 21;
-     if(cur_proto_mode == PLAY) max_bits = 32;
-     int32_t packlen = parse_var_int(recv_buf.peek(max_bits/8),max_bits/8);
-     if(recv_buf.size() < packlen) {
-        LOG(debug) << "not enough bytes received!";
-        LOG(debug) << "need " << packlen << " bytes";
-        return;
+     if(cur_proto_mode == STATUS) {
+       if(recv_buf.peek(1)[0] == 0xFE) {
+          LOG(debug) << "Legacy ping received";
+       }
+     } else {
+       max_bits = 21;
+       if(cur_proto_mode == PLAY) max_bits = 32;
+       packlen = parse_var_int(recv_buf.peek(max_bits/8),max_bits/8);
+       if(recv_buf.size() < packlen) {
+          LOG(debug) << "not enough bytes received!";
+          LOG(debug) << "need " << packlen << " bytes";
+          return;
+       }
      }
 
      packlen = recv_buf.read_varint(max_bits);

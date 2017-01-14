@@ -34,5 +34,6 @@
 void handle_handshake(void* client,int32_t packlen); 
 
 void handle_status_request(void* client, int32_t packlen);
+void handle_status_ping(void* client, int32_t packlen);
 
 void handle_login_start(void* client,int32_t packlen);
