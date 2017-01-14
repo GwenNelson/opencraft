@@ -28,6 +28,10 @@
 #include <packet_handlers.h>
 #include <version.h>
 
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid_io.hpp>
+
 #include <jsoncpp/json/value.h>
 #include <jsoncpp/json/writer.h>
 
@@ -87,7 +91,16 @@ void handle_login_start(void* client, int32_t packlen) {
 
      std::string username  = client_conn->recv_buf.read_string();
      client_conn->username = username;
+
      LOG(debug) << "Got login start for user " << username;
+     client_conn->uuid = boost::uuids::random_generator()();
+
+     LOG(debug) << "Sending login success with UUID " << client_conn->uuid;
+     bound_buffer outpack;
+     outpack.write_string(username);
+     outpack.write_string(to_string(client_conn->uuid));
+
+     client_conn->send_packet(outpack.peek(outpack.size()), PACKET_ID_LOGIN_LOGIN_SUCCESS_DOWNSTREAM, outpack.size());
 }
 
 

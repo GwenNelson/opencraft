@@ -111,7 +111,7 @@ class GameState:
                    for chunk_y in xrange(2,16):
                        retval[chunk_y][(rx,ry,rz)] = (0,0) # air
        return retval
-   def setup_map(self,chunk_w=1,chunk_h=1):
+   def setup_map(self,chunk_w=4,chunk_h=4):
        self.logger.info('Loading %sX%s flat chunks:',str(chunk_w),str(chunk_h))
        for x in xrange(chunk_w):
            for z in xrange(chunk_h):
@@ -224,6 +224,8 @@ class OpenCraftProtocol(ServerProtocol):
        start_chunk = self.player_data.get_cur_chunk()
        self.logger.info('Spawn chunk is %s',str(start_chunk))
        self.send_chunk_column(*start_chunk)
+       for column in self.factory.chunk_data.keys():
+           self.send_chunk_column(*column)
        self.send_poslook(tp_id=random.randint(1000,999999))
 #       self.tasks.add_loop(1.0/20.0,self.client_tick)
 

@@ -33,6 +33,10 @@
 #include <tuple>
 #include <map>
 
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid_io.hpp>
+
 #include <bbuff.h>
 
 using boost::asio::ip::tcp;
@@ -53,6 +57,7 @@ class opencraft_client_connection {
      std::map<packet_id_t,packet_callback_t> packet_callbacks;
      proto_mode_t cur_proto_mode;
      std::string username;
+     boost::uuids::uuid uuid;
    private:
      boost::mutex mtx_;
      boost::mutex send_mtx_;

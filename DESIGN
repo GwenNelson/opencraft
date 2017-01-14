@@ -1,0 +1,96 @@
+Basic architecture
+  C++ daemon process
+   Hook python logging to boost logging
+  Embedded python
+   Twisted/quarry for basic packet comms
+    Look into multithreading this or converting quarry to use boost::asio
+  Callbacks on packet types or events
+   Packet callbacks passed following params:
+    client_conn instance
+    opencraft_server instance
+    game_state instance
+
+event loop
+  passed arbitrary functions+params
+  event handlers are registered and removed in the daemon class
+  2 sides implemented as class members inside opencraft_daemon
+  python
+     simple dict of handlers mapping event type to a list of handlers
+     firing an event causes all the handlers to execute before passing the event type and data to the C++ side
+  C++
+     preferred implementation when writing callbacks, for performance reasons
+     std::map similar to the dict on python side, mapping to a vector of callbacks
+     firing an event causes the callbacks to be run in the asio thread pool and then passed over to the python side
+
+event types and data
+  event data is a tuple - contents of the tuple depend on what the event is
+  every event type has a unique ID defined in both python and C++
+
+threads
+  python thread containing twisted/quarry - totally unique context, independent GIL etc - all communication to the rest of the code is via events ONLY
+  python thread containing any game logic (mobs etc) - same as above
+  python thread containing custom mods? - perhaps merge into game logic context?
+  lua / other scripting ?
+  boost::asio thread pool for event loop - 1 thread per core default, user configurable blabla optimisation etc
+    look into dynamic resizing, add more threads when busy, reduce when not busy etc
+
+opencraft_daemon class
+  C++ implementation
+  container of sorts
+  handles event loop setup
+  contains a single instance of opencraft_server - implement vhost functionality later
+  contains a single instance of game_state
+  does time stepping and invokes tick() on game_state instance
+
+opencraft_server class
+  python implementation - twisted/quarry context
+  handles listening for connections
+  spits out on_connect event with new client_conn instance
+  holds a set of connected clients for player counts and broadcasting etc
+
+client_conn class
+  python implementation - twisted/quarry context
+  basic I/O on client connections
+  spits out on_packet_PACKETTYPE events
+  send_packet() method accepts a buffer and a size (so we can call from C++) and locks the socket before transmitting for obvious reasons
+  tick() method for doing once per tick stuff, must NOT use events - instead should call relevant methods directly
+  contains instance of player_data class with position data etc
+
+player_data class
+  C++ implementation
+  contains player username, UUID, position, etc etc
+  listens for on_packet_PACKETTYPE events for player_position etc
+  spits out player_moved events and handles simple physics
+  tick() method for doing physics or whatever
+  holds a set of chunks within the player's render distance + 1 and updates as the player moves, sending load or unload chunks as appropriate
+    see game_state class below - note that this set of chunks is player-specific
+
+game_state class
+  C++ implementation
+  listens for login_start packets from client_conn and sets up new players
+  tick() method
+    invokes tick() on every player_data instance and then on every client_conn instance
+    checks for chunks that need loading/unloading/updating etc (see below)
+    invokes tick() on all mobs or whatever in currently loaded chunks
+  chunk columns
+    API for accessing chunk data: generating or loading the chunk column if it does not exist
+      for now, loading a chunk generates it and unloading it destroys it - later, loading will only generate if not found on disk
+    API for manipulating blocks
+      once a chunk is changed, it is marked as needing an update the next tick and all players in or near it will get an update as soon as the chunk_data packet is regenerated
+    generates chunk_data packets and caches them
+    holds various sets, which can intersect
+      uses player_moved events to calculate updates to chunks
+      loaded columns with players - resident in RAM and updates sent to the player
+      loaded columns near players - resident in RAM and updates sent to the player - these are columns surrounding a player's current chunk and within render distance+1
+      loaded columns without players - if not within a sane distance from a player these can be unloaded - but only if memory is scarce - look into appropriate algorithms
+      unloaded columns near players - columns near players but which are not yet resident in RAM and need to be loaded
+  entity indices mapping to entity_data instances
+    by chunk - maps to a vector of all entities in a specific chunk
+    by entity ID - maps direct to specific entity
+  player indices mapping to tuples of (client_conn,player_data)
+    by UUID
+    by endpoint
+    by entity ID
+    by username
+    etc etc
+  
