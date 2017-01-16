@@ -39,6 +39,8 @@ from quarry.utils.errors import ProtocolError
 from quarry.utils.tasks import Tasks
 
 class OpenCraftProtocol(ServerProtocol):
+   """ On the C++ side, we call this client_conn
+   """
    def __init__(self, factory, remote_addr):
        self.factory = factory
        self.remote_addr = remote_addr
@@ -63,6 +65,7 @@ class OpenCraftProtocol(ServerProtocol):
    def player_left(self):
        self.in_game = False
        logger.info(str('%s has left' % self.display_name))
+       # TODO - broadcast a leave event of some kind here
    def packet_received(self, buff, name):
        buff.save()
        ServerProtocol.packet_received(self,buff,name)

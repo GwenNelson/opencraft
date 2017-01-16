@@ -18,7 +18,7 @@
 // along with OpenCraft.  If not, see <http://www.gnu.org/licenses/>.
 //
 // DESCRIPTION:
-//     Event dispatcher C++ side
+//     Player data - username, position, etc etc
 //
 //-----------------------------------------------------------------------------
 
@@ -26,31 +26,20 @@
 
 #include <common.h>
 
-#include <boost/asio/io_service.hpp>
-#include <boost/thread/thread.hpp>
-
 #include <event_types.autogen.h>
+#include <opencraft_daemon.h>
+#include <opencraft_event_dispatcher.h>
 
-#include <map>
-#include <vector>
+#include <python_events.h> // for client_conn - which is basically a python object
 #include <string>
 
-#include <boost/python.hpp>
-#include <frameobject.h>
-
-typedef void (*event_callback_t)(int32_t event_id, void *event_data);
-
-typedef struct event_data_onpacket_t {
-   object      client_conn; // the python client connection
-   std::string data;        // raw packet data
-} event_data_onpacket_t;
-
-class opencraft_event_dispatcher {
+/*
+ This class is basically spawned by the game_state class for each player
+ */
+class opencraft_player_data {
    public:
-     opencraft_event_dispatcher(boost::asio::io_service &__io_service);
-     void fire_event(int32_t event_id, void *event_data);
-     void register_handler(int32_t event_id, event_callback_t cb);
-   private:
-     std::map<int32_t,std::vector<event_callback_t> > event_callbacks;
-     boost::asio::io_service *_io_service;
+     opencraft_player_data(object *client_conn);
+     std::string player_username;
+     // TODO add position, UUID, entity ID and all that stuff
+     void tick();
 };
