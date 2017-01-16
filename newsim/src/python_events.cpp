@@ -35,6 +35,8 @@ using namespace boost::python;
 
 extern opencraft_daemon* oc_daemon;
 
+// TODO - typedef "object" for client_conn_t etc
+
 struct cpp_events {
    void on_packet(object client_conn, int32_t event_id, std::string packet) {
         LOG(debug) << "Got packet event ID " << event_id << " of size " << packet.size();

@@ -41,8 +41,8 @@
 typedef void (*event_callback_t)(int32_t event_id, void *event_data);
 
 typedef struct event_data_onpacket_t {
-   object      client_conn; // the python client connection
-   std::string data;        // raw packet data
+   boost::python::object *client_conn; // the python client connection
+   std::string data;                   // raw packet data
 } event_data_onpacket_t;
 
 class opencraft_event_dispatcher {

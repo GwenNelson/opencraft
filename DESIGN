@@ -56,8 +56,14 @@ client_conn class
   tick() method for doing once per tick stuff, must NOT use events - instead should call relevant methods directly
   contains instance of player_data class with position data etc
 
+entity_data class
+  C++ implementation
+  position etc
+  tick() method that does whatever
+
 player_data class
   C++ implementation
+  inherit from entity_data class
   contains player username, UUID, position, etc etc
   listens for on_packet_PACKETTYPE events for player_position etc
   spits out player_moved events and handles simple physics

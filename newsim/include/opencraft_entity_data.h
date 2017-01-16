@@ -18,7 +18,7 @@
 // along with OpenCraft.  If not, see <http://www.gnu.org/licenses/>.
 //
 // DESCRIPTION:
-//     Player data - username, position, etc etc
+//     Entity data - simple base class for all entities
 //
 //-----------------------------------------------------------------------------
 
@@ -26,21 +26,27 @@
 
 #include <common.h>
 
-#include <event_types.autogen.h>
 #include <opencraft_daemon.h>
 #include <opencraft_event_dispatcher.h>
-#include <opencraft_entity_data.h>
 
-#include <python_events.h> // for client_conn - which is basically a python object
 #include <string>
 
-/*
- This class is basically spawned by the game_state class for each player
- */
-class opencraft_player_data : public opencraft_entity_data {
+// based on the classes here - http://minecraft.gamepedia.com/Data_values/Entity_IDs
+// no, this would NOT be better as a set of actual C++ classes - i know what i'm doing bitches
+typedef enum {
+  ENTITY_CLASS_DROP        = 0,
+  ENTITY_CLASS_IMMOBILE    = 1,
+  ENTITY_CLASS_PROJECTILE  = 2,
+  ENTITY_CLASS_BLOCK       = 3,
+  ENTITY_CLASS_VEHICLE     = 4,
+  ENTITY_CLASS_HOSTILE_MOB = 5,
+  ENTITY_CLASS_PASSIVE_MOB = 6,
+  ENTITY_CLASS_PLAYER      = 7
+} entity_class_t;
+
+class opencraft_entity_data {
    public:
-     opencraft_player_data(boost::python::object *client_conn);
-     void tick();
-     std::string player_username;
+     entity_class_t e_class;
      // TODO add position, UUID, entity ID and all that stuff
+     virtual void tick() = 0;
 };
