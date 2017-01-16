@@ -62,6 +62,7 @@ class OpenCraftProtocol(ServerProtocol):
        self.switch_protocol_mode("play")
        logger.info(str('%s has joined' % self.display_name))
        # TODO - broadcast the event here
+       cpp_dispatcher.on_connect(self)
    def player_left(self):
        self.in_game = False
        logger.info(str('%s has left' % self.display_name))

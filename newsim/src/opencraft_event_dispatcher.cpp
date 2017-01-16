@@ -36,7 +36,12 @@ opencraft_event_dispatcher::opencraft_event_dispatcher(boost::asio::io_service &
 }
 
 void opencraft_event_dispatcher::fire_event(int32_t event_id, void *event_data) {
-     
+     if(this->event_callbacks.find(event_id) != this->event_callbacks.end()) {
+        for(int i=0; i != this->event_callbacks.size(); i++) {
+           this->event_callbacks[event_id][i](event_id,event_data);
+        }
+     }
+     free(event_data);
 }
 
 void opencraft_event_dispatcher::register_handler(int32_t event_id, event_callback_t cb) {

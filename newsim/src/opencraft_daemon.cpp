@@ -44,7 +44,7 @@ opencraft_daemon::opencraft_daemon(bool debug_mode, bool daemon_mode, int thread
    this->_thread_count    = thread_count;
    this->_pidfile         = pidfile;
    this->_install_root    = install_root;
-   this->event_dispatcher = new opencraft_event_dispatcher(this->_io_service);
+
 }
 
 void opencraft_daemon::run() {
@@ -60,6 +60,10 @@ void opencraft_daemon::run() {
      for(std::size_t i=0; i< (this->_thread_count); i++) {
          this->_work_pool_threads.create_thread(boost::bind(&boost::asio::io_service::run, &(this->_io_service)));
      }
+
+     LOG(info) << "Setting up event dispatcher and game state...";
+     this->event_dispatcher = new opencraft_event_dispatcher(this->_io_service);
+     this->game_state       = new opencraft_game_state();
 
      LOG(info) << "Spawning python";
      std::string mainpy_path = (this->_install_root) + std::string("/python/opencraft_server.py");

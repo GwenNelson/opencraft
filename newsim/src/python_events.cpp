@@ -42,7 +42,8 @@ struct cpp_events {
         LOG(debug) << "Got packet event ID " << event_id << " of size " << packet.size();
    }
    void on_connect(object client_conn) {
-        LOG(debug) << "Got new connection";
+        event_data_onconnect_t *e_data = (event_data_onconnect_t*)malloc(sizeof(event_data_onconnect_t));
+        oc_daemon->event_dispatcher->fire_event(EVENT_ON_CONNECT,(void*)e_data);
    }
 };
 

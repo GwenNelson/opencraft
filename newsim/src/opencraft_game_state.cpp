@@ -44,7 +44,6 @@ void gamestate_connect_cb(int32_t event_id, void* event_data) {
      event_data_onconnect_t *e_data              = (event_data_onconnect_t*)event_data;
      int32_t new_ent_id                          = (int32_t)random();
      oc_daemon->game_state->entities[new_ent_id] = new opencraft_player_data(e_data->client_conn);
-     free(event_data);
 }
 
 opencraft_game_state::opencraft_game_state() {
