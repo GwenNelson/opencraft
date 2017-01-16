@@ -45,6 +45,10 @@ typedef struct event_data_onpacket_t {
    std::string data;                   // raw packet data
 } event_data_onpacket_t;
 
+typedef struct event_data_onconnect_t {
+   boost::python::object *client_conn;
+} event_data_onconnect_t;
+
 class opencraft_event_dispatcher {
    public:
      opencraft_event_dispatcher(boost::asio::io_service &__io_service);

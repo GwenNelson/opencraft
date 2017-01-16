@@ -18,7 +18,7 @@
 // along with OpenCraft.  If not, see <http://www.gnu.org/licenses/>.
 //
 // DESCRIPTION:
-//     Entity data - simple base class for all entities
+//     Game state
 //
 //-----------------------------------------------------------------------------
 
@@ -26,25 +26,16 @@
 
 #include <common.h>
 
+#include <opencraft_entity_data.h>
 
-#include <string>
+#include <map>
 
-// based on the classes here - http://minecraft.gamepedia.com/Data_values/Entity_IDs
-// no, this would NOT be better as a set of actual C++ classes - i know what i'm doing bitches
-typedef enum {
-  ENTITY_CLASS_DROP        = 0,
-  ENTITY_CLASS_IMMOBILE    = 1,
-  ENTITY_CLASS_PROJECTILE  = 2,
-  ENTITY_CLASS_BLOCK       = 3,
-  ENTITY_CLASS_VEHICLE     = 4,
-  ENTITY_CLASS_HOSTILE_MOB = 5,
-  ENTITY_CLASS_PASSIVE_MOB = 6,
-  ENTITY_CLASS_PLAYER      = 7
-} entity_class_t;
-
-class opencraft_entity_data {
+class opencraft_game_state {
    public:
-     entity_class_t e_class;
-     // TODO add position, UUID, entity ID and all that stuff
-     virtual void tick() = 0;
+     opencraft_game_state();
+     void tick();
+
+     // below fields must not be modified outside this class - seriously
+     // fuck OOP purists who want the compiler to enforce this instead of their own brain
+     std::map<int32_t, opencraft_entity_data*> entities;
 };

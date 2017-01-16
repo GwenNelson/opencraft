@@ -32,12 +32,14 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <opencraft_event_dispatcher.h>
+#include <opencraft_game_state.h>
 
 class opencraft_daemon {
    public:
      opencraft_daemon(bool debug_mode, bool daemon_mode, int thread_count, std::string pidfile, std::string install_root);
      void run();
      opencraft_event_dispatcher *event_dispatcher;
+     opencraft_game_state       *game_state;
 
    private:
      void write_pidfile(std::string filename);

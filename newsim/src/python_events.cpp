@@ -50,6 +50,7 @@ BOOST_PYTHON_MODULE(cpp_events)
 {
     class_<cpp_events>("cpp_events")
         .def("on_packet", &cpp_events::on_packet)
+        .def("on_connect",&cpp_events::on_connect)
     ;
 };
 

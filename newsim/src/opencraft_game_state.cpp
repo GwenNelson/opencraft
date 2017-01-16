@@ -18,33 +18,39 @@
 // along with OpenCraft.  If not, see <http://www.gnu.org/licenses/>.
 //
 // DESCRIPTION:
-//     Entity data - simple base class for all entities
+//     Game state
 //
 //-----------------------------------------------------------------------------
 
-#pragma once
 
 #include <common.h>
 
+#include <event_types.autogen.h>
+#include <opencraft_daemon.h>
+#include <opencraft_event_dispatcher.h>
 
-#include <string>
+#include <opencraft_game_state.h>
+#include <opencraft_entity_data.h>
+#include <opencraft_player_data.h>
 
-// based on the classes here - http://minecraft.gamepedia.com/Data_values/Entity_IDs
-// no, this would NOT be better as a set of actual C++ classes - i know what i'm doing bitches
-typedef enum {
-  ENTITY_CLASS_DROP        = 0,
-  ENTITY_CLASS_IMMOBILE    = 1,
-  ENTITY_CLASS_PROJECTILE  = 2,
-  ENTITY_CLASS_BLOCK       = 3,
-  ENTITY_CLASS_VEHICLE     = 4,
-  ENTITY_CLASS_HOSTILE_MOB = 5,
-  ENTITY_CLASS_PASSIVE_MOB = 6,
-  ENTITY_CLASS_PLAYER      = 7
-} entity_class_t;
+#include <boost/python.hpp>
+#include <frameobject.h>
 
-class opencraft_entity_data {
-   public:
-     entity_class_t e_class;
-     // TODO add position, UUID, entity ID and all that stuff
-     virtual void tick() = 0;
-};
+#include <stdlib.h>
+
+extern opencraft_daemon* oc_daemon;
+
+void gamestate_connect_cb(int32_t event_id, void* event_data) {
+     event_data_onconnect_t *e_data              = (event_data_onconnect_t*)event_data;
+     int32_t new_ent_id                          = (int32_t)random();
+     oc_daemon->game_state->entities[new_ent_id] = new opencraft_player_data(e_data->client_conn);
+     free(event_data);
+}
+
+opencraft_game_state::opencraft_game_state() {
+    oc_daemon->event_dispatcher->register_handler(EVENT_ON_CONNECT,gamestate_connect_cb);
+}
+
+void opencraft_game_state::tick() {
+}
+

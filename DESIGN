@@ -75,7 +75,7 @@ game_state class
   C++ implementation
   listens for login_start packets from client_conn and sets up new players
   tick() method
-    invokes tick() on every player_data instance and then on every client_conn instance
+    invokes tick() on every entity_data instance and then on every client_conn instance
     checks for chunks that need loading/unloading/updating etc (see below)
     invokes tick() on all mobs or whatever in currently loaded chunks
   chunk columns
