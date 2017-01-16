@@ -36,13 +36,15 @@
 #include <signal.h>
 
 #include <python_server.h>
+#include <opencraft_event_dispatcher.h>
 
 opencraft_daemon::opencraft_daemon(bool debug_mode, bool daemon_mode, int thread_count, std::string pidfile, std::string install_root) {
-   this->_debug_mode   = debug_mode;
-   this->_daemon_mode  = daemon_mode;
-   this->_thread_count = thread_count;
-   this->_pidfile      = pidfile;
-   this->_install_root = install_root;
+   this->_debug_mode      = debug_mode;
+   this->_daemon_mode     = daemon_mode;
+   this->_thread_count    = thread_count;
+   this->_pidfile         = pidfile;
+   this->_install_root    = install_root;
+   this->event_dispatcher = new opencraft_event_dispatcher(this->_io_service);
 }
 
 void opencraft_daemon::run() {

@@ -31,11 +31,14 @@
 
 #include <unistd.h>
 #include <stdlib.h>
+#include <opencraft_event_dispatcher.h>
 
 class opencraft_daemon {
    public:
      opencraft_daemon(bool debug_mode, bool daemon_mode, int thread_count, std::string pidfile, std::string install_root);
      void run();
+     opencraft_event_dispatcher *event_dispatcher;
+
    private:
      void write_pidfile(std::string filename);
      void setup_daemon();
