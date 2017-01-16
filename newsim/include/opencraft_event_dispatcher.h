@@ -18,36 +18,30 @@
 // along with OpenCraft.  If not, see <http://www.gnu.org/licenses/>.
 //
 // DESCRIPTION:
-//     Provide a means for python code to send events to C++
+//     Event dispatcher C++ side
 //
 //-----------------------------------------------------------------------------
 
+#pragma once
+
 #include <common.h>
-#include <boost/python.hpp>
-#include <iostream>
-#include <tuple>
-#include <frameobject.h>
 
-using namespace boost::python;
+#include <boost/asio/io_service.hpp>
+#include <boost/thread/thread.hpp>
 
-#include <opencraft_daemon.h>
-#include <opencraft_event_dispatcher.h>
+#include <event_types.autogen.h>
 
-extern opencraft_daemon* oc_daemon;
+#include <map>
+#include <vector>
 
-struct cpp_events {
-   void on_packet(object client_conn, int32_t event_id, std::string packet) {
-        LOG(debug) << "Got packet event ID " << event_id << " of size " << packet.size();
-   }
+typedef void (*event_callback_t)(int32_t event_id, void *event_data);
+
+class opencraft_event_dispatcher {
+   public:
+     opencraft_event_dispatcher(boost::asio::io_service &__io_service);
+     void fire_event(int32_t event_id, void *event_data);
+     void register_handler(int32_t event_id, event_callback_t cb);
+   private:
+     std::map<int32_t,std::vector<event_callback_t> > event_callbacks;
+     boost::asio::io_service *_io_service;
 };
-
-BOOST_PYTHON_MODULE(cpp_events)
-{
-    class_<cpp_events>("cpp_events")
-        .def("on_packet", &cpp_events::on_packet)
-    ;
-};
-
-void add_python_cpp_events() {
-     initcpp_events();
-}

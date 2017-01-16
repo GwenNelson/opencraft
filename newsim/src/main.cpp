@@ -43,6 +43,7 @@ using std::string;
 namespace po      = boost::program_options;
 namespace logging = boost::log;
 
+opencraft_daemon* oc_daemon = NULL;
 void shutdown_server();
 void startup_server();
 
@@ -111,8 +112,8 @@ int main(int argc, char **argv) {
     std::string install_root = vm["root"].as<string>();
     std::string pidfile      = vm["pidfile"].as<string>();
 
-    opencraft_daemon daemon(debug_mode, daemon_mode, thread_count, pidfile, install_root);
-    daemon.run();
+    oc_daemon = new opencraft_daemon(debug_mode, daemon_mode, thread_count, pidfile, install_root);
+    oc_daemon->run();
     for(;;);
     return 0;
 }
