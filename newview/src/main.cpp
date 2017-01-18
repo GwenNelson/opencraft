@@ -34,6 +34,9 @@
 
 #include <common.h>
 
+#include <opencraft_video.h>
+#include <opencraft_appstate_menu.h>
+
 #include <stdlib.h>
 #include <unistd.h>
 #include <physfs.h>
@@ -46,6 +49,10 @@ using std::string;
 
 namespace po      = boost::program_options;
 namespace logging = boost::log;
+
+opencraft_video    *oc_video    = NULL;
+opencraft_appstate *oc_appstate = NULL;
+bool is_running                 = true;
 
 void configure_logging(bool debug_mode) {
      if(debug_mode) {
@@ -72,6 +79,17 @@ void init_vfs(char *argvz, char* install_root) {
 
 }
 
+void sdl_loop_iter() {
+     SDL_Event ev;
+     while (SDL_PollEvent(&ev)) {
+        switch(ev.type) {
+           case SDL_QUIT:
+              is_running = false;
+           break;
+        }
+        oc_appstate->update_state(&ev);
+     }
+}
 
 int main(int argc, char **argv) {
     int i;
@@ -82,6 +100,11 @@ int main(int argc, char **argv) {
                        ("debug,d",       "run in debug mode")
                        ("root,r",         po::value<string>()->default_value("."),
                                          "path to install root")
+                       ("width,w",        po::value<unsigned int>()->default_value(1280),
+                                         "default window/screen width")
+                       ("height,h",       po::value<unsigned int>()->default_value(720),
+                                         "default window/screen height")
+                       ("fullscreen,f",  "run in fullscreen mode")
                        ("texturepack,t",  po::value<string>()->default_value("osrep"),
                                          "Texture pack to use");
 
@@ -105,6 +128,13 @@ int main(int argc, char **argv) {
     if(vm.count("debug")==1) {
        debug_mode = true;
     }
+    bool fullscreen_mode = false;
+    if(vm.count("fullscreen")==1) {
+       fullscreen_mode = true;
+    }
+
+    unsigned int res_w = vm["width"].as<unsigned int>();
+    unsigned int res_h = vm["height"].as<unsigned int>();
 
     configure_logging(debug_mode);
 
@@ -129,6 +159,18 @@ int main(int argc, char **argv) {
        exit(1);
     }
 
-    for(;;);
+    LOG(debug) << "Setting video";
+
+    oc_video = new opencraft_video(fullscreen_mode,res_w,res_h);
+    oc_video->init_video();
+
+    oc_appstate = new opencraft_appstate_menu();
+
+    while(is_running) {
+       oc_video->start_frame();
+        sdl_loop_iter();
+        oc_appstate->render();
+       oc_video->end_frame();
+    }
     return 0;
 }

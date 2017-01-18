@@ -18,16 +18,17 @@
 // along with OpenCraft.  If not, see <http://www.gnu.org/licenses/>.
 //
 // DESCRIPTION:
-//     Common includes everything needs to use
+//     Base application state class: used in FSM to do cool things
 //
 //-----------------------------------------------------------------------------
 
 #pragma once
 
-#include <boost/log/core.hpp>
-#include <boost/log/trivial.hpp>
+#include <common.h>
+#include <SDL.h>
 
-#define LOG BOOST_LOG_TRIVIAL
-
-#include <version.h>
-
+class opencraft_appstate {
+   public:
+     virtual void update_state(SDL_Event *ev) = 0;
+     virtual void render() = 0;
+};

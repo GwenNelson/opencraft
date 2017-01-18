@@ -18,16 +18,33 @@
 // along with OpenCraft.  If not, see <http://www.gnu.org/licenses/>.
 //
 // DESCRIPTION:
-//     Common includes everything needs to use
+//     Video mode setup
 //
 //-----------------------------------------------------------------------------
 
 #pragma once
 
-#include <boost/log/core.hpp>
-#include <boost/log/trivial.hpp>
+#include <common.h>
 
-#define LOG BOOST_LOG_TRIVIAL
+#include <SDL.h>
+#if defined(__APPLE__)
+#include <OpenGL/gl.h>
+#include <OpenGL/glu.h>
+#else
+#include <GL/gl.h>
+#include <GL/glu.h>
+#endif
 
-#include <version.h>
-
+class opencraft_video {
+   public:
+     opencraft_video(bool fullscreen, unsigned int w, unsigned int h);
+     void init_video();
+     void start_frame();
+     void end_frame();
+   private:
+     SDL_Window *screen;
+     SDL_GLContext glcontext;
+     bool is_fullscreen;
+     unsigned int res_w;
+     unsigned int res_h;
+};

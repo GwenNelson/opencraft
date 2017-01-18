@@ -18,16 +18,19 @@
 // along with OpenCraft.  If not, see <http://www.gnu.org/licenses/>.
 //
 // DESCRIPTION:
-//     Common includes everything needs to use
+//     Menu appstate
 //
 //-----------------------------------------------------------------------------
 
-#pragma once
+#include <common.h>
+#include <opencraft_appstate_menu.h>
 
-#include <boost/log/core.hpp>
-#include <boost/log/trivial.hpp>
+opencraft_appstate_menu::opencraft_appstate_menu() {
+}
 
-#define LOG BOOST_LOG_TRIVIAL
+void opencraft_appstate_menu::update_state(SDL_Event *ev) {
+}
 
-#include <version.h>
+void opencraft_appstate_menu::render() {
+}
 
