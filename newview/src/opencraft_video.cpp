@@ -65,6 +65,7 @@ void opencraft_video::enter_2d() {
      glMatrixMode(GL_PROJECTION);
      glLoadIdentity();
      glOrtho(0.0,this->res_w,this->res_h, 0.0, 1.0, -1.0);
+     glEnable(GL_TEXTURE_2D);
 }
 
 void opencraft_video::end_frame() {
