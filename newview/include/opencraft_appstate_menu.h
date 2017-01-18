@@ -33,4 +33,6 @@ class opencraft_appstate_menu : public opencraft_appstate{
      opencraft_appstate_menu();
      void update_state(SDL_Event *ev);
      void render();
+   private:
+     int title_gl_tex_id;
 };

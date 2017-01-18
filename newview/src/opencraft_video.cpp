@@ -61,6 +61,12 @@ void opencraft_video::start_frame() {
      glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 }
 
+void opencraft_video::enter_2d() {
+     glMatrixMode(GL_PROJECTION);
+     glLoadIdentity();
+     glOrtho(0.0,this->res_w,this->res_h, 0.0, 1.0, -1.0);
+}
+
 void opencraft_video::end_frame() {
      SDL_GL_SwapWindow(this->screen);
 }

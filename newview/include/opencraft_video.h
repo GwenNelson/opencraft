@@ -41,6 +41,8 @@ class opencraft_video {
      void init_video();
      void start_frame();
      void end_frame();
+     void enter_2d();
+
    private:
      SDL_Window *screen;
      SDL_GLContext glcontext;

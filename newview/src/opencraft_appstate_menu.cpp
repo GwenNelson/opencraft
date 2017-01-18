@@ -24,8 +24,12 @@
 
 #include <common.h>
 #include <opencraft_appstate_menu.h>
+#include <opencraft_video.h>
+
+extern opencraft_video *oc_video;
 
 opencraft_appstate_menu::opencraft_appstate_menu() {
+    oc_video->enter_2d();
 }
 
 void opencraft_appstate_menu::update_state(SDL_Event *ev) {
