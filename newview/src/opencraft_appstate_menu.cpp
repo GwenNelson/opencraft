@@ -26,6 +26,8 @@
 #include <opencraft_appstate_menu.h>
 #include <opencraft_video.h>
 
+#include <SOIL.h>
+
 extern opencraft_video *oc_video;
 
 opencraft_appstate_menu::opencraft_appstate_menu() {
