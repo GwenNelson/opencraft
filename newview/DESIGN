@@ -1,0 +1,17 @@
+Basic architecture
+  C++ main process
+  Python logging hooked to boost logging
+  Embedded python
+   Twisted/quarry
+  OpenGL rendering + SDL event loop
+   Game state is updated inside of python
+   Renderer is implemented in C++ for speed
+
+Threads
+  Main renderer and SDL thread
+  Python thread containing quarry
+
+Core of the client is implemented in Python for simplicity
+
+Main loop queues up events from SDL, passes over to Python and gets back game state to render
+  

@@ -2,14 +2,14 @@
 //
 // Copyright (C) 2017 by Gareth Nelson (gareth@garethnelson.com)
 //
-// This file is part of the OpenCraft server.
+// This file is part of the OpenCraft client.
 //
-// The OpenCraft server is free software: you can redistribute it and/or modify
+// The OpenCraft client is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 2 of the License, or
 // (at your option) any later version.
 //
-// The OpenCraft server is distributed in the hope that it will be useful,
+// The OpenCraft client is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
@@ -33,7 +33,6 @@
 #include <boost/log/utility/setup/common_attributes.hpp>
 
 #include <common.h>
-#include <opencraft_daemon.h>
 
 using std::cerr;
 using std::cout;
@@ -43,17 +42,7 @@ using std::string;
 namespace po      = boost::program_options;
 namespace logging = boost::log;
 
-opencraft_daemon* oc_daemon = NULL;
-void shutdown_server();
-void startup_server();
-
-void configure_logging(std::string logfile, bool debug_mode) {
-     if(!debug_mode) {
-       logging::add_file_log(logging::keywords::file_name = logfile,
-                             logging::keywords::rotation_size = 10 * 1024 * 1024,
-                             logging::keywords::time_based_rotation = logging::sinks::file::rotation_at_time_point(0, 0, 0),
-                             logging::keywords::format = "[%TimeStamp%]: %Message%");
-     }
+void configure_logging(bool debug_mode) {
      if(debug_mode) {
         logging::core::get()->set_filter(logging::trivial::severity >= logging::trivial::debug);
      } else {
@@ -67,17 +56,12 @@ int main(int argc, char **argv) {
     cout << OPENCRAFT_LONG_VER << endl << "Built on " << OPENCRAFT_BUILDDATE << endl;
     po::options_description desc("Options");
 
-    desc.add_options() ("help,h",       "display this help")
-                       ("foreground,f", "don't daemonize")
-                       ("debug,d",      "run in debug mode")
-                       ("workers,w",    po::value<int>()->default_value(4),
-                                        "how many worker threads to use in the main threadpool")
-                       ("logfile,l",    po::value<string>()->default_value("./opencraftd.log.%N"),
-                                        "log to file")
-                       ("root,r",       po::value<string>()->default_value("."),
-                                        "path to install root")
-                       ("pidfile,p",    po::value<string>()->default_value("~/.opencraftd.pid"),
-                                        "path to the PID file for daemon");
+    desc.add_options() ("help,h",        "display this help")
+                       ("debug,d",       "run in debug mode")
+                       ("root,r",         po::value<string>()->default_value("."),
+                                         "path to install root")
+                       ("texturepack,t",  po::value<string>()->default_value("osrep"),
+                                         "Texture pack to use");
 
     po::variables_map vm;
     
@@ -91,7 +75,7 @@ int main(int argc, char **argv) {
     }
 
     if(parse_error || vm.count("help")==1) {
-       cout << "Usage: newsim [options]\n" << desc << endl;
+       cout << "Usage: newview [options]\n" << desc << endl;
        return 0;
     }
 
@@ -100,20 +84,13 @@ int main(int argc, char **argv) {
        debug_mode = true;
     }
 
-    bool daemon_mode = true;
-    if(vm.count("foreground")==1) {
-       daemon_mode = false;
-    }
+    configure_logging(debug_mode);
 
-    std::string logfilename = vm["logfile"].as<string>();
-    configure_logging(logfilename,debug_mode);
-
-    int         thread_count = vm["workers"].as<int>();
     std::string install_root = vm["root"].as<string>();
-    std::string pidfile      = vm["pidfile"].as<string>();
+    std::string texture_pack = vm["texturepack"].as<string>();
 
-    oc_daemon = new opencraft_daemon(debug_mode, daemon_mode, thread_count, pidfile, install_root);
-    oc_daemon->run();
+    LOG(debug) << "Will try to find texture pack in " << install_root << "/texture_packs/" << texture_pack;
+
     for(;;);
     return 0;
 }
