@@ -1,8 +1,16 @@
 cmake_minimum_required(VERSION 2.8.3)
+
+cmake_policy(SET CMP0004 OLD)
+
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/CMakeFiles")
+
 FIND_PACKAGE(PythonInterp 2.7 REQUIRED)
 FIND_PACKAGE(PythonLibs   2.7 REQUIRED)
 
 FIND_PACKAGE(Boost COMPONENTS system program_options thread log log_setup python)
+
+find_package(SDL2 REQUIRED)
+find_package(SDL2TTF REQUIRED)
 
 set (CMAKE_CXX_STANDARD 11)
 
@@ -18,13 +26,18 @@ else()
 endif()
 
 ADD_DEFINITIONS(-DBOOST_LOG_DYN_LINK)
-INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS} ${PYTHON_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/include)
+INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS} ${PYTHON_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/include)
 
 FILE(GLOB newview_src ${CMAKE_SOURCE_DIR}/src/*.cpp)
 
 ADD_EXECUTABLE(newview ${newview_src})
 
-TARGET_LINK_LIBRARIES(newview pthread ${PYTHON_LIBRARIES} ${Boost_LIBRARIES})
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+   set(EXTRA_GL GL)
+endif()
+
+
+TARGET_LINK_LIBRARIES(newview physfs pthread ${EXTRA_GL} ${SDL2_LIBRARIES} ${PYTHON_LIBRARIES} ${Boost_LIBRARIES})
 
 ADD_CUSTOM_COMMAND( OUTPUT ${CMAKE_SOURCE_DIR}/include/version.h
                     COMMAND ${CMAKE_SOURCE_DIR}/autogen.sh

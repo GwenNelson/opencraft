@@ -34,6 +34,11 @@
 
 #include <common.h>
 
+#include <stdlib.h>
+#include <unistd.h>
+#include <physfs.h>
+#include <SDL.h>
+
 using std::cerr;
 using std::cout;
 using std::endl;
@@ -50,6 +55,23 @@ void configure_logging(bool debug_mode) {
      }
      logging::add_common_attributes();
 }
+
+void init_vfs(char *argvz, char* install_root) {
+     LOG(info) << "Starting VFS layer...";
+     if(PHYSFS_init(argvz)==0) {
+        LOG(error) << "Could not setup PhysFS - VFS will not be operational!";
+        exit(1);
+     } else {
+        LOG(debug) << "Loaded PhysFS - VFS will be operational";
+     }
+
+     if(PHYSFS_setSaneConfig("opencraft","newview","pk3",0,1)==0) {
+        LOG(error) << "Error configuring PhysFS!";
+        exit(1);
+     }
+
+}
+
 
 int main(int argc, char **argv) {
     int i;
@@ -89,7 +111,23 @@ int main(int argc, char **argv) {
     std::string install_root = vm["root"].as<string>();
     std::string texture_pack = vm["texturepack"].as<string>();
 
-    LOG(debug) << "Will try to find texture pack in " << install_root << "/texture_packs/" << texture_pack;
+    init_vfs(argv[0], (char*)install_root.c_str());
+
+    LOG(debug) << "Will try to find texture packs in " << install_root << "/texture_packs/";
+    std::string full_pack_path = install_root + "/texture_packs";
+
+    if(PHYSFS_mount((const char*)full_pack_path.c_str(),(const char*)"/texture_packs",1)==0) {
+       LOG(error) << "Could not mount texture_packs!";
+       exit(1);
+    } else {
+       LOG(debug) << "Mounted " << full_pack_path << " at /texture_packs";
+    }
+    
+    std::string title_png_path = std::string("/texture_packs/") + texture_pack + std::string( "/assets/opencraft/textures/gui/title/opencraft.png");
+    if(PHYSFS_exists((const char*)title_png_path.c_str())==0) {
+       LOG(error) << "Could not load title image " << title_png_path;
+       exit(1);
+    }
 
     for(;;);
     return 0;
