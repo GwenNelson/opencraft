@@ -25,52 +25,45 @@
 #include <common.h>
 #include <opencraft_appstate_menu.h>
 #include <opencraft_video.h>
+#include <r_2d.h>
 
-#include <SOIL.h>
-#include <physfs.h>
 #include <string>
 
+
 extern opencraft_video *oc_video;
-extern std::string title_png_path;
 
 opencraft_appstate_menu::opencraft_appstate_menu() {
     oc_video->enter_2d();
-    this->title_gl_tex_id = 0;
-    PHYSFS_File* fd = PHYSFS_openRead(title_png_path.c_str());
-    
-    if(fd==NULL) {
-       LOG(error) << "Could not load title PNG!";
-    }
+    this->title_gl_tex_id      = load_texture(std::string("gui/title/opencraft.png"));
+    this->dirtblock_gl_tex_id  = load_texture(std::string("blocks/dirt.png"));
+    this->grassblock_gl_tex_id = load_texture(std::string("blocks/grass_side.png"));
 
-    PHYSFS_uint32 f_size = PHYSFS_fileLength(fd);
-    void*         f_data = malloc(f_size);
-    PHYSFS_read(fd,f_data,(PHYSFS_uint32)f_size,1);
-    PHYSFS_close(fd);
-    this->title_gl_tex_id = SOIL_load_OGL_texture_from_memory(
-                            (const unsigned char*)f_data,
-                            f_size,
-                            SOIL_LOAD_AUTO,
-                            SOIL_CREATE_NEW_ID,0);
-    free(f_data);
+    this->logo_w = LOGO_TEXTURE_WIDTH; // TODO: Make this dynamic - currently defined in common.h
+    this->logo_h = LOGO_TEXTURE_HEIGHT;
+    this->logo_x = (oc_video->res_w/2) - (this->logo_w/2);
+    this->logo_y = 10.0f;
+
+    this->bg_dirt_x = 0.0f;
+    this->bg_dirt_y = BLOCK_TEXTURE_SIZE;
+    this->bg_dirt_w = oc_video->res_w;
+    this->bg_dirt_h = oc_video->res_h-BLOCK_TEXTURE_SIZE;
+
+    this->bg_grass_x = 0.0f;
+    this->bg_grass_y = 0.0f;
+    this->bg_grass_w = oc_video->res_w;
+    this->bg_grass_h = BLOCK_TEXTURE_SIZE;
 }
 
 void opencraft_appstate_menu::update_state(SDL_Event *ev) {
 }
 
 void opencraft_appstate_menu::render() {
+     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); glEnable( GL_BLEND ); glClearColor(0.0,0.0,0.0,0.0);
+     draw_tiled_quad(this->bg_dirt_x,  this->bg_dirt_y,  this->bg_dirt_w,  this->bg_dirt_h,  BLOCK_TEXTURE_SIZE, BLOCK_TEXTURE_SIZE, this->dirtblock_gl_tex_id);
+     draw_tiled_quad(this->bg_grass_x, this->bg_grass_y, this->bg_grass_w, this->bg_grass_h, BLOCK_TEXTURE_SIZE, BLOCK_TEXTURE_SIZE, this->grassblock_gl_tex_id);
+
      glEnable(GL_BLEND);
-     glBindTexture(GL_TEXTURE_2D, this->title_gl_tex_id);
-     glColor4f(1.0f,1.0f,1.0f,1.0f);
-     float x = 10.0f;
-     float y = 10.0f;
-     float w = 512.0f;
-     float h = 128.0f;
-     glBegin(GL_QUADS);
-            glTexCoord2f(0.0f, 0.0f); glVertex2f(x, y );
-            glTexCoord2f(1.0f, 0.0f); glVertex2f(x+w, y );
-            glTexCoord2f(1.0f, 1.0f); glVertex2f(x+w,  y+h );
-            glTexCoord2f(0.0f, 1.0f); glVertex2f(x,  y+h );
-     glEnd();
+     draw_textured_quad(this->logo_x, this->logo_y, this->logo_w, this->logo_h, this->title_gl_tex_id);
      glDisable(GL_BLEND);
 }
 

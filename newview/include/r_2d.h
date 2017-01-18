@@ -18,22 +18,29 @@
 // along with OpenCraft.  If not, see <http://www.gnu.org/licenses/>.
 //
 // DESCRIPTION:
-//     Common includes everything needs to use
+//     Rendering stuff for 2D rendering
 //
 //-----------------------------------------------------------------------------
 
 #pragma once
 
-#include <boost/log/core.hpp>
-#include <boost/log/trivial.hpp>
+#include <common.h>
+#include <opencraft_video.h>
 
-#define LOG BOOST_LOG_TRIVIAL
+#include <SOIL.h>
+#include <physfs.h>
+#include <string>
 
-#define BLOCK_TEXTURE_SIZE 32.0f
+#include <SDL.h>
+#if defined(__APPLE__)
+#include <OpenGL/gl.h>
+#include <OpenGL/glu.h>
+#else
+#include <GL/gl.h>
+#include <GL/glu.h>
+#endif
 
-// used in the main menu screen
-#define LOGO_TEXTURE_WIDTH  512.0f
-#define LOGO_TEXTURE_HEIGHT 128.0f
+unsigned int load_texture(std::string filename);
+void draw_textured_quad(float x, float y, float w, float h, unsigned int tex_id);
 
-#include <version.h>
-
+void draw_tiled_quad(float x, float y, float w, float h, float tile_w, float tile_h, unsigned int tex_id);

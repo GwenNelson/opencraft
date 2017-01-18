@@ -55,6 +55,7 @@ opencraft_appstate *oc_appstate = NULL;
 bool is_running                 = true;
 
 std::string title_png_path;
+std::string texturepack_path;
 
 void configure_logging(bool debug_mode) {
      if(debug_mode) {
@@ -155,6 +156,8 @@ int main(int argc, char **argv) {
        LOG(debug) << "Mounted " << full_pack_path << " at /texture_packs";
     }
     
+    texturepack_path = std::string("/texture_packs/") + texture_pack + std::string("/assets/opencraft/textures/");
+
     title_png_path = std::string("/texture_packs/") + texture_pack + std::string( "/assets/opencraft/textures/gui/title/opencraft.png");
     if(PHYSFS_exists((const char*)title_png_path.c_str())==0) {
        LOG(error) << "Could not load title image " << title_png_path;

@@ -42,11 +42,11 @@ class opencraft_video {
      void start_frame();
      void end_frame();
      void enter_2d();
+     unsigned int res_w;
+     unsigned int res_h;
 
    private:
      SDL_Window *screen;
      SDL_GLContext glcontext;
      bool is_fullscreen;
-     unsigned int res_w;
-     unsigned int res_h;
 };

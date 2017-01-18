@@ -34,5 +34,20 @@ class opencraft_appstate_menu : public opencraft_appstate{
      void update_state(SDL_Event *ev);
      void render();
    private:
-     int title_gl_tex_id;
+     unsigned int title_gl_tex_id;
+     unsigned int dirtblock_gl_tex_id;
+     unsigned int grassblock_gl_tex_id;
+     float logo_x;
+     float logo_y;
+     float logo_w;
+     float logo_h;
+     float bg_dirt_x;
+     float bg_dirt_y;
+     float bg_dirt_w;
+     float bg_dirt_h;
+     float bg_grass_x;
+     float bg_grass_y;
+     float bg_grass_w;
+     float bg_grass_h;     
+
 };
