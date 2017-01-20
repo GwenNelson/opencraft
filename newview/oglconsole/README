@@ -1,0 +1,53 @@
+Licensed under the GNU GPL 2. Pricing for other licenses is negotiable,
+contact the author for details:
+
+Donny Viszneki <smirk@thebuicksix.com>
+
+******************************* NEVER FAIL *******************************
+
+The primary directive of OGLCONSOLE is to NEVER FAIL (unless you can't
+initialize your OpenGL context.)
+
+OGLCONSOLE Mission Statement: OGLCONSOLE will provide text-based user I/O
+even when no resources can be found or loaded by the application embedding
+it. As long as you successfully initialize your OpenGL context, OGLCONSOLE
+can report any and all errors to the user, and at the discretion of the
+programmer, can allow the user to repair the problem, or take any other
+actions provided by the programmer through the console interface.  
+Additionally, putting a console in your application makes troubleshooting
+and various debugging efforts much easier.
+
+*************************** MULTIPLE CONSOLES ***************************
+
+There are two very small subsets of the API. For an 
+application that uses multiple consoles, you must be responsible for the 
+variable representing each console. Call Render(), Destroy(), Focus() 
+and Edit() to select for options changes.
+
+If you have one console you are responsible for much less. Just call
+Create() once, and throw away the return value. Whenever you need, just
+call Draw(), or change options, and Quit() when you're done.
+
+******************************* Other Crap *******************************
+
+OGLCONSOLE Features: OGLCONSOLE supports scrolling up and down to see past
+output from the application. OGLCONSOLE also supports scrolling up and
+down the "history" of user input. The primary purpose of having "history"
+is to be able to re-execute complex commands that have already been issued
+with little or no modification, saving the time of re-entering a complex
+command.
+
+OGLCONSOLE Extras: Since OGLCONSOLE's functionality requires text-drawing
+functionality, you too are able to leverage that functionality. However it
+is a very ugly font.
+
+OGLCONSOLE Limitations: OGLCONSOLE makes the slightly wasteful decision of
+compiling its font directly into its binary target. To amend this waste,
+the very simplest of fonts has been chosen.
+
+OGLCONSOLE Quirks: OGLCONSOLE allows for multiple consoles to exist within
+an application, however it is geared toward applications with a single
+console. Functions which operate on consoles do not specify the console
+they are to operate on within their parameters. Instead, a separate
+function is used to select a console, and all subsequent console
+operations are directed toward that console.

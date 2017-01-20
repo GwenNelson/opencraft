@@ -1,0 +1,14 @@
+The way OGLCONSOLE is currently being plugged into applications at the 
+compiler / linker level is by adding something like this to the Makefile:
+
+##########################################################################
+oglconsole_path = /path/to/oglconsole
+oglconsole = $(oglconsole_path)/oglconsole.o
+
+$(oglconsole) : $(oglconsole_path)/oglconsole.c \
+		$(oglconsole_path)/oglconsole.h
+	make -C $(oglconsole_path)
+##########################################################################
+
+You may be inclined to just drop the entire oglconsole directory into your 
+project, this makes everything very simple.

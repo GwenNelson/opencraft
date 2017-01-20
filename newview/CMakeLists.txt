@@ -26,12 +26,13 @@ else()
 endif()
 
 ADD_DEFINITIONS(-DBOOST_LOG_DYN_LINK)
-INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS} ${PYTHON_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/soil)
+INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS} ${PYTHON_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/soil ${CMAKE_SOURCE_DIR}/oglconsole)
 
-FILE(GLOB newview_src ${CMAKE_SOURCE_DIR}/src/*.cpp)
-FILE(GLOB soil_src    ${CMAKE_SOURCE_DIR}/soil/*.c)
+FILE(GLOB newview_src     ${CMAKE_SOURCE_DIR}/src/*.cpp)
+FILE(GLOB soil_src        ${CMAKE_SOURCE_DIR}/soil/*.c)
+SET(oglconsole_src        ${CMAKE_SOURCE_DIR}/oglconsole/ConsoleFont.c ${CMAKE_SOURCE_DIR}/oglconsole/oglconsole.c)
 
-ADD_EXECUTABLE(newview ${soil_src} ${newview_src})
+ADD_EXECUTABLE(newview ${soil_src} ${oglconsole_src} ${newview_src})
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
    set(EXTRA_GL GL)

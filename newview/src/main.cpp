@@ -36,6 +36,9 @@
 
 #include <opencraft_video.h>
 #include <opencraft_appstate_menu.h>
+#include <opencraft_console.h>
+
+#include <oglconsole.h>
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -52,6 +55,7 @@ namespace logging = boost::log;
 
 opencraft_video    *oc_video    = NULL;
 opencraft_appstate *oc_appstate = NULL;
+opencraft_console  *oc_console  = NULL;
 bool is_running                 = true;
 
 std::string title_png_path;
@@ -85,7 +89,7 @@ void init_vfs(char *argvz, char* install_root) {
 void sdl_loop_iter() {
      SDL_Event ev;
      while (SDL_PollEvent(&ev)) {
-        switch(ev.type) {
+        if(OGLCONSOLE_SDLEvent(&ev)==0) switch(ev.type) {
            case SDL_QUIT:
               is_running = false;
            break;
@@ -170,11 +174,13 @@ int main(int argc, char **argv) {
     oc_video->init_video();
 
     oc_appstate = new opencraft_appstate_menu();
+    oc_console  = new opencraft_console();
 
     while(is_running) {
        oc_video->start_frame();
         sdl_loop_iter();
         oc_appstate->render();
+        oc_console->render();
        oc_video->end_frame();
     }
     return 0;

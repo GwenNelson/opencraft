@@ -1,0 +1,34 @@
+Add support for GLUT and GlGtkArea
+--------------------------------------------------------------------------------
+Maintain several caches of rendering instructions on the graphics card.  
+One for each visible line of text. Perhaps a queue should be utilized for
+the visible lines of console-output, and then one just used for current
+input line.
+--------------------------------------------------------------------------------
+The show/hide animation needs to try real hard to try and animate
+show/hide progress versus TIME instead of show/hide progress versus FRAME
+COUNT. The reason for this is because, at the time of writing this, you 
+will see the console show/hide itself in about 3/10ths of a second at 80 
+FPS, but at 20 FPS you'd see it animate in 1.25 seconds. That's a big 
+difference. And an important part of this animation is that it adds to the 
+appeal of the console without getting in the way, and waiting 1.25 seconds 
+for a console to open or close is completely unacceptable.
+--------------------------------------------------------------------------------
+The infrastructure already exists to allow for "real" in-game consoles. 
+For instance a player could walk up to a computer terminal and on the 
+monitor could be an OGLCONSOLE running, and perhaps the game could give 
+the console full control of player input, or even just partial control, so 
+that the player could interact with a console on a screen this way. 
+However the actual functionality has not been implemented, neither have 
+interfaces for setting these options. Also, depth testing should be an 
+option that is added for this.
+--------------------------------------------------------------------------------
+Compress the compiled-in font data into a two-tone bitmap, and use some 
+kind of really snazzy image / arbitrary data compression that won't 
+complicate things too much but ends up saving memory. Also bear in mind 
+that the purpose of the compiled-in font is to NEVER FAIL so don't use a 
+process that has even the slightest possibility of failing (this means 
+ruling out code complex enough to have a bug in it that will go unnoticed 
+for any perceptible period of time.) Maybe something like RLE could be 
+used
+--------------------------------------------------------------------------------
