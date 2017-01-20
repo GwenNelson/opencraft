@@ -46,3 +46,8 @@ void draw_textured_quad(float x, float y, float w, float h, unsigned int tex_id)
 void draw_tiled_quad(float x, float y, float w, float h, float tile_w, float tile_h, unsigned int tex_id);
 
 void* load_font(std::string filename,unsigned int size);
+
+
+void predraw_text(void* font, int r, int g, int b, char* text, int *w, int *h, int *text_w, int *text_h, GLuint *tex_out);
+void draw_transparent_quad(float x, float y, float w, float h, GLuint tex_id);
+void draw_text(float x, float y, void* font, int r, int g, int b, char* text);

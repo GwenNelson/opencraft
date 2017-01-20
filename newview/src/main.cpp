@@ -162,7 +162,7 @@ int main(int argc, char **argv) {
     }
 
     LOG(debug) << "Loading default font...";
-    default_font = load_font("default.ttf",12);
+    default_font = load_font("default.ttf",32);
 
     LOG(debug) << "Will try to find texture packs in " << install_root << "/texture_packs/";
     std::string full_pack_path = install_root + "/texture_packs";

@@ -43,6 +43,91 @@
 extern opencraft_video *oc_video;
 extern std::string texturepack_path;
 
+static int power_of_two(int input)
+{
+    int value = 1;
+
+    while ( value < input ) {
+        value <<= 1;
+    }
+    return value;
+}
+
+GLuint SDL_GL_LoadTexture(SDL_Surface *surface)
+{
+    GLfloat texcoord[4];
+    GLuint texture;
+    int w, h;
+    SDL_Surface *image;
+    SDL_Rect area;
+    Uint8  saved_alpha;
+    SDL_BlendMode saved_mode;
+
+    /* Use the surface width and height expanded to powers of 2 */
+//    w = power_of_two(surface->w);
+//    h = power_of_two(surface->h);
+    w = surface->w;
+    h = surface->h;
+    texcoord[0] = 0.0f;         /* Min X */
+    texcoord[1] = 0.0f;         /* Min Y */
+    texcoord[2] = (GLfloat)surface->w / w;  /* Max X */
+    texcoord[3] = (GLfloat)surface->h / h;  /* Max Y */
+
+    image = SDL_CreateRGBSurface(
+            SDL_SWSURFACE,
+            w, h,
+            32,
+#if SDL_BYTEORDER == SDL_LIL_ENDIAN /* OpenGL RGBA masks */
+            0x000000FF,
+            0x0000FF00,
+            0x00FF0000,
+            0xFF000000
+#else
+            0xFF000000,
+            0x00FF0000,
+            0x0000FF00,
+            0x000000FF
+#endif
+               );
+    if ( image == NULL ) {
+        return 0;
+    }
+
+    /* Save the alpha blending attributes */
+    SDL_GetSurfaceAlphaMod(surface, &saved_alpha);
+    SDL_SetSurfaceAlphaMod(surface, 0xFF);
+    SDL_GetSurfaceBlendMode(surface, &saved_mode);
+    SDL_SetSurfaceBlendMode(surface, SDL_BLENDMODE_NONE);
+
+    /* Copy the surface into the GL texture image */
+    area.x = 0;
+    area.y = 0;
+    area.w = surface->w;
+    area.h = surface->h;
+    SDL_BlitSurface(surface, &area, image, &area);
+
+    /* Restore the alpha blending attributes */
+    SDL_SetSurfaceAlphaMod(surface, saved_alpha);
+    SDL_SetSurfaceBlendMode(surface, saved_mode);
+
+    /* Create an OpenGL texture for the image */
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D,
+             0,
+             GL_RGBA,
+             w, h,
+             0,
+             GL_RGBA,
+             GL_UNSIGNED_BYTE,
+             image->pixels);
+    SDL_FreeSurface(image); /* No longer needed */
+
+    return texture;
+}
+
 unsigned int load_texture(std::string filename) {
     std::string fullpath = texturepack_path + filename;
     LOG(debug) << "Loading texture " << fullpath;
@@ -110,8 +195,32 @@ void* load_font(std::string filename,unsigned int size) {
       return (void*)font;
 }
 
+void predraw_text(void* font, int r, int g, int b, char* text, int *w, int *h, int *text_w, int *text_h, GLuint *tex_out) {
+     TTF_Font *sdl_font = (TTF_Font*)font;
+     SDL_Surface *sdl_output;
+     SDL_Color font_col = {r,g,b,0};
+     sdl_output = TTF_RenderText_Solid(sdl_font,(const char*)text,font_col);
+     *tex_out = SDL_GL_LoadTexture(sdl_output);
+     *w = sdl_output->w;
+     *h = sdl_output->h;
 
+     TTF_SizeText(sdl_font,(const char*)text,text_w,text_h);
+     SDL_FreeSurface(sdl_output);
+}
 
+void draw_transparent_quad(float x, float y, float w, float h, GLuint tex_id) {
+     glEnable(GL_BLEND);
+     draw_textured_quad(x,y,w,h,(unsigned int)tex_id);
+     glDisable(GL_BLEND);
+}
+
+void draw_text(float x, float y, void* font, int r, int g, int b, char* text) {
+     int w,h;
+     int text_w,text_h;
+     GLuint text_tex;
+     predraw_text(font,r,g,b,text,&w,&h,&text_w,&text_h,&text_tex);
+     draw_transparent_quad(x,y,w,h,text_tex);
+}
 
 
 
