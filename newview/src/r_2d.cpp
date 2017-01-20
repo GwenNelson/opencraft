@@ -30,6 +30,8 @@
 #include <string>
 
 #include <SDL.h>
+#include <SDL_ttf.h>
+
 #if defined(__APPLE__)
 #include <OpenGL/gl.h>
 #include <OpenGL/glu.h>
@@ -88,4 +90,28 @@ void draw_tiled_quad(float x, float y, float w, float h, float tile_w, float til
             glTexCoord2f(0.0f, h/tile_h); glVertex2f(x,  y+h );
      glEnd();
 }
+
+void* load_font(std::string filename,unsigned int size) {
+      if(!TTF_WasInit()) {
+         TTF_Init();
+      }
+      LOG(debug) << "Loading font " << filename;
+
+      std::string fullfontpath = "/fonts/" + filename;
+
+      PHYSFS_file *fd     = PHYSFS_openRead((const char*)fullfontpath.c_str());
+      unsigned int f_size = PHYSFS_fileLength(fd);
+      void* buf           = malloc(f_size);
+      PHYSFS_read(fd,buf,(PHYSFS_uint32)f_size,1);
+      PHYSFS_close(fd);
+
+      TTF_Font *font = TTF_OpenFontRW(SDL_RWFromMem(buf,f_size),1,size);
+      LOG(debug) << "Loaded font!";
+      return (void*)font;
+}
+
+
+
+
+
 

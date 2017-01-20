@@ -37,6 +37,7 @@
 #include <opencraft_video.h>
 #include <opencraft_appstate_menu.h>
 #include <opencraft_console.h>
+#include <r_2d.h>
 
 #include <oglconsole.h>
 
@@ -53,10 +54,11 @@ using std::string;
 namespace po      = boost::program_options;
 namespace logging = boost::log;
 
-opencraft_video    *oc_video    = NULL;
-opencraft_appstate *oc_appstate = NULL;
-opencraft_console  *oc_console  = NULL;
-bool is_running                 = true;
+opencraft_video    *oc_video     = NULL;
+opencraft_appstate *oc_appstate  = NULL;
+opencraft_console  *oc_console   = NULL;
+void*               default_font = NULL;
+bool is_running                  = true;
 
 std::string title_png_path;
 std::string texturepack_path;
@@ -150,6 +152,18 @@ int main(int argc, char **argv) {
 
     init_vfs(argv[0], (char*)install_root.c_str());
 
+    LOG(debug) << "Will try to find fonts in " << install_root << "/fonts/";
+    std::string full_font_path = install_root + "/fonts";
+    if(PHYSFS_mount((const char*)full_font_path.c_str(),(const char*)"/fonts",1)==0) {
+      LOG(error) << "Could not mount fonts!";
+      exit(1);
+    } else {
+      LOG(debug) << "Mounted " << full_font_path << " at /fonts";
+    }
+
+    LOG(debug) << "Loading default font...";
+    default_font = load_font("default.ttf",12);
+
     LOG(debug) << "Will try to find texture packs in " << install_root << "/texture_packs/";
     std::string full_pack_path = install_root + "/texture_packs";
 
@@ -172,6 +186,7 @@ int main(int argc, char **argv) {
 
     oc_video = new opencraft_video(fullscreen_mode,res_w,res_h);
     oc_video->init_video();
+
 
     oc_appstate = new opencraft_appstate_menu();
     oc_console  = new opencraft_console();

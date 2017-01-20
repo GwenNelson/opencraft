@@ -44,3 +44,5 @@ unsigned int load_texture(std::string filename);
 void draw_textured_quad(float x, float y, float w, float h, unsigned int tex_id);
 
 void draw_tiled_quad(float x, float y, float w, float h, float tile_w, float tile_h, unsigned int tex_id);
+
+void* load_font(std::string filename,unsigned int size);
