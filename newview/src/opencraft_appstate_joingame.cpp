@@ -82,6 +82,32 @@ opencraft_appstate_joingame::~opencraft_appstate_joingame() {
 }
 
 void opencraft_appstate_joingame::update_state(SDL_Event *ev) {
+     int mouse_x;
+     int mouse_y;
+     int entry_x;
+     int entry_y;
+     int entry_w;
+     int entry_h;
+     SDL_GetMouseState(&mouse_x,&mouse_y);
+     float last_y=this->logo_y;
+     float last_h=this->logo_h;
+     this->connect_to = std::string("");
+     for(int i=0; i < this->entries.size(); i++) {
+              entry_x = (oc_video->res_w/2) - (std::get<4>(this->entries[i])/2);
+              entry_y = last_y+last_h+1.0f;
+              entry_w = std::get<4>(this->entries[i]);
+              entry_h = std::get<5>(this->entries[i]);
+              last_y=last_y+last_h+1.0f+std::get<4>(this->entries[i]);
+              last_h=std::get<4>(this->entries[i]);
+              if((mouse_x>=entry_x) && (mouse_x<=(entry_x+entry_w)) && (mouse_y>=entry_y) && (mouse_y<=(entry_y+entry_h))) {
+                 this->connect_to = std::get<1>(this->entries[i]);
+              }
+     }
+     switch(ev->type) {
+        case SDL_MOUSEBUTTONDOWN:
+          LOG(info) << "Trying to connect to " << this->connect_to;
+        break;
+     }
 }
 
 void opencraft_appstate_joingame::render() {
@@ -93,12 +119,20 @@ void opencraft_appstate_joingame::render() {
      float last_y=this->logo_y;
      float last_h=this->logo_h;
 
+     unsigned int tex_id;
      for(int i=0; i< this->entries.size(); i++) {
+         if(this->connect_to == std::get<1>(this->entries[i])) {
+            tex_id = std::get<3>(this->entries[i]);
+         } else {
+            tex_id = std::get<2>(this->entries[i]);
+         }
          draw_textured_quad((oc_video->res_w/2) - (std::get<4>(this->entries[i])/2),
                             last_y+last_h+1.0f,
                             std::get<4>(this->entries[i]),
                             std::get<5>(this->entries[i]),
-                            std::get<3>(this->entries[i]));
+                            tex_id);
+         last_y=last_y+last_h+1.0f+std::get<4>(this->entries[i]);
+         last_h=std::get<4>(this->entries[i]);
      }
      glDisable(GL_BLEND);
 }

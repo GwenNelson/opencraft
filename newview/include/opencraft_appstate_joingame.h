@@ -48,6 +48,8 @@ class opencraft_appstate_joingame : public opencraft_appstate{
      unsigned int dirtblock_gl_tex_id;
      unsigned int grassblock_gl_tex_id;
 
+     std::string connect_to;
+
      float logo_x;
      float logo_y;
      float logo_w;
