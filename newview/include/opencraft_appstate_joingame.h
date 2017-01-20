@@ -28,13 +28,22 @@
 #include <SDL.h>
 #include <opencraft_appstate.h>
 
+#include <tuple>
+#include <vector>
+
+typedef std::tuple<std::string, std::string, unsigned int, unsigned int, float, float> joingame_entry_t; // name, address, name_tex_id, addr_tex_id, w, h
+typedef std::vector<joingame_entry_t> joingame_entries_t;
+
 class opencraft_appstate_joingame : public opencraft_appstate{
    public:
      opencraft_appstate_joingame();
      ~opencraft_appstate_joingame();
      void update_state(SDL_Event *ev);
      void render();
+     void add_entries(); //TODO: Make this load from a config file or something
+     void add_entry(std::string name, std::string address);
    private:
+     joingame_entries_t entries;
      unsigned int title_gl_tex_id;
      unsigned int dirtblock_gl_tex_id;
      unsigned int grassblock_gl_tex_id;
