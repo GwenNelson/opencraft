@@ -40,13 +40,13 @@
 #include <iostream>
 #include <sstream>
 
-class opencraft_console : public std::stringbuf {
+class opencraft_console {
    public:
      opencraft_console();
      bool is_active();
      void toggle();
-     virtual int sync(); // inherited from std::stringbuf
      void render();
+     std::ostringstream *stream;
 
    private:
      bool active;

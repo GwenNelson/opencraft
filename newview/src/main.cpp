@@ -145,7 +145,12 @@ int main(int argc, char **argv) {
     unsigned int res_w = vm["width"].as<unsigned int>();
     unsigned int res_h = vm["height"].as<unsigned int>();
 
+    oc_video = new opencraft_video(fullscreen_mode,res_w,res_h);
+    oc_video->init_video();
+
     configure_logging(debug_mode);
+    oc_console = new opencraft_console();
+
 
     std::string install_root = vm["root"].as<string>();
     std::string texture_pack = vm["texturepack"].as<string>();
@@ -184,12 +189,10 @@ int main(int argc, char **argv) {
 
     LOG(debug) << "Setting video";
 
-    oc_video = new opencraft_video(fullscreen_mode,res_w,res_h);
-    oc_video->init_video();
+
 
 
     oc_appstate = new opencraft_appstate_menu();
-    oc_console  = new opencraft_console();
 
     while(is_running) {
        oc_video->start_frame();

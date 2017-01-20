@@ -26,6 +26,14 @@
 #include <opencraft_console.h>
 #include <opencraft_video.h>
 
+#include <boost/log/core.hpp>
+#include <boost/log/trivial.hpp>
+
+#include <boost/shared_ptr.hpp>
+#include <boost/log/utility/setup/file.hpp>
+#include <boost/log/utility/setup/common_attributes.hpp>
+#include <boost/log/sinks/text_ostream_backend.hpp>
+
 extern opencraft_video *oc_video;
 
 #include <oglconsole.h>
@@ -37,6 +45,8 @@ extern opencraft_video *oc_video;
 #include <boost/function.hpp>
 #include <string>
 
+namespace logging = boost::log;
+
 void cmd_cb(OGLCONSOLE_Console console, char* cmd) {
      LOG(debug) << "Got console input: " << cmd;
 }
@@ -47,6 +57,21 @@ opencraft_console::opencraft_console() {
    glViewport(0,0, (GLsizei)res_w, (GLsizei)res_h);
    OGLCONSOLE_Create();
    OGLCONSOLE_EnterKey(cmd_cb);
+
+   this->stream = new std::ostringstream();
+
+   boost::shared_ptr< logging::core > core = logging::core::get();
+   boost::shared_ptr< logging::sinks::text_ostream_backend > backend =
+        boost::make_shared< logging::sinks::text_ostream_backend >();
+   backend->add_stream(boost::shared_ptr<std::ostream>(this->stream));
+   backend->add_stream(boost::shared_ptr<std::ostream>(&std::cout));
+
+   backend->auto_flush(true);
+
+   typedef logging::sinks::synchronous_sink< logging::sinks::text_ostream_backend > sink_t;
+
+   boost::shared_ptr< sink_t > sink(new sink_t(backend));
+   core->add_sink(sink);
 }
 
 bool opencraft_console::is_active() {
@@ -58,11 +83,10 @@ void opencraft_console::toggle() {
      OGLCONSOLE_SetVisibility((int)this->active);
 }
 
-int opencraft_console::sync() {
-    OGLCONSOLE_Print((char*)(this->str().c_str()) );
-    this->str("");
-}
-
 void opencraft_console::render() {
+     if(this->stream->str().size() > 0) {
+        OGLCONSOLE_Print((char*)this->stream->str().c_str());
+        this->stream->str("");
+     }
      OGLCONSOLE_Draw();
 }

@@ -138,6 +138,7 @@ void opencraft_appstate_menu::update_state(SDL_Event *ev) {
 }
 
 void opencraft_appstate_menu::handle_menuitem(int menu_item) {
+     LOG(debug) << "Handle menu item: " << menu_item;
      switch(menu_item) {
          case APPSTATE_MENUITEM_NULL:
          break;
