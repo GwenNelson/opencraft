@@ -18,7 +18,7 @@
 // along with OpenCraft.  If not, see <http://www.gnu.org/licenses/>.
 //
 // DESCRIPTION:
-//     Menu appstate
+//     Join game appstate - NOT the same thing as being ingame
 //
 //-----------------------------------------------------------------------------
 
@@ -28,63 +28,16 @@
 #include <SDL.h>
 #include <opencraft_appstate.h>
 
-#define APPSTATE_MENUITEM_NULL     0
-#define APPSTATE_MENUITEM_JOINGAME 1
-#define APPSTATE_MENUITEM_OPTIONS  2
-#define APPSTATE_MENUITEM_QUITGAME 3
-
-class opencraft_appstate_menu : public opencraft_appstate{
+class opencraft_appstate_joingame : public opencraft_appstate{
    public:
-     opencraft_appstate_menu();
-     ~opencraft_appstate_menu();
+     opencraft_appstate_joingame();
+     ~opencraft_appstate_joingame();
      void update_state(SDL_Event *ev);
      void render();
-     void handle_menuitem(int menu_item);
    private:
      unsigned int title_gl_tex_id;
      unsigned int dirtblock_gl_tex_id;
      unsigned int grassblock_gl_tex_id;
-
-     unsigned int join_game_text_tex;
-     unsigned int join_game_text_tex_active;
-     unsigned int join_game_text_tex_inactive;
-     int join_game_w;
-     int join_game_h;
-     int join_game_text_w;
-     int join_game_text_h;
-
-     unsigned int options_text_tex;
-     unsigned int options_text_tex_active;
-     unsigned int options_text_tex_inactive;
-     int options_tex_w;
-     int options_tex_h;
-     int options_text_w;
-     int options_text_h;
-
-     unsigned int quit_text_tex;
-     unsigned int quit_text_tex_active;
-     unsigned int quit_text_tex_inactive;
-     int quit_tex_w;
-     int quit_tex_h;
-     int quit_text_w;
-     int quit_text_h;
-
-     int active_menu_item;
-
-     float join_x;
-     float join_y;
-     float join_w;
-     float join_h;
-
-     float options_x;
-     float options_y;
-     float options_w;
-     float options_h;
-
-     float quit_x;
-     float quit_y;
-     float quit_w;
-     float quit_h;
 
      float logo_x;
      float logo_y;

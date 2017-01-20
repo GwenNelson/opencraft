@@ -24,13 +24,15 @@
 
 #include <common.h>
 #include <opencraft_appstate_menu.h>
+#include <opencraft_appstate_joingame.h>
 #include <opencraft_video.h>
 #include <r_2d.h>
 
 #include <string>
 
 
-extern opencraft_video *oc_video;
+extern opencraft_video    *oc_video;
+extern opencraft_appstate *oc_appstate;
 extern void* default_font;
 
 opencraft_appstate_menu::opencraft_appstate_menu() {
@@ -79,6 +81,18 @@ opencraft_appstate_menu::opencraft_appstate_menu() {
     this->quit_text_tex = this->quit_text_tex_inactive;    
 
     this->active_menu_item = APPSTATE_MENUITEM_NULL;
+}
+
+opencraft_appstate_menu::~opencraft_appstate_menu() {
+    glDeleteTextures(1, &(this->title_gl_tex_id));
+    glDeleteTextures(1, &(this->dirtblock_gl_tex_id));
+    glDeleteTextures(1, &(this->grassblock_gl_tex_id));
+    glDeleteTextures(1, &(this->join_game_text_tex_active));
+    glDeleteTextures(1, &(this->join_game_text_tex_inactive));
+    glDeleteTextures(1, &(this->options_text_tex_active));
+    glDeleteTextures(1, &(this->options_text_tex_inactive));
+    glDeleteTextures(1, &(this->quit_text_tex_active));
+    glDeleteTextures(1, &(this->quit_text_tex_inactive));
 }
 
 void opencraft_appstate_menu::update_state(SDL_Event *ev) {
@@ -143,6 +157,8 @@ void opencraft_appstate_menu::handle_menuitem(int menu_item) {
          case APPSTATE_MENUITEM_NULL:
          break;
          case APPSTATE_MENUITEM_JOINGAME:
+           oc_appstate = new opencraft_appstate_joingame();
+           delete this;
          break;
          case APPSTATE_MENUITEM_OPTIONS:
          break;
