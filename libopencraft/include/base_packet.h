@@ -33,7 +33,7 @@ namespace opencraft {
 
 int varint_size(int32_t input);
 int32_t parse_var_int(unsigned char* buf, size_t buflen);
-std::vector<unsigned char> create_varint(int32_t i);
+void pack_varint(int32_t i, unsigned char *buf);
 
 // Packet classes should be considered as read only once created
 class opencraft_packet {

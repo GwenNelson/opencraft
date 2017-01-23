@@ -28,6 +28,8 @@
 #include <proto_constants.h>
 #include <handshake.packet.h>
 
+#include <arpa/inet.h>
+
 #include <string>
 #include <iostream>
 #include <exception>
@@ -141,26 +143,34 @@ bool unpack_handshakefile_fieldd() {
 
 bool packed_127_equal_unpacked() {
      int32_t     testval=127;
-     std::vector<unsigned char>  packedval=opencraft::packets::create_varint(testval);
-     unsigned char buf[4];
-     for(int i=0; i<packedval.size(); i++) {
-         buf[i]=packedval[i];
-     }
-     if(opencraft::packets::parse_var_int(buf,4)==testval) return true;
+     unsigned char packedval[4];
+     opencraft::packets::pack_varint(testval,packedval);
+     int32_t unpacked_val = opencraft::packets::parse_var_int(packedval,4);
+     if(unpacked_val==testval) return true;     
      return false;
 }
-
 
 bool packed_128_equal_unpacked() {
      int32_t     testval=128;
-     std::vector<unsigned char>  packedval=opencraft::packets::create_varint(testval);
-     unsigned char buf[4];
-     for(int i=0; i<packedval.size(); i++) {
-         buf[i]=packedval[i];
-     }
-     if(opencraft::packets::parse_var_int(buf,4)==testval) return true;
+     unsigned char packedval[4];
+     opencraft::packets::pack_varint(testval,packedval);
+     int32_t unpacked_val = opencraft::packets::parse_var_int(packedval,4);
+     if(unpacked_val==testval) return true;     
+     std::cerr << "\nGot " << unpacked_val << " isntead of 128\n";
      return false;
 }
+
+bool packed_130_equal_unpacked() {
+     int32_t     testval=130;
+     unsigned char packedval[4];
+     opencraft::packets::pack_varint(testval,packedval);
+     int32_t unpacked_val = opencraft::packets::parse_var_int(packedval,4);
+     if(unpacked_val==testval) return true;     
+     std::cerr << "\nGot " << unpacked_val << " isntead of 130\n";
+     return false;
+}
+
+
 
 int main(int argc, char** argv) {
     cout << LIBOPENCRAFT_LONG_VER << endl << "Built on " << LIBOPENCRAFT_BUILDDATE << endl << endl;
@@ -176,6 +186,7 @@ int main(int argc, char** argv) {
     run_test("Unpacked handshake.packet file has correct field D",&unpack_handshakefile_fieldd);
     run_test("127 Packed as varint has same value when unpacked",&packed_127_equal_unpacked);
     run_test("128 Packed as varint has same value when unpacked",&packed_128_equal_unpacked);
+    run_test("130 Packed as varint has same value when unpacked",&packed_130_equal_unpacked);
 
     cout << endl;
     cout << tests_passed << "/" << tests_run << " Passed" << endl;
