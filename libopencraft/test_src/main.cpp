@@ -76,13 +76,26 @@ bool serialise_handshake() {
      return false;
 }
 
+bool unserialise_handshake() {
+     opencraft::packets::handshake_handshaking_upstream hspack(OPENCRAFT_PROTOCOL_VERSION,std::string(OPENCRAFT_DEFAULT_SERVER),OPENCRAFT_DEFAULT_TCP_PORT,OPENCRAFT_STATE_STATUS);     
+     unsigned char* packdata =hspack.pack();
+     opencraft::packets::opencraft_packet *newpack = opencraft::packets::opencraft_packet::unpack_packet(packdata);
+
+     bool retval=false;
+     if(newpack != NULL) retval=true;
+     delete newpack;
+     return retval;
+}
+
+
 int main(int argc, char** argv) {
     cout << LIBOPENCRAFT_LONG_VER << endl << "Built on " << LIBOPENCRAFT_BUILDDATE << endl << endl;
 
     run_test("Create handshake packet",&create_handshake);
     run_test("Check handshake packet has valid name",&check_handshake_name);
     run_test("Serialise handshake packet returns none-NULL",&serialise_handshake);
-
+    run_test("Unserialising handshake packet returns none-NULL",&unserialise_handshake);
+    
     cout << endl;
     cout << tests_passed << "/" << tests_run << " Passed" << endl;
     cout << tests_failed << "/" << tests_run << " Failed" << endl;

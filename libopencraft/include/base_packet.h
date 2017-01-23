@@ -32,7 +32,7 @@ namespace opencraft {
 class opencraft_packet {
    public:
       unsigned char* pack(); // pack into a transmission-ready format, no compression or encryption yet applied but length prefix in place
-      static opencraft_packet unpack_packet(unsigned char* packdata); // unpack raw data into a packet
+      static opencraft_packet *unpack_packet(unsigned char* packdata); // unpack raw data into a packet
       std::string name(); // return the packet name
    private:
    // subclasses should include a tuple of the packet contents here named pack_fields
