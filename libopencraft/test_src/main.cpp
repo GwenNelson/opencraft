@@ -116,7 +116,7 @@ bool unpack_handshakefile_fieldb() {
      }
      opencraft::packets::handshake_handshaking_upstream hspack(packdata);
      if(hspack.b == handshake_packet_b) return true;
-     cout << endl << "Correct value was:\"" << handshake_packet_b << "\" but got value \"" << hspack.b << "\"" << endl;
+     cout << endl << "Correct value was:\"" << handshake_packet_b << "\"\n but got value \"" << hspack.b << "\"" << endl;
      return false;
 }
 

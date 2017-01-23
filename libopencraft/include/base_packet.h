@@ -58,7 +58,7 @@ class opencraft_packet {
       std::vector<unsigned char>     unpack_bytes();
 
       std::vector<unsigned char> packed; // buffer used for packing - shou
-      unsigned int bufpos; // current offset into the buffer for read/write operations, should be set to 0 in constructor
+      int bufpos; // current offset into the buffer for read/write operations, should be set to 0 in constructor
 };
 
 }
