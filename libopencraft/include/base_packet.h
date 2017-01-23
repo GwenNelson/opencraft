@@ -39,6 +39,7 @@ class opencraft_packet {
       void unpack(std::vector<unsigned char> packdata); // used by the static method to do unpacking on each packet
       static opencraft_packet *unpack_packet(std::vector<unsigned char> packdata); // unpack raw data into a packet
       std::string name(); // return the packet name
+      int32_t ident(); // return the packet ident
 
       std::string unpack_string(); // fuck you unicode
 
@@ -57,7 +58,7 @@ class opencraft_packet {
       int32_t                        unpack_enum();
       std::vector<unsigned char>     unpack_bytes();
 
-      std::vector<unsigned char> packed; // buffer used for packing - shou
+      std::vector<unsigned char> packed; // buffer used for packing
       int bufpos; // current offset into the buffer for read/write operations, should be set to 0 in constructor
 };
 

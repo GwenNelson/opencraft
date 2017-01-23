@@ -106,6 +106,7 @@ for k,v in packets_fields.items():
        header_fd.write("    %s(%s);\n" % (k,','.join(params))) # constructor from values
        header_fd.write("    std::vector<unsigned char> pack();\n")
        header_fd.write("    std::string name() { return \"%s\"; }\n" % packets_names[k])
+       header_fd.write("    uint32_t ident() { return %s; }\n" % packets_idents[k])
        for f in xrange(len(params)):
            header_fd.write("    %s; //%s\n" % (params[f],v[f]))
        header_fd.write("};\n")
@@ -116,7 +117,6 @@ for k,v in packets_fields.items():
        cpp_fd.write("   this->bufpos = 0;\n")
        for f in xrange(len(v)): # constructor from data
            cpp_fd.write("   this->%s = this->unpack_%s();\n" % (alphabet[f],param_types[f]))
-           pass
        cpp_fd.write("}\n")
        cpp_fd.write('%s::%s(%s) {\n' % (k,k,','.join(params)))         # constructor from values
 
@@ -124,6 +124,8 @@ for k,v in packets_fields.items():
            cpp_fd.write("   this->%s = %s;\n" % (alphabet[f],alphabet[f]))
 
        cpp_fd.write("   this->bufpos = 0;\n");
+       for f in xrange(len(v)):
+           cpp_fd.write("   this->pack_%s(this->%s);\n" % (param_types[f],alphabet[f]))
        cpp_fd.write('}\n')
        cpp_fd.write('std::vector<unsigned char> %s::pack() {\n   return this->packed;\n}\n' % k) # pack()
        
