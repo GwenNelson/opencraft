@@ -35,29 +35,29 @@
 
 using namespace std;
 
-unsigned int tests_run;
-unsigned int tests_passed;
-unsigned int tests_failed;
+float tests_run;
+float tests_passed;
+float tests_failed;
 
 typedef bool (*testcase_t)();
 
 void run_test(std::string desc, testcase_t test) {
      cout << "Testing " << desc;
-     tests_run++;
+     tests_run+=1.0f;
      bool retval=false;
      try {
        retval = test();
      } catch(exception& e) {
-       tests_failed++;
+       tests_failed+=1.0f;
        cout << ": FAIL - Exception: " << e.what() << endl;
        return;
      }
      if(retval) {
-       tests_passed++;
+       tests_passed+=1.0f;
        cout << ": PASS" << endl;
      } else {
        cout << ": FAIL" << endl;
-       tests_failed++;
+       tests_failed+=1.0f;
      }
 }
 
@@ -129,6 +129,16 @@ bool unpack_handshakefile_fieldc() {
      return false;
 }
 
+bool unpack_handshakefile_fieldd() {
+     std::vector<unsigned char> packdata;
+     for(int i=0; i<handshake_packet_length; i++) {
+         packdata.push_back((unsigned char)handshake_packet[i]);
+     }
+     opencraft::packets::handshake_handshaking_upstream hspack(packdata);
+     if(hspack.d == handshake_packet_d) return true;
+     return false;
+}
+
 int main(int argc, char** argv) {
     cout << LIBOPENCRAFT_LONG_VER << endl << "Built on " << LIBOPENCRAFT_BUILDDATE << endl << endl;
 
@@ -140,10 +150,12 @@ int main(int argc, char** argv) {
     run_test("Unpacked handshake.packet file has correct field A",&unpack_handshakefile_fielda);
     run_test("Unpacked handshake.packet file has correct field B",&unpack_handshakefile_fieldb);
     run_test("Unpacked handshake.packet file has correct field C",&unpack_handshakefile_fieldc);
- 
+    run_test("Unpacked handshake.packet file has correct field D",&unpack_handshakefile_fieldd);
+
     cout << endl;
     cout << tests_passed << "/" << tests_run << " Passed" << endl;
     cout << tests_failed << "/" << tests_run << " Failed" << endl;
+    cout << "Pass rate: " << (tests_passed/tests_run)*100.0f << endl;
 }
 
 
