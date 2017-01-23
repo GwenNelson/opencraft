@@ -25,6 +25,7 @@
 
 #include <packets.autogen.h>
 #include <version.h>
+#include <proto_constants.h>
 #include <string>
 #include <iostream>
 #include <exception>
@@ -57,14 +58,15 @@ void run_test(std::string desc, testcase_t test) {
      }
 }
 
-bool always_fail() {
-     return false;
+bool create_handshake() {
+     opencraft::packets::handshake_handshaking_upstream newpack(OPENCRAFT_PROTOCOL_VERSION,std::string(OPENCRAFT_DEFAULT_SERVER),OPENCRAFT_DEFAULT_TCP_PORT,OPENCRAFT_STATE_STATUS);
+     return true;
 }
 
 int main(int argc, char** argv) {
     cout << LIBOPENCRAFT_LONG_VER << endl << "Built on " << LIBOPENCRAFT_BUILDDATE << endl << endl;
 
-    run_test("Always fail",&always_fail);
+    run_test("Create handshake packet",&create_handshake);
 
     cout << endl;
     cout << tests_passed << "/" << tests_run << " Passed" << endl;
