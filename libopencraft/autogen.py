@@ -86,28 +86,37 @@ mctypes = {'boolean' :'bool',
 
 for k,v in packets_fields.items():
     skip = False
-    params = []
+    params      = []
+    param_types = []
     for f in xrange(len(v)):
         if not mctypes.has_key(v[f]):
            print 'WARNING: Can not autogenerate %s due to missing type %s ' % (k,v[f])
            print "         %s(%s)" % (k,','.join(v))
            skip = True
         else:
+           param_types.append(v[f])
            params.append('%s %s' % (mctypes[v[f]],alphabet[f]))
     if not skip:
        # write out the header first
        header_fd.write("class %s : public opencraft_packet {\n" % k)
        header_fd.write("  public:\n")
        header_fd.write("    %s(%s);\n" % (k,','.join(params)))
+       header_fd.write("    unsigned char* pack();\n")
        header_fd.write("    std::string name() { return \"%s\"; }\n" % packets_names[k])
        for p in params:
            header_fd.write("    %s;\n" % p)
-       header_fd.write("  private:\n");
+       header_fd.write("    std::tuple<%s> packfields;\n" % ','.join(map(lambda x: mctypes[x],param_types)))
        header_fd.write("};\n")
 
        # then write out the class implementation
-       cpp_fd.write('%s::%s(%s) {\n' % (k,k,','.join(params)))
+       cpp_fd.write('%s::%s(%s) {\n' % (k,k,','.join(params))) # constructor
+       cpp_fd.write("this->packed = NULL;\n")
+       for f in xrange(len(v)):
+           cpp_fd.write("this->%s = %s;\n" % (alphabet[f],alphabet[f]))
        cpp_fd.write('}\n')
+
+       cpp_fd.write('unsigned char* %s::pack() {return this->packed;}\n' % k) # pack() method
+       
 
 cpp_fd.write("}\n}\n");       
 header_fd.write("}\n}\n");

@@ -25,16 +25,21 @@
 #pragma once
 
 #include <string>
+#include <tuple>
+#include <boost/asio/buffer.hpp>
 
 namespace opencraft {
   namespace packets {
 
+
+// Packet classes should be considered as read only once created
 class opencraft_packet {
    public:
       unsigned char* pack(); // pack into a transmission-ready format, no compression or encryption yet applied but length prefix in place
+      void unpack(unsigned char* packdata); // used by the static method to do unpacking on each packet
       static opencraft_packet *unpack_packet(unsigned char* packdata); // unpack raw data into a packet
       std::string name(); // return the packet name
-   private:
+      unsigned char* packed;
    // subclasses should include a tuple of the packet contents here named pack_fields
    // the constructor should setup the packet fields
    // the name() method should be implemented and return the name of the packet
