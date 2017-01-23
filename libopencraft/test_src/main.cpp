@@ -35,6 +35,8 @@
 #include <exception>
 #include <vector>
 
+#include <proto_constants.h>
+
 using namespace std;
 
 float tests_run;
@@ -84,7 +86,7 @@ bool serialise_handshake() {
 bool unserialise_handshake() {
      opencraft::packets::handshake_handshaking_upstream hspack(OPENCRAFT_PROTOCOL_VERSION,std::string(OPENCRAFT_DEFAULT_SERVER),OPENCRAFT_DEFAULT_TCP_PORT,OPENCRAFT_STATE_STATUS);     
      std::vector<unsigned char> packdata =hspack.pack();
-     opencraft::packets::opencraft_packet *newpack = opencraft::packets::opencraft_packet::unpack_packet(packdata);
+     opencraft::packets::opencraft_packet *newpack = opencraft::packets::opencraft_packet::unpack_packet(OPENCRAFT_STATE_HANDSHAKING,packdata);
 
      bool retval=false;
      if(newpack != NULL) retval=true;
@@ -144,7 +146,7 @@ bool unpack_handshakefile_fieldd() {
 bool packed_127_equal_unpacked() {
      int32_t     testval=127;
      unsigned char packedval[4];
-     opencraft::packets::pack_varint(testval,packedval);
+     opencraft::packets::unparse_varint(testval,packedval);
      int32_t unpacked_val = opencraft::packets::parse_var_int(packedval,4);
      if(unpacked_val==testval) return true;     
      return false;
@@ -153,7 +155,7 @@ bool packed_127_equal_unpacked() {
 bool packed_128_equal_unpacked() {
      int32_t     testval=128;
      unsigned char packedval[4];
-     opencraft::packets::pack_varint(testval,packedval);
+     opencraft::packets::unparse_varint(testval,packedval);
      int32_t unpacked_val = opencraft::packets::parse_var_int(packedval,4);
      if(unpacked_val==testval) return true;     
      std::cerr << "\nGot " << unpacked_val << " isntead of 128\n";
@@ -163,7 +165,7 @@ bool packed_128_equal_unpacked() {
 bool packed_130_equal_unpacked() {
      int32_t     testval=130;
      unsigned char packedval[4];
-     opencraft::packets::pack_varint(testval,packedval);
+     opencraft::packets::unparse_varint(testval,packedval);
      int32_t unpacked_val = opencraft::packets::parse_var_int(packedval,4);
      if(unpacked_val==testval) return true;     
      std::cerr << "\nGot " << unpacked_val << " isntead of 130\n";

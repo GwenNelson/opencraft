@@ -33,14 +33,14 @@ namespace opencraft {
 
 int varint_size(int32_t input);
 int32_t parse_var_int(unsigned char* buf, size_t buflen);
-void pack_varint(int32_t i, unsigned char *buf);
+void unparse_varint(int32_t i, unsigned char *buf);
 
 // Packet classes should be considered as read only once created
 class opencraft_packet {
    public:
       std::vector<unsigned char> pack(); // return a packed packet with no encryption or compression, but with ident + length prefix
 
-      static opencraft_packet *unpack_packet(std::vector<unsigned char> packdata); // unpack raw data (with length prefix and packet ident but no compression/crypto) into a packet
+      static opencraft_packet *unpack_packet(int proto_state, std::vector<unsigned char> packdata); // unpack raw data (with length prefix and packet ident but no compression/crypto) into a packet
 
       std::string name(); // return the packet name
       uint32_t ident(); // return the packet ident
@@ -61,6 +61,22 @@ class opencraft_packet {
       std::tuple<float,float,float>  unpack_position();
       int32_t                        unpack_enum();
       std::vector<unsigned char>     unpack_bytes();
+
+      void pack_boolean(bool val);
+      void pack_byte(unsigned char val);
+      void pack_char(char val);
+      void pack_string(std::string val);
+      void pack_string16(std::string val);
+      void pack_double(double val);
+      void pack_float(float val);
+      void pack_int(int32_t val);
+      void pack_long(int64_t val);
+      void pack_short(int16_t val);
+      void pack_string8(std::string val);
+      void pack_varint(int32_t val);
+      void pack_position(std::tuple<float,float,float>);
+      void pack_enum(int32_t val);
+      void pack_bytes(std::vector<unsigned char>);
 
       std::vector<unsigned char> packed; // buffer used for packing
       int bufpos; // current offset into the buffer for read/write operations, should be set to 0 in constructor
