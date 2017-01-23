@@ -31,15 +31,19 @@
 namespace opencraft {
   namespace packets {
 
+int varint_size(int32_t input);
+int32_t parse_var_int(unsigned char* buf, size_t buflen);
+std::vector<unsigned char> create_varint(int32_t i);
 
 // Packet classes should be considered as read only once created
 class opencraft_packet {
    public:
-      std::vector<unsigned char> pack(); // pack into a transmission-ready format, no compression or encryption yet applied but length prefix in place
-      void unpack(std::vector<unsigned char> packdata); // used by the static method to do unpacking on each packet
-      static opencraft_packet *unpack_packet(std::vector<unsigned char> packdata); // unpack raw data into a packet
+      std::vector<unsigned char> pack(); // return a packed packet with no encryption or compression, but with ident + length prefix
+
+      static opencraft_packet *unpack_packet(std::vector<unsigned char> packdata); // unpack raw data (with length prefix and packet ident but no compression/crypto) into a packet
+
       std::string name(); // return the packet name
-      int32_t ident(); // return the packet ident
+      uint32_t ident(); // return the packet ident
 
       std::string unpack_string(); // fuck you unicode
 

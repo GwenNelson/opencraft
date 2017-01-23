@@ -139,6 +139,29 @@ bool unpack_handshakefile_fieldd() {
      return false;
 }
 
+bool packed_127_equal_unpacked() {
+     int32_t     testval=127;
+     std::vector<unsigned char>  packedval=opencraft::packets::create_varint(testval);
+     unsigned char buf[4];
+     for(int i=0; i<packedval.size(); i++) {
+         buf[i]=packedval[i];
+     }
+     if(opencraft::packets::parse_var_int(buf,4)==testval) return true;
+     return false;
+}
+
+
+bool packed_128_equal_unpacked() {
+     int32_t     testval=128;
+     std::vector<unsigned char>  packedval=opencraft::packets::create_varint(testval);
+     unsigned char buf[4];
+     for(int i=0; i<packedval.size(); i++) {
+         buf[i]=packedval[i];
+     }
+     if(opencraft::packets::parse_var_int(buf,4)==testval) return true;
+     return false;
+}
+
 int main(int argc, char** argv) {
     cout << LIBOPENCRAFT_LONG_VER << endl << "Built on " << LIBOPENCRAFT_BUILDDATE << endl << endl;
 
@@ -151,6 +174,8 @@ int main(int argc, char** argv) {
     run_test("Unpacked handshake.packet file has correct field B",&unpack_handshakefile_fieldb);
     run_test("Unpacked handshake.packet file has correct field C",&unpack_handshakefile_fieldc);
     run_test("Unpacked handshake.packet file has correct field D",&unpack_handshakefile_fieldd);
+    run_test("127 Packed as varint has same value when unpacked",&packed_127_equal_unpacked);
+    run_test("128 Packed as varint has same value when unpacked",&packed_128_equal_unpacked);
 
     cout << endl;
     cout << tests_passed << "/" << tests_run << " Passed" << endl;
