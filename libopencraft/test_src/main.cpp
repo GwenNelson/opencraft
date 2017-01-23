@@ -29,6 +29,7 @@
 #include <string>
 #include <iostream>
 #include <exception>
+#include <vector>
 
 using namespace std;
 
@@ -71,14 +72,14 @@ bool check_handshake_name() {
 
 bool serialise_handshake() {
      opencraft::packets::handshake_handshaking_upstream newpack(OPENCRAFT_PROTOCOL_VERSION,std::string(OPENCRAFT_DEFAULT_SERVER),OPENCRAFT_DEFAULT_TCP_PORT,OPENCRAFT_STATE_STATUS);     
-     unsigned char* packdata = newpack.pack();
-     if(packdata != NULL) return true;
+     std::vector<unsigned char> packdata = newpack.pack();
+     if(packdata.size() != 0) return true;
      return false;
 }
 
 bool unserialise_handshake() {
      opencraft::packets::handshake_handshaking_upstream hspack(OPENCRAFT_PROTOCOL_VERSION,std::string(OPENCRAFT_DEFAULT_SERVER),OPENCRAFT_DEFAULT_TCP_PORT,OPENCRAFT_STATE_STATUS);     
-     unsigned char* packdata =hspack.pack();
+     std::vector<unsigned char> packdata =hspack.pack();
      opencraft::packets::opencraft_packet *newpack = opencraft::packets::opencraft_packet::unpack_packet(packdata);
 
      bool retval=false;
@@ -93,7 +94,7 @@ int main(int argc, char** argv) {
 
     run_test("Create handshake packet",&create_handshake);
     run_test("Check handshake packet has valid name",&check_handshake_name);
-    run_test("Serialise handshake packet returns none-NULL",&serialise_handshake);
+    run_test("Serialise handshake packet returns vector of non-zero length",&serialise_handshake);
     run_test("Unserialising handshake packet returns none-NULL",&unserialise_handshake);
     
     cout << endl;
