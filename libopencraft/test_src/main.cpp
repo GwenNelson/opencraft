@@ -39,6 +39,8 @@
 
 using namespace std;
 
+std::string failmsg = "";
+
 float tests_run;
 float tests_passed;
 float tests_failed;
@@ -46,6 +48,7 @@ float tests_failed;
 typedef bool (*testcase_t)();
 
 void run_test(std::string desc, testcase_t test) {
+     failmsg = "";
      cout << "Testing " << desc;
      tests_run+=1.0f;
      bool retval=false;
@@ -60,7 +63,7 @@ void run_test(std::string desc, testcase_t test) {
        tests_passed+=1.0f;
        cout << ": PASS" << endl;
      } else {
-       cout << ": FAIL" << endl;
+       cout << ": FAIL: " << failmsg << endl;
        tests_failed+=1.0f;
      }
 }
@@ -73,6 +76,7 @@ bool create_handshake() {
 bool check_handshake_name() {
      opencraft::packets::handshake_handshaking_upstream newpack(OPENCRAFT_PROTOCOL_VERSION,std::string(OPENCRAFT_DEFAULT_SERVER),OPENCRAFT_DEFAULT_TCP_PORT,OPENCRAFT_STATE_STATUS);
      if(newpack.name()=="handshake") return true;
+     failmsg = "name did not match, got " + newpack.name() + " instead of handshake";
      return false;
 }
 
@@ -80,6 +84,7 @@ bool serialise_handshake() {
      opencraft::packets::handshake_handshaking_upstream newpack(OPENCRAFT_PROTOCOL_VERSION,std::string(OPENCRAFT_DEFAULT_SERVER),OPENCRAFT_DEFAULT_TCP_PORT,OPENCRAFT_STATE_STATUS);     
      std::vector<unsigned char> packdata = newpack.pack();
      if(packdata.size() != 0) return true;
+     failmsg = "pack() method returned 0-length vector";
      return false;
 }
 
@@ -89,10 +94,38 @@ bool unserialise_handshake() {
      opencraft::packets::opencraft_packet *newpack = opencraft::packets::opencraft_packet::unpack_packet(OPENCRAFT_STATE_HANDSHAKING,packdata);
 
      bool retval=false;
+     failmsg = "Got NULL from unpack_packet";
      if(newpack != NULL) retval=true;
      delete newpack;
      return retval;
 }
+
+bool unserialise_handshake_samevalues() {
+     opencraft::packets::handshake_handshaking_upstream hspack(OPENCRAFT_PROTOCOL_VERSION,std::string(OPENCRAFT_DEFAULT_SERVER),OPENCRAFT_DEFAULT_TCP_PORT,OPENCRAFT_STATE_STATUS);     
+     std::vector<unsigned char> packdata =hspack.pack();
+     opencraft::packets::handshake_handshaking_upstream *newpack = (opencraft::packets::handshake_handshaking_upstream*)opencraft::packets::opencraft_packet::unpack_packet(OPENCRAFT_STATE_HANDSHAKING,packdata);
+
+     bool retval = true;
+     if(newpack->a != OPENCRAFT_PROTOCOL_VERSION) {
+        failmsg = "\nExpected a=" + to_string(OPENCRAFT_PROTOCOL_VERSION) + ", got a=" + to_string(newpack->a);
+        retval = false;
+     }
+     if(newpack->b != std::string(OPENCRAFT_DEFAULT_SERVER)) {
+        failmsg += "\nExpected b=\"" + std::string(OPENCRAFT_DEFAULT_SERVER) + "\", got b=\"" + newpack->b + "\"";
+        retval = false;
+     }
+     if(newpack->c != OPENCRAFT_DEFAULT_TCP_PORT) {
+        failmsg += "\nExpected c=" + to_string(OPENCRAFT_DEFAULT_TCP_PORT) + ", got c=" + to_string(newpack->c);
+        retval = false;
+     }
+     if(newpack->d != OPENCRAFT_STATE_STATUS) {
+        failmsg += "\nExpected d=" + to_string(OPENCRAFT_STATE_STATUS) +", got d=" + to_string(newpack->d);
+        retval = false;
+     }
+     delete newpack;
+     return retval;
+}
+
 
 bool unpack_file_via_constructor() {
      std::vector<unsigned char> packdata;
@@ -181,6 +214,7 @@ int main(int argc, char** argv) {
     run_test("Check handshake packet has valid name",&check_handshake_name);
     run_test("Serialise handshake packet returns vector of non-zero length",&serialise_handshake);
     run_test("Unserialising handshake packet returns none-NULL",&unserialise_handshake);
+    run_test("Unserialised handshake packet has same values as original packet",&unserialise_handshake_samevalues);
     run_test("Unpack handshake.packet file via handshake packet class constructor does not crash",&unpack_file_via_constructor);
     run_test("Unpacked handshake.packet file has correct field A",&unpack_handshakefile_fielda);
     run_test("Unpacked handshake.packet file has correct field B",&unpack_handshakefile_fieldb);
@@ -189,6 +223,7 @@ int main(int argc, char** argv) {
     run_test("127 Packed as varint has same value when unpacked",&packed_127_equal_unpacked);
     run_test("128 Packed as varint has same value when unpacked",&packed_128_equal_unpacked);
     run_test("130 Packed as varint has same value when unpacked",&packed_130_equal_unpacked);
+
 
     cout << endl;
     cout << tests_passed << "/" << tests_run << " Passed" << endl;
