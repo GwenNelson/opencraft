@@ -26,6 +26,8 @@
 #include <packets.autogen.h>
 #include <version.h>
 #include <proto_constants.h>
+#include <handshake.packet.h>
+
 #include <string>
 #include <iostream>
 #include <exception>
@@ -88,6 +90,35 @@ bool unserialise_handshake() {
      return retval;
 }
 
+bool unpack_file_via_constructor() {
+     std::vector<unsigned char> packdata;
+     for(int i=0; i<handshake_packet_length; i++) {
+         packdata.push_back((unsigned char)handshake_packet[i]);
+     }
+     opencraft::packets::handshake_handshaking_upstream hspack(packdata);
+     return true;
+}
+
+bool unpack_handshakefile_fielda() {
+     std::vector<unsigned char> packdata;
+     for(int i=0; i<handshake_packet_length; i++) {
+         packdata.push_back((unsigned char)handshake_packet[i]);
+     }
+     opencraft::packets::handshake_handshaking_upstream hspack(packdata);
+     if(hspack.a == handshake_packet_a) return true;
+     return false;
+}
+
+bool unpack_handshakefile_fieldb() {
+     std::vector<unsigned char> packdata;
+     for(int i=0; i<handshake_packet_length; i++) {
+         packdata.push_back((unsigned char)handshake_packet[i]);
+     }
+     opencraft::packets::handshake_handshaking_upstream hspack(packdata);
+     if(hspack.b == handshake_packet_b) return true;
+     cout << endl << "Correct value was:\"" << handshake_packet_b << "\" but got value \"" << hspack.b << "\"" << endl;
+     return false;
+}
 
 int main(int argc, char** argv) {
     cout << LIBOPENCRAFT_LONG_VER << endl << "Built on " << LIBOPENCRAFT_BUILDDATE << endl << endl;
@@ -96,6 +127,9 @@ int main(int argc, char** argv) {
     run_test("Check handshake packet has valid name",&check_handshake_name);
     run_test("Serialise handshake packet returns vector of non-zero length",&serialise_handshake);
     run_test("Unserialising handshake packet returns none-NULL",&unserialise_handshake);
+    run_test("Unpack handshake.packet file via handshake packet class constructor does not crash",&unpack_file_via_constructor);
+    run_test("Unpacked handshake.packet file has correct field A",&unpack_handshakefile_fielda);
+    run_test("Unpacked handshake.packet file has correct field B",&unpack_handshakefile_fieldb);
     
     cout << endl;
     cout << tests_passed << "/" << tests_run << " Passed" << endl;
