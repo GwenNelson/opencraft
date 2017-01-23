@@ -24,6 +24,9 @@
 
 #pragma once
 
+namespace opencraft {
+  namespace packets {
+
 class opencraft_packet {
    public:
       unsigned char* pack(); // pack into a transmission-ready format, no compression or encryption yet applied but length prefix in place
@@ -31,3 +34,6 @@ class opencraft_packet {
       std::string name(); // return the packet name
 
 };
+
+}
+}
