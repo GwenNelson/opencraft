@@ -38,7 +38,7 @@ void unparse_varint(int32_t i, unsigned char *buf);
 // Packet classes should be considered as read only once created
 class opencraft_packet {
    public:
-      std::vector<unsigned char> pack(); // return a packed packet with no encryption or compression, but with ident + length prefix
+      std::vector<unsigned char> pack(); // return a packed packet with no encryption, compression or length+ident header
 
       static opencraft_packet *unpack_packet(int proto_state, std::vector<unsigned char> packdata); // unpack raw data (with length prefix and packet ident but no compression/crypto) into a packet
 

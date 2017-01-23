@@ -50,6 +50,7 @@ typedef bool (*testcase_t)();
 void run_test(std::string desc, testcase_t test) {
      failmsg = "";
      cout << "Testing " << desc;
+     cout.flush();
      tests_run+=1.0f;
      bool retval=false;
      try {
@@ -104,6 +105,11 @@ bool unserialise_handshake_samevalues() {
      opencraft::packets::handshake_handshaking_upstream hspack(OPENCRAFT_PROTOCOL_VERSION,std::string(OPENCRAFT_DEFAULT_SERVER),OPENCRAFT_DEFAULT_TCP_PORT,OPENCRAFT_STATE_STATUS);     
      std::vector<unsigned char> packdata =hspack.pack();
      opencraft::packets::handshake_handshaking_upstream *newpack = (opencraft::packets::handshake_handshaking_upstream*)opencraft::packets::opencraft_packet::unpack_packet(OPENCRAFT_STATE_HANDSHAKING,packdata);
+     
+     if(newpack == NULL) {
+        failmsg = "Got NULL from opencraft_packet::unpack_packet";
+        return false;
+     }
 
      bool retval = true;
      if(newpack->a != OPENCRAFT_PROTOCOL_VERSION) {

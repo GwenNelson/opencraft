@@ -134,10 +134,10 @@ for k,v in packets_fields.items():
 
 unpack_fd = open('include/unpack_packet.inc','w')
 unpack_fd.write('if(proto_state==OPENCRAFT_STATE_HANDSHAKING) {\n')
-unpack_fd.write('   switch(packid) {\n')
+unpack_fd.write('   switch(raw_pack.pack_ident) {\n')
 for k in protostates_packets['handshaking']:
     unpack_fd.write('      case %s:\n' % packets_idents[k])
-    unpack_fd.write('       return new %s(packdata);\n' % k)
+    unpack_fd.write('       retval = new %s(raw_pack.pack_data);\n' % k)
     unpack_fd.write('      break;\n')
 unpack_fd.write('   }\n')
 unpack_fd.write('}\n')
