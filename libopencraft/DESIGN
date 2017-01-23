@@ -1,0 +1,10 @@
+Basic features
+  Packet serialisation/deserialisation
+Packet classes
+  Automatically generated from burger data
+  Some packets may be manually defined instead of generated from burger data
+  All packets inherit from opencraft::packets::base_packet
+Basic usage:
+  Open TCP socket, read in full packets, decompress/decrypt, send to base_packet::unpack_packet, get back a packet object
+  Create packets by passing relevant fields to the relevant classe's constructor then pack it and send it across the TCP socket
+  Fields are assigned alphabetical names (i.e first is a, second is b and so on) unless proper field names have been defined

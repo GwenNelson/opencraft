@@ -2,11 +2,13 @@
 
 This is an attempt to rewrite minecraft as free software, currently a work in progress so don't expect it to work properly yet.
 
-It is split into 2 components (and some random old legacy stuff) named after similar components from Second Life because i'm nostalgic as hell:
+It is split into 3 components (and some random old legacy stuff) named after similar components from Second Life because i'm nostalgic as hell:
 
 + newsim: the server component, needed even for single player games
 
 + newview: the client component, this is what you run if you want to actually play the game
+
++ libopencraft: a C++ library for handling serialisation and deserialisation of minecraft packets
 
 All game logic is handled by the server whenever possible, so both components are required to run the game.
 
