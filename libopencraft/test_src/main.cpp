@@ -116,7 +116,16 @@ bool unpack_handshakefile_fieldb() {
      }
      opencraft::packets::handshake_handshaking_upstream hspack(packdata);
      if(hspack.b == handshake_packet_b) return true;
-     cout << endl << "Correct value was:\"" << handshake_packet_b << "\"\n but got value \"" << hspack.b << "\"" << endl;
+     return false;
+}
+
+bool unpack_handshakefile_fieldc() {
+     std::vector<unsigned char> packdata;
+     for(int i=0; i<handshake_packet_length; i++) {
+         packdata.push_back((unsigned char)handshake_packet[i]);
+     }
+     opencraft::packets::handshake_handshaking_upstream hspack(packdata);
+     if(hspack.c == handshake_packet_c) return true;
      return false;
 }
 
@@ -130,7 +139,8 @@ int main(int argc, char** argv) {
     run_test("Unpack handshake.packet file via handshake packet class constructor does not crash",&unpack_file_via_constructor);
     run_test("Unpacked handshake.packet file has correct field A",&unpack_handshakefile_fielda);
     run_test("Unpacked handshake.packet file has correct field B",&unpack_handshakefile_fieldb);
-    
+    run_test("Unpacked handshake.packet file has correct field C",&unpack_handshakefile_fieldc);
+ 
     cout << endl;
     cout << tests_passed << "/" << tests_run << " Passed" << endl;
     cout << tests_failed << "/" << tests_run << " Failed" << endl;

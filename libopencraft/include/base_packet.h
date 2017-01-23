@@ -50,7 +50,7 @@ class opencraft_packet {
       float                          unpack_float();
       int32_t                        unpack_int();
       int64_t                        unpack_long();
-      int16_t                        unpack_short();
+      uint16_t                       unpack_short();
       std::string                    unpack_string8();
       int32_t                        unpack_varint();
       std::tuple<float,float,float>  unpack_position();
