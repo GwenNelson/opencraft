@@ -60,13 +60,28 @@ void run_test(std::string desc, testcase_t test) {
 
 bool create_handshake() {
      opencraft::packets::handshake_handshaking_upstream newpack(OPENCRAFT_PROTOCOL_VERSION,std::string(OPENCRAFT_DEFAULT_SERVER),OPENCRAFT_DEFAULT_TCP_PORT,OPENCRAFT_STATE_STATUS);
-     return true;
+     return true; // if an exception occurred above, we failed - otherwise always succeed
+}
+
+bool check_handshake_name() {
+     opencraft::packets::handshake_handshaking_upstream newpack(OPENCRAFT_PROTOCOL_VERSION,std::string(OPENCRAFT_DEFAULT_SERVER),OPENCRAFT_DEFAULT_TCP_PORT,OPENCRAFT_STATE_STATUS);
+     if(newpack.name()=="handshake") return true;
+     return false;
+}
+
+bool serialise_handshake() {
+     opencraft::packets::handshake_handshaking_upstream newpack(OPENCRAFT_PROTOCOL_VERSION,std::string(OPENCRAFT_DEFAULT_SERVER),OPENCRAFT_DEFAULT_TCP_PORT,OPENCRAFT_STATE_STATUS);     
+     unsigned char* packdata = newpack.pack();
+     if(packdata != NULL) return true;
+     return false;
 }
 
 int main(int argc, char** argv) {
     cout << LIBOPENCRAFT_LONG_VER << endl << "Built on " << LIBOPENCRAFT_BUILDDATE << endl << endl;
 
     run_test("Create handshake packet",&create_handshake);
+    run_test("Check handshake packet has valid name",&check_handshake_name);
+    run_test("Serialise handshake packet returns none-NULL",&serialise_handshake);
 
     cout << endl;
     cout << tests_passed << "/" << tests_run << " Passed" << endl;
