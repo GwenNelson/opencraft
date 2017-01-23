@@ -27,6 +27,7 @@
 #include <version.h>
 #include <proto_constants.h>
 #include <handshake.packet.h>
+#include <raw_packet.h>
 
 #include <arpa/inet.h>
 
@@ -72,6 +73,33 @@ void run_test(std::string desc, testcase_t test) {
 bool create_handshake() {
      opencraft::packets::handshake_handshaking_upstream newpack(OPENCRAFT_PROTOCOL_VERSION,std::string(OPENCRAFT_DEFAULT_SERVER),OPENCRAFT_DEFAULT_TCP_PORT,OPENCRAFT_STATE_STATUS);
      return true; // if an exception occurred above, we failed - otherwise always succeed
+}
+
+bool create_raw() {
+     std::vector<unsigned char> test_vector;
+     test_vector.push_back((unsigned char)1);
+     test_vector.push_back((unsigned char)2);
+
+     int32_t ident = 666;
+     int32_t size  = test_vector.size();
+
+     opencraft::packets::raw_packet raw_pack_a(size,ident,test_vector);
+     std::vector<unsigned char> packdata = raw_pack_a.pack();
+
+     opencraft::packets::raw_packet raw_pack_b(packdata);
+     
+     bool retval=true;
+     if(raw_pack_b.pack_ident != ident) {
+        failmsg += "\nexpected ident=666, got ident=" + to_string(raw_pack_b.pack_ident);
+        retval = false;
+     }
+     if(raw_pack_b.pack_length != size) {
+        failmsg += "\nexpected length=" + to_string(test_vector.size()) + ", got length=" + to_string(raw_pack_b.pack_length);
+     }
+     if(raw_pack_b.pack_data != test_vector) {
+        failmsg += "\npack_data does not match test_vector";
+     }
+     return retval;
 }
 
 bool check_handshake_name() {
@@ -216,6 +244,7 @@ bool packed_130_equal_unpacked() {
 int main(int argc, char** argv) {
     cout << LIBOPENCRAFT_LONG_VER << endl << "Built on " << LIBOPENCRAFT_BUILDDATE << endl << endl;
 
+    run_test("Create/Serialise/Unserialise raw_packet and check fields match",&create_raw);
     run_test("Create handshake packet",&create_handshake);
     run_test("Check handshake packet has valid name",&check_handshake_name);
     run_test("Serialise handshake packet returns vector of non-zero length",&serialise_handshake);
