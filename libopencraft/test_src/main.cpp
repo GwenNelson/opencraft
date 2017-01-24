@@ -53,7 +53,7 @@ typedef bool (*testcase_t)();
 std::string dump_hex_vector(std::vector<unsigned char> v) {
      std::stringstream retstream;
      for(int i=0; i<v.size(); i++) {
-         retstream << std::hex << (uint32_t)v[i];
+         retstream << std::setfill('0') << std::setw(2) << std::hex << (uint32_t)v[i];
      }
      return retstream.str();
 }
@@ -115,6 +115,10 @@ bool create_raw() {
         failmsg += "\ntest_vector contains  :" + dump_hex_vector(test_vector);
         retval = false;
      }
+     if(raw_pack_b.pack_data[0] != 1) {
+        failmsg += "\ntest_vector[0] should be 1, instead got " + to_string(raw_pack_b.pack_data[0]);
+        retval = false;
+     }
      return retval;
 }
 
@@ -147,7 +151,39 @@ bool unserialise_handshake() {
      return retval;
 }
 
-bool unserialise_handshake_samevalues() {
+bool unserialise_handshake_via_constructor() {
+     opencraft::packets::handshake_handshaking_upstream hspack_a(OPENCRAFT_PROTOCOL_VERSION,std::string(OPENCRAFT_DEFAULT_SERVER),OPENCRAFT_DEFAULT_TCP_PORT,OPENCRAFT_STATE_STATUS);
+     std::vector<unsigned char> packdata = hspack_a.pack();
+     
+     opencraft::packets::handshake_handshaking_upstream hspack_b(packdata);
+     bool retval=true;
+     if(hspack_b.a != hspack_a.a) {
+        failmsg = "\nExpected a=" + to_string(hspack_a.a) + ", got a=" + to_string(hspack_b.a);
+        retval = false;
+     }
+     if(hspack_b.b != hspack_a.b) {
+        failmsg += "\nExpected b=\"" + std::string(hspack_a.b) + "\", got b=\"" + hspack_b.b + "\"";
+        retval = false;
+     }
+     if(hspack_b.c != hspack_a.c) {
+        failmsg += "\nExpected c=" + to_string(hspack_a.c) + ", got c=" + to_string(hspack_b.c);
+        retval = false;
+     }
+     if(hspack_b.d != hspack_a.d) {
+        failmsg += "\nExpected d=" + to_string(hspack_a.d) +", got d=" + to_string(hspack_b.d);
+        retval = false;
+     }
+     if(!retval) {
+        failmsg += "\nOriginal packet data: " + dump_hex_vector(hspack_a.packed);
+        failmsg += "   a=" + to_string(hspack_a.a) + ", b=\"" + std::string(hspack_a.b) + "\", c=" + to_string(hspack_a.c) + ", d=" + to_string(hspack_a.d);
+        failmsg += "\nReceived packet data: " + dump_hex_vector(hspack_b.packed);
+        failmsg += "   a=" + to_string(hspack_b.a) + ", b=\"" + std::string(hspack_b.b) + "\", c=" + to_string(hspack_b.c) + ", d=" + to_string(hspack_b.d);
+     }
+
+     return retval;
+}
+
+bool unserialise_handshake_viaunpack_samevalues() {
      opencraft::packets::handshake_handshaking_upstream hspack(OPENCRAFT_PROTOCOL_VERSION,std::string(OPENCRAFT_DEFAULT_SERVER),OPENCRAFT_DEFAULT_TCP_PORT,OPENCRAFT_STATE_STATUS);     
      std::vector<unsigned char> packdata =hspack.pack();
 
@@ -175,6 +211,10 @@ bool unserialise_handshake_samevalues() {
      if(newpack->d != OPENCRAFT_STATE_STATUS) {
         failmsg += "\nExpected d=" + to_string(OPENCRAFT_STATE_STATUS) +", got d=" + to_string(newpack->d);
         retval = false;
+     }
+     if(!retval) {
+        failmsg += "\nOriginal packet data: " + dump_hex_vector(hspack.packed);
+        failmsg += "\nReceived packet data: " + dump_hex_vector(newpack->packed);
      }
      delete newpack;
      return retval;
@@ -263,13 +303,20 @@ bool packed_130_equal_unpacked() {
 
 int main(int argc, char** argv) {
     cout << LIBOPENCRAFT_LONG_VER << endl << "Built on " << LIBOPENCRAFT_BUILDDATE << endl << endl;
+    
+    std::vector<unsigned char> raw_handshake_pack;
+    for (int i=0; i<handshake_packet_length; i++) {
+        raw_handshake_pack.push_back(handshake_packet[i]);
+    }
+    cout << endl << "Raw handshake packet from handshake.packet.h:\n" << dump_hex_vector(raw_handshake_pack) << endl;
 
     run_test("Create/Serialise/Unserialise raw_packet and check fields match",&create_raw);
     run_test("Create handshake packet",&create_handshake);
     run_test("Check handshake packet has valid name",&check_handshake_name);
     run_test("Serialise handshake packet returns vector of non-zero length",&serialise_handshake);
     run_test("Unserialising handshake packet returns none-NULL",&unserialise_handshake);
-    run_test("Unserialised handshake packet has same values as original packet",&unserialise_handshake_samevalues);
+    run_test("Unserialised handshake via constructor has same values as original packet",&unserialise_handshake_via_constructor);
+    run_test("Handshake unserialised via unpack_packet() has same values as original packet",&unserialise_handshake_viaunpack_samevalues);
     run_test("Unpack handshake.packet file via handshake packet class constructor does not crash",&unpack_file_via_constructor);
     run_test("Unpacked handshake.packet file has correct field A",&unpack_handshakefile_fielda);
     run_test("Unpacked handshake.packet file has correct field B",&unpack_handshakefile_fieldb);

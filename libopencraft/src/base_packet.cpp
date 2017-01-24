@@ -40,7 +40,7 @@ namespace opencraft {
 
 
 int varint_size(int32_t input) {
-    if(input==0) return 1;
+//    if(input==0) return 1;
     int s=0;
     while(input) {
        s++;
@@ -127,7 +127,7 @@ int32_t opencraft_packet::unpack_varint() {
      for(int i=0; i<maxsize; i++) {
          varint_buf[i] = this->packed[this->bufpos+i];
      }
-     int32_t retval = parse_var_int(varint_buf,4);
+     int32_t retval = parse_var_int(varint_buf,this->packed.size());
      this->bufpos += varint_size(retval);
      return retval;
 }
@@ -207,13 +207,17 @@ void opencraft_packet::pack_double(double val){}
 void opencraft_packet::pack_float(float val){}
 void opencraft_packet::pack_int(int32_t val){}
 void opencraft_packet::pack_long(int64_t val){}
-void opencraft_packet::pack_short(int16_t val){}
+void opencraft_packet::pack_short(int16_t val) {
+     uint16_t netval = val;
+     this->packed.push_back((unsigned char)(netval >> 8));
+     this->packed.push_back((unsigned char)(netval &  0xFF));
+}
 void opencraft_packet::pack_string8(std::string val){}
 void opencraft_packet::pack_varint(int32_t val) {
      unsigned char buf[4];
      unparse_varint(val,buf);
      for(int i=0; i<varint_size(val); i++) {
-         this->pack_byte(buf[i]);
+         this->packed.push_back(buf[i]);
      }
 }
 void opencraft_packet::pack_position(std::tuple<float,float,float>){}
