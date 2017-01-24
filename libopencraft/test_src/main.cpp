@@ -121,7 +121,7 @@ bool create_raw() {
 bool check_handshake_name() {
      opencraft::packets::handshake_handshaking_upstream newpack(OPENCRAFT_PROTOCOL_VERSION,std::string(OPENCRAFT_DEFAULT_SERVER),OPENCRAFT_DEFAULT_TCP_PORT,OPENCRAFT_STATE_STATUS);
      if(newpack.name()=="handshake") return true;
-     failmsg = "name did not match, got " + newpack.name() + " instead of handshake";
+     failmsg = "\nname did not match, got " + newpack.name() + " instead of handshake";
      return false;
 }
 
@@ -129,17 +129,19 @@ bool serialise_handshake() {
      opencraft::packets::handshake_handshaking_upstream newpack(OPENCRAFT_PROTOCOL_VERSION,std::string(OPENCRAFT_DEFAULT_SERVER),OPENCRAFT_DEFAULT_TCP_PORT,OPENCRAFT_STATE_STATUS);     
      std::vector<unsigned char> packdata = newpack.pack();
      if(packdata.size() != 0) return true;
-     failmsg = "pack() method returned 0-length vector";
+     failmsg = "\npack() method returned 0-length vector";
      return false;
 }
 
 bool unserialise_handshake() {
      opencraft::packets::handshake_handshaking_upstream hspack(OPENCRAFT_PROTOCOL_VERSION,std::string(OPENCRAFT_DEFAULT_SERVER),OPENCRAFT_DEFAULT_TCP_PORT,OPENCRAFT_STATE_STATUS);     
      std::vector<unsigned char> packdata =hspack.pack();
-     opencraft::packets::opencraft_packet *newpack = opencraft::packets::opencraft_packet::unpack_packet(OPENCRAFT_STATE_HANDSHAKING,packdata);
+
+     opencraft::packets::raw_packet raw_pack(hspack.ident(),packdata);
+     opencraft::packets::opencraft_packet *newpack = opencraft::packets::opencraft_packet::unpack_packet(OPENCRAFT_STATE_HANDSHAKING,raw_pack.pack());
 
      bool retval=false;
-     failmsg = "Got NULL from unpack_packet";
+     failmsg = "\nGot NULL from unpack_packet";
      if(newpack != NULL) retval=true;
      delete newpack;
      return retval;
@@ -148,10 +150,12 @@ bool unserialise_handshake() {
 bool unserialise_handshake_samevalues() {
      opencraft::packets::handshake_handshaking_upstream hspack(OPENCRAFT_PROTOCOL_VERSION,std::string(OPENCRAFT_DEFAULT_SERVER),OPENCRAFT_DEFAULT_TCP_PORT,OPENCRAFT_STATE_STATUS);     
      std::vector<unsigned char> packdata =hspack.pack();
-     opencraft::packets::handshake_handshaking_upstream *newpack = (opencraft::packets::handshake_handshaking_upstream*)opencraft::packets::opencraft_packet::unpack_packet(OPENCRAFT_STATE_HANDSHAKING,packdata);
+
+     opencraft::packets::raw_packet raw_pack(hspack.ident(),packdata);
+     opencraft::packets::handshake_handshaking_upstream *newpack = (opencraft::packets::handshake_handshaking_upstream*)opencraft::packets::opencraft_packet::unpack_packet(OPENCRAFT_STATE_HANDSHAKING,raw_pack.pack());
      
      if(newpack == NULL) {
-        failmsg = "Got NULL from opencraft_packet::unpack_packet";
+        failmsg = "\nGot NULL from opencraft_packet::unpack_packet";
         return false;
      }
 
