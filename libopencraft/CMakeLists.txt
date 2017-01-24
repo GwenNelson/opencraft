@@ -4,7 +4,7 @@ cmake_policy(SET CMP0004 OLD)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/CMakeFiles")
 
-FIND_PACKAGE(Boost COMPONENTS system)
+FIND_PACKAGE(Boost COMPONENTS system thread log log_setup)
 
 set (CMAKE_CXX_STANDARD 11)
 
@@ -20,6 +20,8 @@ else()
 endif()
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-narrowing")
+
+ADD_DEFINITIONS(-DBOOST_LOG_DYN_LINK)
 
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/test_data)
 

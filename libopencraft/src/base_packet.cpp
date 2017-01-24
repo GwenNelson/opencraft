@@ -33,6 +33,7 @@
 
 #include <proto_constants.h>
 #include <packets.autogen.h>
+#include <common.h>
 
 namespace opencraft {
   namespace packets {

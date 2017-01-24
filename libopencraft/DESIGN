@@ -1,9 +1,18 @@
 Basic features
   Packet serialisation/deserialisation
+  Simple client/server interfaces
+    Both inherit from a base_protocol class
+    Call .send()    to transmit raw data (you can get raw data by serialising a raw_packet)
+    Call .on_recv() in a loop with all data coming from the socket, when a valid packet comes in, handlers will be triggered
 Packet classes
   Automatically generated from burger data
   Some packets may be manually defined instead of generated from burger data
   All packets inherit from opencraft::packets::base_packet
+
+raw_packet encapsulation
+  all packets may be wrapped inside a raw_packet by serialising the packet and then passing it to raw_packet's constructor
+  raw packets may then be wrapped inside of zlib compression etc before final transmission
+
 Basic usage:
   Open TCP socket, read in full packets, decompress/decrypt, send to base_packet::unpack_packet, get back a packet object
   Create packets by passing relevant fields to the relevant classe's constructor then pack it and send it across the TCP socket
