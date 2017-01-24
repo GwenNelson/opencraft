@@ -27,6 +27,7 @@
 #include <version.h>
 #include <proto_constants.h>
 #include <handshake.packet.h>
+#include <mc_login.bin.h>
 #include <raw_packet.h>
 
 #include <arpa/inet.h>
@@ -322,7 +323,38 @@ bool packed_130_equal_unpacked() {
      return false;
 }
 
-
+bool deserialise_captured() {
+     std::vector<unsigned char> raw_data;
+     for(int i=0; i< mclogin_bin_length; i++) {
+         raw_data.push_back(mclogin_bin[i]);
+     }
+     opencraft::packets::opencraft_packet *newpack = opencraft::packets::opencraft_packet::unpack_packet(OPENCRAFT_STATE_HANDSHAKING,false,raw_data);
+     opencraft::packets::handshake_handshaking_upstream *hspack = (opencraft::packets::handshake_handshaking_upstream*)newpack;
+     bool retval = true;
+     if(hspack->a != mclogin_bin_a) {
+        failmsg += "\na != " + to_string(mclogin_bin_a);
+        failmsg += "\nExpected " + to_string(mclogin_bin_a) + ", got " + to_string(hspack->a);
+        retval   = false;
+     }
+     if(hspack->b != mclogin_bin_b) {
+        failmsg += "\nb != \"" + mclogin_bin_b + "\"";
+        failmsg += "\nExpected \"" + mclogin_bin_b + "\", got \"" + hspack->b + "\"";
+        retval = false;
+     }
+     if(hspack->c != mclogin_bin_c) {
+        failmsg += "\nc != " + to_string(mclogin_bin_c);
+        failmsg += "\nExpected " + to_string(mclogin_bin_c) + ", got " + to_string(hspack->c);
+        retval   = false;
+     }
+     if(hspack->d != mclogin_bin_d) {
+        failmsg += "\nd != " + to_string(mclogin_bin_d);
+        failmsg += "\nExpected " + to_string(mclogin_bin_d) + ", got " + to_string(hspack->d);
+        retval   = false;
+     }
+     delete newpack;
+     return retval;
+ 
+}
 
 int main(int argc, char** argv) {
     cout << LIBOPENCRAFT_LONG_VER << endl << "Built on " << LIBOPENCRAFT_BUILDDATE << endl << endl;
@@ -349,7 +381,7 @@ int main(int argc, char** argv) {
     run_test("127 Packed as varint has same value when unpacked",&packed_127_equal_unpacked);
     run_test("128 Packed as varint has same value when unpacked",&packed_128_equal_unpacked);
     run_test("130 Packed as varint has same value when unpacked",&packed_130_equal_unpacked);
-
+    run_test("Deserialise captured data from minecraft client and read values",&deserialise_captured);
 
     cout << endl;
     cout << tests_passed << "/" << tests_run << " Passed" << endl;
