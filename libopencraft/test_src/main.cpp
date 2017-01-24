@@ -122,6 +122,23 @@ bool create_raw() {
      return retval;
 }
 
+bool create_raw_ident() {
+     std::vector<unsigned char> test_vector;
+     test_vector.push_back((unsigned char)1);
+     test_vector.push_back((unsigned char)2);
+
+     int32_t ident=666;
+     opencraft::packets::raw_packet raw_pack_a(ident,test_vector);
+
+     opencraft::packets::raw_packet raw_pack_b(raw_pack_a.pack());
+
+     if(raw_pack_b.pack_ident != ident) {
+        failmsg += "\nexpected ident=666, got ident=" + to_string(raw_pack_b.pack_ident);
+        return false;
+     }
+     return true;
+}
+
 bool check_handshake_name() {
      opencraft::packets::handshake_handshaking_upstream newpack(OPENCRAFT_PROTOCOL_VERSION,std::string(OPENCRAFT_DEFAULT_SERVER),OPENCRAFT_DEFAULT_TCP_PORT,OPENCRAFT_STATE_STATUS);
      if(newpack.name()=="handshake") return true;
@@ -139,13 +156,19 @@ bool serialise_handshake() {
 
 bool unserialise_handshake() {
      opencraft::packets::handshake_handshaking_upstream hspack(OPENCRAFT_PROTOCOL_VERSION,std::string(OPENCRAFT_DEFAULT_SERVER),OPENCRAFT_DEFAULT_TCP_PORT,OPENCRAFT_STATE_STATUS);     
-     std::vector<unsigned char> packdata =hspack.pack();
 
-     opencraft::packets::raw_packet raw_pack(hspack.ident(),packdata);
+     opencraft::packets::raw_packet raw_pack(hspack.ident(),hspack.pack());
      opencraft::packets::opencraft_packet *newpack = opencraft::packets::opencraft_packet::unpack_packet(OPENCRAFT_STATE_HANDSHAKING,raw_pack.pack());
 
      bool retval=false;
-     failmsg = "\nGot NULL from unpack_packet";
+     failmsg += "\nGot NULL from unpack_packet";
+     failmsg += "\nhspack:                 " + dump_hex_vector(hspack.pack());
+     failmsg += "\n  hspack length:        " + to_string(hspack.packed.size());
+     failmsg += "\n  hspack ident:         " + to_string(hspack.ident());
+     failmsg += "\nraw_pack.pack_data:     " + dump_hex_vector(raw_pack.pack_data);
+     failmsg += "\nraw_pack:               " + dump_hex_vector(raw_pack.pack());
+     failmsg += "\n  raw_pack.pack_length: " + to_string(raw_pack.pack_length);
+     failmsg += "\n  raw_pack.pack_ident:  " + to_string(raw_pack.pack_ident);
      if(newpack != NULL) retval=true;
      delete newpack;
      return retval;
@@ -311,6 +334,7 @@ int main(int argc, char** argv) {
     cout << endl << "Raw handshake packet from handshake.packet.h:\n" << dump_hex_vector(raw_handshake_pack) << endl;
 
     run_test("Create/Serialise/Unserialise raw_packet and check fields match",&create_raw);
+    run_test("Create/Serialise/Unserialise raw_packet with (ident,data) constructor and check ident matches",&create_raw_ident);
     run_test("Create handshake packet",&create_handshake);
     run_test("Check handshake packet has valid name",&check_handshake_name);
     run_test("Serialise handshake packet returns vector of non-zero length",&serialise_handshake);

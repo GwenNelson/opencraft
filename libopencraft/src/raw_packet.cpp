@@ -29,7 +29,7 @@ namespace opencraft {
   namespace packets {
 
 raw_packet::raw_packet(std::vector<unsigned char> data) {
-  this->packed = data;
+  this->packed = std::vector<unsigned char>(data);
   this->bufpos = 0;
   this->pack_length = this->unpack_varint();
   this->pack_ident  = this->unpack_varint();
@@ -37,8 +37,8 @@ raw_packet::raw_packet(std::vector<unsigned char> data) {
 }
 
 raw_packet::raw_packet(int32_t length, int32_t ident, std::vector<unsigned char> data) {
+  this->packed.clear();
   this->bufpos      = 0;
-  this->packed      = std::vector<unsigned char>();
   this->pack_length = length;
   this->pack_ident  = ident;
   this->pack_data   = data;
@@ -48,12 +48,11 @@ raw_packet::raw_packet(int32_t length, int32_t ident, std::vector<unsigned char>
 }
 
 raw_packet::raw_packet(int32_t ident, std::vector<unsigned char> data) {
+  this->packed.clear();
   this->bufpos        = 0;
-  this->packed        = std::vector<unsigned char>();
   this->pack_ident    = ident;
   this->pack_data     = data;
-  int pack_ident_size = varint_size(ident);
-  this->pack_length   = pack_ident_size + data.size();
+  this->pack_length   = data.size();
   this->pack_varint(this->pack_length);
   this->pack_varint(this->pack_ident);
   this->pack_bytes(this->pack_data);
