@@ -32,7 +32,9 @@
 #include <arpa/inet.h>
 
 #include <string>
+#include <sstream>
 #include <iostream>
+#include <iomanip>
 #include <exception>
 #include <vector>
 
@@ -47,6 +49,14 @@ float tests_passed;
 float tests_failed;
 
 typedef bool (*testcase_t)();
+
+std::string dump_hex_vector(std::vector<unsigned char> v) {
+     std::stringstream retstream;
+     for(int i=0; i<v.size(); i++) {
+         retstream << std::hex << (uint32_t)v[i];
+     }
+     return retstream.str();
+}
 
 void run_test(std::string desc, testcase_t test) {
      failmsg = "";
@@ -95,9 +105,15 @@ bool create_raw() {
      }
      if(raw_pack_b.pack_length != size) {
         failmsg += "\nexpected length=" + to_string(test_vector.size()) + ", got length=" + to_string(raw_pack_b.pack_length);
+        retval = false;
      }
-     if(raw_pack_b.pack_data != test_vector) {
+     if(raw_pack_b.pack_data.size() != test_vector.size()) {
         failmsg += "\npack_data does not match test_vector";
+        failmsg += "\npack_data is size " + to_string(raw_pack_b.pack_data.size());
+        failmsg += "\ntest_vector is size " + to_string(test_vector.size());
+        failmsg += "\npack_data contains    :" + dump_hex_vector(raw_pack_b.pack_data);
+        failmsg += "\ntest_vector contains  :" + dump_hex_vector(test_vector);
+        retval = false;
      }
      return retval;
 }
