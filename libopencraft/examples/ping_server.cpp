@@ -67,7 +67,7 @@ int main(int argc, char** argv) {
 
    cout << "Sending a handshake packet..." << endl;
    // create a handshake packet
-   opencraft::packets::handshake_handshaking_upstream hspack(OPENCRAFT_PROTOCOL_VERSION,std::string("localhost"),25565,OPENCRAFT_STATE_STATUS);
+   opencraft::packets::handshake_handshaking_upstream hspack(OPENCRAFT_PROTOCOL_VERSION,std::string("127.0.0.1"),25565,OPENCRAFT_STATE_STATUS);
 
    // wrap it in a raw packet
    opencraft::packets::raw_packet raw_hs(hspack.ident(),hspack.pack());

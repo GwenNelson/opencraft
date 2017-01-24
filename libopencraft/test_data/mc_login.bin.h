@@ -1,5 +1,6 @@
 // This file was captured via a network sniffer from a minecraft 1.11 client
 // The first packet should contain a valid handshake packet
+// The second packet appears to be a login_start, but for testing it can be safely ignored
 
 const char mclogin_bin[35] = {
 	0x10, 0x00, 0xbb, 0x02, 0x09, 0x31, 0x32, 0x37, 0x2e, 0x30, 0x2e, 
