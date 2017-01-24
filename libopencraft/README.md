@@ -14,3 +14,5 @@ To build the library do the following:
  4. make
 
 By default this will compile the actual library (libopencraft.so) as well as an executable named test_opencraft. Simply run the file to execute a test suite.
+
+A few examples are also available in examples/

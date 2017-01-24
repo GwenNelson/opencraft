@@ -13,6 +13,7 @@ unknown_packets = {(315, u'handshaking', 'upstream', 0):'handshake'}
 PROTOCOL_VER = 315
 
 protostates_packets = {'play':[],'status':[],'login':[],'handshaking':[]}
+packets_clientbound = {}
 
 for k,v in json_data[0]['packets']['packet'].items():
     protover  = PROTOCOL_VER
@@ -39,7 +40,8 @@ for k,v in json_data[0]['packets']['packet'].items():
         else:
            packfields.append('bytes')
     k = '%s_%s_%s' % (packet_name,protomode,packdir)
-   
+
+    packets_clientbound[k] = (packdir=='downstream')
     protostates_packets[protomode].append(k)
     packets_names[k]  = packet_name
     packets_fields[k] = packfields
@@ -90,7 +92,7 @@ mctypes = {'boolean' :'bool',
            'enum'    :'int32_t',
            'bytes'   :'std::vector<unsigned char>'}
 
-
+skipped_packets = set()
 for k,v in packets_fields.items():
     skip = False
     params      = []
@@ -99,6 +101,7 @@ for k,v in packets_fields.items():
         if not mctypes.has_key(v[f]):
            print 'WARNING: Can not autogenerate %s due to missing type %s ' % (k,v[f])
            print "         %s(%s)" % (k,','.join(v))
+           skipped_packets.add(k)
            skip = True
         else:
            param_types.append(v[f])
@@ -133,15 +136,26 @@ for k,v in packets_fields.items():
        cpp_fd.write('}\n')
 
 unpack_fd = open('include/unpack_packet.inc','w')
-unpack_fd.write('if(proto_state==OPENCRAFT_STATE_HANDSHAKING) {\n')
-unpack_fd.write('   switch(raw_pack.pack_ident) {\n')
-for k in protostates_packets['handshaking']:
-    unpack_fd.write('      case %s:\n' % packets_idents[k])
-    unpack_fd.write('       retval = new %s(raw_pack.pack_data);\n' % k)
-    unpack_fd.write('      break;\n')
-unpack_fd.write('   }\n')
-unpack_fd.write('}\n')
 
+for pstate in protostates_packets.keys():
+
+    unpack_fd.write('if(proto_state==OPENCRAFT_STATE_%s && client_bound) {\n' % pstate.upper())
+    unpack_fd.write('   switch(raw_pack.pack_ident) {\n')
+    for k in protostates_packets[pstate]:
+	if packets_clientbound[k] and (not k in skipped_packets):
+	   unpack_fd.write('      case %s:\n' % packets_idents[k])
+	   unpack_fd.write('       retval = new %s(raw_pack.pack_data);\n' % k)
+	   unpack_fd.write('      break;\n')
+    unpack_fd.write('   }\n')
+    unpack_fd.write('} else if (proto_state==OPENCRAFT_STATE_%s) {\n' % pstate.upper())
+    unpack_fd.write('   switch(raw_pack.pack_ident) {\n')
+    for k in protostates_packets[pstate]:
+	if not packets_clientbound[k] and (not k in skipped_packets):
+	   unpack_fd.write('      case %s:\n' % packets_idents[k])
+	   unpack_fd.write('       retval = new %s(raw_pack.pack_data);\n' % k)
+	   unpack_fd.write('      break;\n')
+    unpack_fd.write('   }\n')
+    unpack_fd.write('}\n')
 
 cpp_fd.write("}\n}\n");       
 header_fd.write("}\n}\n");

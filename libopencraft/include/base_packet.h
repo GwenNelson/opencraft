@@ -27,7 +27,7 @@
 #include <string>
 #include <tuple>
 #include <vector>
-
+#include <common.h>
 namespace opencraft {
   namespace packets {
 
@@ -40,7 +40,7 @@ class opencraft_packet {
    public:
       std::vector<unsigned char> pack(); // return a packed packet with no encryption, compression or length+ident header
 
-      static opencraft_packet *unpack_packet(int proto_state, std::vector<unsigned char> packdata); // unpack raw data (with length prefix and packet ident but no compression/crypto) into a packet
+      static opencraft_packet *unpack_packet(int proto_state, bool client_bound, std::vector<unsigned char> packdata); // unpack raw data (with length prefix and packet ident but no compression/crypto) into a packet
 
       std::string name(); // return the packet name
       uint32_t ident(); // return the packet ident

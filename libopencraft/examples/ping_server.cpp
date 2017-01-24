@@ -18,17 +18,25 @@
 // along with OpenCraft.  If not, see <http://www.gnu.org/licenses/>.
 //
 // DESCRIPTION:
-//     Various constants used by the protocol
+//     Connects to a server, pings it and displays server info
 //
 //-----------------------------------------------------------------------------
 
-#pragma once
 
-#define OPENCRAFT_PROTOCOL_VERSION 315
-#define OPENCRAFT_DEFAULT_SERVER   "127.0.0.1:25565"
-#define OPENCRAFT_DEFAULT_TCP_PORT 25565
+#include <packets.autogen.h>
+#include <version.h>
+#include <proto_constants.h>
+#include <handshake.packet.h>
+#include <raw_packet.h>
+#include <iostream>
 
-#define OPENCRAFT_STATE_HANDSHAKING 0
-#define OPENCRAFT_STATE_STATUS      1
-#define OPENCRAFT_STATE_LOGIN       2
-#define OPENCRAFT_STATE_PLAY        3
+using namespace std;
+int main(int argc, char** argv) {
+    cout << LIBOPENCRAFT_LONG_VER << endl << "Built on " << LIBOPENCRAFT_BUILDDATE << endl << endl;
+    
+    
+}
+
+
+
+
