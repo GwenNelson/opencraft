@@ -30,6 +30,7 @@
 #include <proto_constants.h>
 #include <handshake.packet.h>
 #include <raw_packet.h>
+#include <packet_stream.h>
 #include <iostream>
 
 #include <iostream>
@@ -40,11 +41,6 @@ using namespace std;
 
 using boost::asio::ip::tcp;
 
-std::string make_string(boost::asio::streambuf& streambuf)
-{
-  return {boost::asio::buffers_begin(streambuf.data()), 
-          boost::asio::buffers_end(streambuf.data())};
-}
 
 int main(int argc, char** argv) {
     cout << LIBOPENCRAFT_LONG_VER << endl << "Built on " << LIBOPENCRAFT_BUILDDATE << endl << endl;
@@ -106,15 +102,20 @@ int main(int argc, char** argv) {
    cout << "Transmitting..." << endl;
    boost::asio::write(socket, boost::asio::buffer(raw_status.pack()),boost::asio::transfer_all(), net_error);
 
-   // this should really use packet_stream (once that is implemented)
-   // also, it should parse the JSON, or at least scrap the ident and pack length bytes
    cout << "Receiving..." << endl;
-   boost::asio::streambuf read_buffer;
+   std::vector<unsigned char> indata = std::vector<unsigned char>(4096);
    size_t bytes_read;
-   bytes_read = boost::asio::read(socket, read_buffer, boost::asio::transfer_at_least(16));
 
-   cout << "Received " << bytes_read << " bytes" << endl;
-   cout << endl << make_string(read_buffer) << endl;
+
+   opencraft::packets::packet_stream pack_stream;
+   bytes_read = boost::asio::read(socket, boost::asio::buffer(indata,4096), boost::asio::transfer_at_least(16));
+
+   vector<opencraft::packets::raw_packet> inpacks = pack_stream.on_recv(indata);
+
+   // we (naively) assume there's only one packet and that it's a status response
+   opencraft::packets::status_response_status_downstream *newpack = (opencraft::packets::status_response_status_downstream*)opencraft::packets::opencraft_packet::unpack_packet(OPENCRAFT_STATE_STATUS,true,inpacks[0].pack());
+
+   cout << "Here is the JSON data from the server:\n" << newpack->a << endl;
 }
 
 
