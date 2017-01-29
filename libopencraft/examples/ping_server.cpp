@@ -106,7 +106,8 @@ int main(int argc, char** argv) {
    cout << "Transmitting..." << endl;
    boost::asio::write(socket, boost::asio::buffer(raw_status.pack()),boost::asio::transfer_all(), net_error);
 
-
+   // this should really use packet_stream (once that is implemented)
+   // also, it should parse the JSON, or at least scrap the ident and pack length bytes
    cout << "Receiving..." << endl;
    boost::asio::streambuf read_buffer;
    size_t bytes_read;

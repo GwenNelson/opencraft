@@ -29,6 +29,7 @@
 #include <handshake.packet.h>
 #include <mc_login.bin.h>
 #include <raw_packet.h>
+#include <packet_stream.h>
 
 #include <arpa/inet.h>
 
@@ -356,6 +357,53 @@ bool deserialise_captured() {
  
 }
 
+bool simple_packstream() {
+     opencraft::packets::packet_stream pack_stream;
+
+     opencraft::packets::handshake_handshaking_upstream hspack(OPENCRAFT_PROTOCOL_VERSION,std::string("127.0.0.1"),25565,OPENCRAFT_STATE_STATUS);
+     opencraft::packets::raw_packet raw_hs(hspack.ident(),hspack.pack());
+
+     vector<opencraft::packets::raw_packet> inpacks = pack_stream.on_recv(raw_hs.pack());
+
+     if(inpacks.size() != 1) {
+        failmsg += "pack_stream.on_recv() expected return vector of length 1, got vector of length " + to_string(inpacks.size());
+        return false;
+     }
+
+     if(inpacks[0].pack_ident != hspack.ident()) {
+        failmsg += "packet ident: expected " + to_string(hspack.ident()) + ", got " + to_string(inpacks[0].ident());
+        return false;
+     }
+     opencraft::packets::handshake_handshaking_upstream *newpack = (opencraft::packets::handshake_handshaking_upstream*)opencraft::packets::opencraft_packet::unpack_packet(OPENCRAFT_STATE_HANDSHAKING,false,inpacks[0].pack());
+     
+     if(newpack==NULL) {
+        failmsg += "unpack returned NULL";
+        return false;
+     }
+
+     bool retval = true;
+     if(newpack->a != hspack.a) {
+       failmsg += "a != " + to_string(hspack.a);
+       retval   = false;
+     }
+     if(newpack->b != hspack.b) {
+       failmsg += "b != " + hspack.b;
+       retval   = false;
+     }
+     if(newpack->c != hspack.c) {
+       failmsg += "c != " + to_string(hspack.c);
+       retval   = false;
+     }
+     if(newpack->d != hspack.d) {
+       failmsg += "\nd != " + to_string(hspack.d);
+       failmsg += "\ngot "  + to_string(newpack->d) + " instead of " + to_string(hspack.d);
+       retval   = false;
+     }
+
+     delete newpack;    
+     return retval;
+}
+
 int main(int argc, char** argv) {
     cout << LIBOPENCRAFT_LONG_VER << endl << "Built on " << LIBOPENCRAFT_BUILDDATE << endl << endl;
     
@@ -363,7 +411,7 @@ int main(int argc, char** argv) {
     for (int i=0; i<handshake_packet_length; i++) {
         raw_handshake_pack.push_back(handshake_packet[i]);
     }
-    cout << endl << "Raw handshake packet from handshake.packet.h:\n" << dump_hex_vector(raw_handshake_pack) << endl;
+    cout << endl << "Raw handshake packet from handshake.packet.h:\n" << dump_hex_vector(raw_handshake_pack) << endl << endl;
 
     run_test("Create/Serialise/Unserialise raw_packet and check fields match",&create_raw);
     run_test("Create/Serialise/Unserialise raw_packet with (ident,data) constructor and check ident matches",&create_raw_ident);
@@ -382,6 +430,7 @@ int main(int argc, char** argv) {
     run_test("128 Packed as varint has same value when unpacked",&packed_128_equal_unpacked);
     run_test("130 Packed as varint has same value when unpacked",&packed_130_equal_unpacked);
     run_test("Deserialise captured data from minecraft client and read values",&deserialise_captured);
+    run_test("Deserialise from a byte stream using full packet write",&simple_packstream);
 
     cout << endl;
     cout << tests_passed << "/" << tests_run << " Passed" << endl;
