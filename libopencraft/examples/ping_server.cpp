@@ -65,13 +65,20 @@ int main(int argc, char** argv) {
       throw boost::system::system_error(error);
 
 
-   cout << "Sending a handshake packet..." << endl;
+   cout << "Creating a handshake packet..." << endl;
    // create a handshake packet
    opencraft::packets::handshake_handshaking_upstream hspack(OPENCRAFT_PROTOCOL_VERSION,std::string("127.0.0.1"),25565,OPENCRAFT_STATE_STATUS);
 
+   cout << "Hex dump of handshake packet: " << hspack.dump_hex() << endl;
+
    // wrap it in a raw packet
+   cout << "Wrapping handshake inside raw packet..." << endl;
+
    opencraft::packets::raw_packet raw_hs(hspack.ident(),hspack.pack());
 
+   cout << "Hex dump of raw packet containing handshake packet: " << raw_hs.dump_hex() << endl;
+
+   cout << "Transmitting..." << endl;
 
    // transmit it
    boost::system::error_code ignored_error;

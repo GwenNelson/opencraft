@@ -42,6 +42,7 @@ class opencraft_packet {
 
       static opencraft_packet *unpack_packet(int proto_state, bool client_bound, std::vector<unsigned char> packdata); // unpack raw data (with length prefix and packet ident but no compression/crypto) into a packet
 
+      std::string dump_hex(); // return a hex dump of the packet, for debug purposes
       std::string name(); // return the packet name
       uint32_t ident(); // return the packet ident
 

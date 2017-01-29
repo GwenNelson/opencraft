@@ -104,8 +104,8 @@ bool create_raw() {
         failmsg += "\nexpected ident=666, got ident=" + to_string(raw_pack_b.pack_ident);
         retval = false;
      }
-     if(raw_pack_b.pack_length != size) {
-        failmsg += "\nexpected length=" + to_string(test_vector.size()) + ", got length=" + to_string(raw_pack_b.pack_length);
+     if(raw_pack_b.pack_length != raw_pack_a.pack_length) {
+        failmsg += "\nexpected length=" + to_string(raw_pack_a.pack_length) + ", got length=" + to_string(raw_pack_b.pack_length);
         retval = false;
      }
      if(raw_pack_b.pack_data.size() != test_vector.size()) {

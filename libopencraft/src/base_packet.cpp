@@ -31,6 +31,12 @@
 #include <raw_packet.h>
 #include <arpa/inet.h>
 
+#include <string>
+#include <sstream>
+#include <iostream>
+#include <iomanip>
+
+
 #include <proto_constants.h>
 #include <packets.autogen.h>
 #include <common.h>
@@ -102,6 +108,14 @@ uint32_t opencraft_packet::ident() {
 
 std::string opencraft_packet::name() {
    return std::string("unknown"); // this should NEVER actually turn up, always override
+}
+
+std::string opencraft_packet::dump_hex() {
+     std::stringstream retstream;
+     for(int i=0; i<this->packed.size(); i++) {
+         retstream << std::setfill('0') << std::setw(2) << std::hex << (uint32_t)this->packed[i];
+     }
+     return retstream.str();
 }
 
 unsigned char opencraft_packet::unpack_byte() {

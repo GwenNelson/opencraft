@@ -39,10 +39,10 @@ raw_packet::raw_packet(std::vector<unsigned char> data) {
 raw_packet::raw_packet(int32_t length, int32_t ident, std::vector<unsigned char> data) {
   this->packed.clear();
   this->bufpos      = 0;
-  this->pack_length = length;
+  this->pack_length = length+varint_size(ident);
   this->pack_ident  = ident;
   this->pack_data   = data;
-  this->pack_varint(length);
+  this->pack_varint(this->pack_length);
   this->pack_varint(ident);
   this->pack_bytes(data);
 }
@@ -52,7 +52,7 @@ raw_packet::raw_packet(int32_t ident, std::vector<unsigned char> data) {
   this->bufpos        = 0;
   this->pack_ident    = ident;
   this->pack_data     = data;
-  this->pack_length   = data.size();
+  this->pack_length   = data.size()+varint_size(ident);
   this->pack_varint(this->pack_length);
   this->pack_varint(this->pack_ident);
   this->pack_bytes(this->pack_data);
