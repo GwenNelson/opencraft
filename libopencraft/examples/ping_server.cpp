@@ -40,6 +40,12 @@ using namespace std;
 
 using boost::asio::ip::tcp;
 
+std::string make_string(boost::asio::streambuf& streambuf)
+{
+  return {boost::asio::buffers_begin(streambuf.data()), 
+          boost::asio::buffers_end(streambuf.data())};
+}
+
 int main(int argc, char** argv) {
     cout << LIBOPENCRAFT_LONG_VER << endl << "Built on " << LIBOPENCRAFT_BUILDDATE << endl << endl;
    
@@ -81,8 +87,12 @@ int main(int argc, char** argv) {
    cout << "Transmitting..." << endl;
 
    // transmit it
-   boost::system::error_code ignored_error;
-   boost::asio::write(socket, boost::asio::buffer(raw_hs.pack()),boost::asio::transfer_all(), ignored_error);
+   boost::system::error_code net_error;
+   boost::asio::write(socket, boost::asio::buffer(raw_hs.pack()),boost::asio::transfer_all(), net_error);
+
+   if(net_error) {
+      throw boost::system::system_error(net_error);
+   }
    
    cout << "Creating a status request packet..." << endl;
    opencraft::packets::status_request_status_upstream status_pack;
@@ -94,8 +104,16 @@ int main(int argc, char** argv) {
    cout << "Hex dump of raw packet containing status request: " << raw_status.dump_hex() << endl;
 
    cout << "Transmitting..." << endl;
-   boost::asio::write(socket, boost::asio::buffer(raw_status.pack()),boost::asio::transfer_all(), ignored_error);
+   boost::asio::write(socket, boost::asio::buffer(raw_status.pack()),boost::asio::transfer_all(), net_error);
 
+
+   cout << "Receiving..." << endl;
+   boost::asio::streambuf read_buffer;
+   size_t bytes_read;
+   bytes_read = boost::asio::read(socket, read_buffer, boost::asio::transfer_at_least(16));
+
+   cout << "Received " << bytes_read << " bytes" << endl;
+   cout << endl << make_string(read_buffer) << endl;
 }
 
 
