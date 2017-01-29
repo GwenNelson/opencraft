@@ -18,34 +18,16 @@
 // along with OpenCraft.  If not, see <http://www.gnu.org/licenses/>.
 //
 // DESCRIPTION:
-//     Packet stream: a facility for turning streams of bytes into streams
-//     of packets
+//     Includes used by multiple modules
 //
 //-----------------------------------------------------------------------------
 
 #pragma once
 
-#include <common.h>
-#include <base_packet.h>
-#include <raw_packet.h>
-#include <deque>
+#include <boost/log/core.hpp>
+#include <boost/log/trivial.hpp>
 
-namespace opencraft {
-  namespace packets {
+#define LOG BOOST_LOG_TRIVIAL
 
-
-// this class is intended to be used as the building block for higher level async goodness
-// basically, when data comes in from the socket, pass it to on_recv and get back a vector of packets, which may be 0-length
-// note that there's no way to save packets inbetween calls to on_recv
-class packet_stream {
-   public:
-      packet_stream();
-
-      std::vector<raw_packet> on_recv(std::vector<unsigned char> data);
-   private:
-      std::deque<unsigned char> buf;
-      int32_t try_varint();
-};
-
-}
-}
+#include <libopencraft/version.h>
+#include <libopencraft/proto_constants.h>

@@ -25,12 +25,11 @@
 //-----------------------------------------------------------------------------
 
 
-#include <packets.autogen.h>
-#include <version.h>
-#include <proto_constants.h>
-#include <handshake.packet.h>
-#include <raw_packet.h>
-#include <packet_stream.h>
+#include <libopencraft/packets.autogen.h>
+#include <libopencraft/version.h>
+#include <libopencraft/proto_constants.h>
+#include <libopencraft/raw_packet.h>
+#include <libopencraft/packet_stream.h>
 #include <iostream>
 
 #include <iostream>

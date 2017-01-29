@@ -27,7 +27,7 @@
 #include <string>
 #include <tuple>
 #include <vector>
-#include <common.h>
+#include <libopencraft/common.h>
 namespace opencraft {
   namespace packets {
 

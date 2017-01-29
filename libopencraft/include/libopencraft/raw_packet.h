@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include <base_packet.h>
+#include <libopencraft/base_packet.h>
 
 namespace opencraft {
   namespace packets {

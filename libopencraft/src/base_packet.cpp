@@ -27,8 +27,8 @@
 #include <vector>
 #include <tuple>
 #include <iostream>
-#include <base_packet.h>
-#include <raw_packet.h>
+#include <libopencraft/base_packet.h>
+#include <libopencraft/raw_packet.h>
 #include <arpa/inet.h>
 
 #include <string>
@@ -37,9 +37,9 @@
 #include <iomanip>
 
 
-#include <proto_constants.h>
-#include <packets.autogen.h>
-#include <common.h>
+#include <libopencraft/proto_constants.h>
+#include <libopencraft/packets.autogen.h>
+#include <libopencraft/common.h>
 
 namespace opencraft {
   namespace packets {

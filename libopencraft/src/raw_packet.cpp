@@ -22,8 +22,8 @@
 //
 //-----------------------------------------------------------------------------
 
-#include <base_packet.h>
-#include <raw_packet.h>
+#include <libopencraft/base_packet.h>
+#include <libopencraft/raw_packet.h>
 
 namespace opencraft {
   namespace packets {

@@ -23,9 +23,9 @@
 //
 //-----------------------------------------------------------------------------
 
-#include <common.h>
-#include <packet_stream.h>
-#include <raw_packet.h>
+#include <libopencraft/common.h>
+#include <libopencraft/packet_stream.h>
+#include <libopencraft/raw_packet.h>
 
 #include <vector>
 
