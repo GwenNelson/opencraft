@@ -83,6 +83,19 @@ int main(int argc, char** argv) {
    // transmit it
    boost::system::error_code ignored_error;
    boost::asio::write(socket, boost::asio::buffer(raw_hs.pack()),boost::asio::transfer_all(), ignored_error);
+   
+   cout << "Creating a status request packet..." << endl;
+   opencraft::packets::status_request_status_upstream status_pack;
+   cout << "Hex dump of status request packet: " << status_pack.dump_hex() << endl;
+   
+   cout << "Wrapping status request inside raw packet..." << endl;
+   opencraft::packets::raw_packet raw_status(status_pack.ident(),status_pack.pack());
+
+   cout << "Hex dump of raw packet containing status request: " << raw_status.dump_hex() << endl;
+
+   cout << "Transmitting..." << endl;
+   boost::asio::write(socket, boost::asio::buffer(raw_status.pack()),boost::asio::transfer_all(), ignored_error);
+
 }
 
 
