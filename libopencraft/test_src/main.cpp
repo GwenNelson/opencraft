@@ -404,6 +404,51 @@ bool simple_packstream() {
      return retval;
 }
 
+
+bool multiple_packstream() {
+     opencraft::packets::packet_stream pack_stream;
+
+     opencraft::packets::handshake_handshaking_upstream hspack(OPENCRAFT_PROTOCOL_VERSION,std::string("127.0.0.1"),25565,OPENCRAFT_STATE_STATUS);
+     opencraft::packets::status_request_status_upstream status_pack;
+
+     opencraft::packets::raw_packet raw_hs(hspack.ident(),hspack.pack());
+     opencraft::packets::raw_packet raw_status(status_pack.ident(),status_pack.pack());
+
+     vector<unsigned char> packed_hs     = raw_hs.pack();
+     vector<unsigned char> packed_status = raw_status.pack();
+
+     vector<unsigned char> recv_data = std::vector<unsigned char>();
+
+     for(int i=0; i<packed_hs.size(); i++) {
+         recv_data.push_back(packed_hs[i]);
+     }
+
+     for(int i=0; i<packed_status.size(); i++) {
+         recv_data.push_back(packed_status[i]);
+     }
+
+     vector<opencraft::packets::raw_packet> inpacks = pack_stream.on_recv(recv_data);
+
+     if(inpacks.size() != 2) {
+        failmsg += "pack_stream.on_recv() expected return vector of length 2, got vector of length " + to_string(inpacks.size());
+        return false;
+     }
+
+     if(inpacks[0].pack_ident != hspack.ident()) {
+        failmsg += "packet ident: expected " + to_string(hspack.ident()) + ", got " + to_string(inpacks[0].ident());
+        return false;
+     }
+
+     if(inpacks[1].pack_ident != status_pack.ident()) {
+        failmsg += "packed ident: expected " + to_string(status_pack.ident()) + ", got " + to_string(inpacks[1].ident());
+        return false;
+     }
+
+     return true;
+}
+
+
+
 int main(int argc, char** argv) {
     cout << LIBOPENCRAFT_LONG_VER << endl << "Built on " << LIBOPENCRAFT_BUILDDATE << endl << endl;
     
@@ -431,6 +476,7 @@ int main(int argc, char** argv) {
     run_test("130 Packed as varint has same value when unpacked",&packed_130_equal_unpacked);
     run_test("Deserialise captured data from minecraft client and read values",&deserialise_captured);
     run_test("Deserialise from a byte stream using full packet write",&simple_packstream);
+    run_test("Deserialise multiple packets from a byte stream using full packet write",&multiple_packstream);
 
     cout << endl;
     cout << tests_passed << "/" << tests_run << " Passed" << endl;

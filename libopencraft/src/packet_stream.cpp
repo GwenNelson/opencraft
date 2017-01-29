@@ -55,17 +55,19 @@ std::vector<raw_packet> packet_stream::on_recv(std::vector<unsigned char> data) 
     }
 
     int32_t packlen = this->try_varint();
-    if(packlen >0) {
-       if(this->buf.size() >= packlen) {
-          std::vector<unsigned char> tmpbuf = std::vector<unsigned char>();
-          for(int i=0; i<packlen; i++) {
-              tmpbuf.push_back(this->buf.front());
-              this->buf.pop_front();
+    while(packlen > 0) {
+       packlen = this->try_varint();
+       if(packlen >0) {
+          if(this->buf.size() >= packlen) {
+             std::vector<unsigned char> tmpbuf = std::vector<unsigned char>();
+             for(int i=0; i<=packlen; i++) {
+                 tmpbuf.push_back(this->buf.front());
+                 this->buf.pop_front();
+             }
+             retval.push_back(raw_packet(tmpbuf));
           }
-          retval.push_back(raw_packet(tmpbuf));
        }
     }
-
     return retval;
 }
 
