@@ -4,12 +4,14 @@ Basic features
   Basic server with packet handler callbacks
 
 Basic client
-  Handles logging in to a server, spawning and responding to keepalive
   Provides methods for adding data received from the server socket and getting data that needs to be sent to the server
 
   Intended usage:
     Main loop polls server socket, if data is available for reading, pass to client instance, if socket ready for sending, send data from client instance
     Upon passing data for reading, if a packet is parsed, callbacks are executed
+
+Spawning client
+  Connects to a server, logs in and does enough handling (assuming on_recv/on_send called in loop) to spawn inworld
 
 Packet classes
   Automatically generated from burger data

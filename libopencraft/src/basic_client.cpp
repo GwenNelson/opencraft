@@ -34,12 +34,9 @@
 namespace opencraft {
   namespace client {
 
-basic_client::basic_client() {
-    this->sendbuf.clear();
-}
 
-void basic_client::register_handler(int32_t pack_ident, pack_callback_t cb) {
-     this->pack_callbacks[pack_ident].push_back(cb);
+void basic_client::register_handler(int32_t pack_ident, pack_callback_t cb, void* ctx) {
+     this->pack_callbacks[pack_ident].push_back(std::tuple<void*,pack_callback_t>(ctx,cb));
 }
 
 void basic_client::on_recv(std::vector<unsigned char> data) {
@@ -48,7 +45,9 @@ void basic_client::on_recv(std::vector<unsigned char> data) {
         if(this->pack_callbacks.find(inpacks[a].pack_ident) != this->pack_callbacks.end()) {
            opencraft::packets::opencraft_packet *inpack = opencraft::packets::opencraft_packet::unpack_packet(this->proto_mode,true,inpacks[a].pack());
            for(int b=0; b != this->pack_callbacks[inpacks[a].pack_ident].size(); b++) {
-               if(inpack != NULL) this->pack_callbacks[inpacks[a].pack_ident][b](inpack);
+               if(inpack != NULL) { 
+                  std::get<1>(this->pack_callbacks[inpacks[a].pack_ident][b])(std::get<0>(this->pack_callbacks[inpacks[a].pack_ident][b]),inpack);
+               }
            }
            if(inpack != NULL) delete inpack;
         }

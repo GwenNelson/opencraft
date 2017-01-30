@@ -31,17 +31,17 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <tuple>
 
 namespace opencraft {
   namespace client {
 
-typedef void (*pack_callback_t)(opencraft::packets::opencraft_packet *pack); // callbacks should NEVER delete/free the pack param lest bad things happen
+typedef void (*pack_callback_t)(void* ctx, opencraft::packets::opencraft_packet *pack); // callbacks should NEVER delete/free the pack param lest bad things happen
 
 class basic_client {
    public:
-      basic_client();
 
-      void register_handler(int32_t pack_ident, pack_callback_t cb);
+      void register_handler(int32_t pack_ident, pack_callback_t cb, void* ctx);
 
       void on_recv(std::vector<unsigned char> data); // call this when data is available from the socket
       std::vector<unsigned char> on_send();          // call this to get data that should be transmitted to the server
@@ -50,7 +50,7 @@ class basic_client {
       void send_pack(opencraft::packets::opencraft_packet *pack); // call this to queue a packet for transmission on the next on_send()
 
    private:
-      std::map<int32_t,std::vector<pack_callback_t> > pack_callbacks;
+      std::map<int32_t,std::vector<std::tuple<void*, pack_callback_t> > > pack_callbacks;
       std::vector<unsigned char> sendbuf;
       opencraft::packets::packet_stream p_stream;
       int proto_mode;

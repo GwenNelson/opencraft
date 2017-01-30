@@ -39,7 +39,7 @@ using namespace std;
 
 using boost::asio::ip::tcp;
 
-void status_resp_cb(opencraft::packets::status_response_status_downstream *pack) {
+void status_resp_cb(void* ctx, opencraft::packets::status_response_status_downstream *pack) {
      cout << "Got " << pack->a << endl;
 }
 
@@ -57,7 +57,7 @@ int main(int argc, char** argv) {
 
     // setup our client
     opencraft::client::basic_client oc_client;
-    oc_client.register_handler(OPENCRAFT_PACKIDENT_STATUS_RESPONSE_STATUS_DOWNSTREAM,status_resp_cb);
+    oc_client.register_handler(OPENCRAFT_PACKIDENT_STATUS_RESPONSE_STATUS_DOWNSTREAM,status_resp_cb,NULL);
 
     // connect
     cout << "Connecting to 127.0.0.1:25565..." << endl;
