@@ -45,10 +45,11 @@ class basic_client {
 
       void on_recv(std::vector<unsigned char> data); // call this when data is available from the socket
       std::vector<unsigned char> on_send();          // call this to get data that should be transmitted to the server
+      
+      int proto_mode;
 
    private:
       std::map<int32_t,std::vector<pack_callback_t> > pack_callbacks;
-      int proto_mode;
       opencraft::packets::packet_stream p_stream;
 };
 
