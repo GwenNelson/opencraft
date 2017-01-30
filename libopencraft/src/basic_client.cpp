@@ -24,6 +24,7 @@
 
 #include <libopencraft/common.h>
 #include <libopencraft/basic_client.h>
+#include <libopencraft/packets.autogen.h>
 
 #include <string>
 #include <map>
@@ -34,6 +35,7 @@ namespace opencraft {
   namespace client {
 
 basic_client::basic_client() {
+    this->sendbuf.clear();
 }
 
 void basic_client::register_handler(int32_t pack_ident, pack_callback_t cb) {
@@ -46,14 +48,29 @@ void basic_client::on_recv(std::vector<unsigned char> data) {
         if(this->pack_callbacks.find(inpacks[a].pack_ident) != this->pack_callbacks.end()) {
            opencraft::packets::opencraft_packet *inpack = opencraft::packets::opencraft_packet::unpack_packet(this->proto_mode,true,inpacks[a].pack());
            for(int b=0; b != this->pack_callbacks[inpacks[a].pack_ident].size(); b++) {
-               this->pack_callbacks[inpacks[a].pack_ident][b](inpack);
+               if(inpack != NULL) this->pack_callbacks[inpacks[a].pack_ident][b](inpack);
            }
-           delete inpack;
+           if(inpack != NULL) delete inpack;
         }
      }
 }
 
+void basic_client::send_pack(opencraft::packets::opencraft_packet *pack) {
+     opencraft::packets::raw_packet raw_pack(pack->ident(),pack->pack());
+     std::vector<unsigned char> packed = raw_pack.pack();
+     for(int i=0; i<packed.size(); i++) {
+         this->sendbuf.push_back(packed[i]);
+     }
+}
+
+void basic_client::send_hs(std::string hostname, int port, int new_proto_mode) {
+     opencraft::packets::handshake_handshaking_upstream hspack(OPENCRAFT_PROTOCOL_VERSION,hostname,port,new_proto_mode);
+     this->send_pack(&hspack);
+     this->proto_mode = new_proto_mode;
+}
+
 std::vector<unsigned char> basic_client::on_send() {
+     return this->sendbuf;
 }
 
 

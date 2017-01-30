@@ -57,7 +57,6 @@ int main(int argc, char** argv) {
 
     // setup our client
     opencraft::client::basic_client oc_client;
-    oc_client.proto_mode = OPENCRAFT_STATE_STATUS;
     oc_client.register_handler(OPENCRAFT_PACKIDENT_STATUS_RESPONSE_STATUS_DOWNSTREAM,status_resp_cb);
 
     // connect
@@ -74,50 +73,31 @@ int main(int argc, char** argv) {
       throw boost::system::system_error(error);
 
 
-   cout << "Creating a handshake packet..." << endl;
-   // create a handshake packet
-   opencraft::packets::handshake_handshaking_upstream hspack(OPENCRAFT_PROTOCOL_VERSION,std::string("127.0.0.1"),25565,OPENCRAFT_STATE_STATUS);
+    // send a handshake
+    oc_client.send_hs("127.0.0.1",25565,OPENCRAFT_STATE_STATUS);
 
-   cout << "Hex dump of handshake packet: " << hspack.dump_hex() << endl;
+    // send a status request packet
+    opencraft::packets::status_request_status_upstream status_pack;
+    oc_client.send_pack(&status_pack);
 
-   // wrap it in a raw packet
-   cout << "Wrapping handshake inside raw packet..." << endl;
 
-   opencraft::packets::raw_packet raw_hs(hspack.ident(),hspack.pack());
 
-   cout << "Hex dump of raw packet containing handshake packet: " << raw_hs.dump_hex() << endl;
+    // transmit it all at once
+    boost::system::error_code net_error;
+    boost::asio::write(socket, boost::asio::buffer(oc_client.on_send()),boost::asio::transfer_all(), net_error);
 
-   cout << "Transmitting..." << endl;
-
-   // transmit it
-   boost::system::error_code net_error;
-   boost::asio::write(socket, boost::asio::buffer(raw_hs.pack()),boost::asio::transfer_all(), net_error);
-
-   if(net_error) {
-      throw boost::system::system_error(net_error);
-   }
+    if(net_error) {
+       throw boost::system::system_error(net_error);
+    }
    
-   cout << "Creating a status request packet..." << endl;
-   opencraft::packets::status_request_status_upstream status_pack;
-   cout << "Hex dump of status request packet: " << status_pack.dump_hex() << endl;
-   
-   cout << "Wrapping status request inside raw packet..." << endl;
-   opencraft::packets::raw_packet raw_status(status_pack.ident(),status_pack.pack());
-
-   cout << "Hex dump of raw packet containing status request: " << raw_status.dump_hex() << endl;
-
-   cout << "Transmitting..." << endl;
-   boost::asio::write(socket, boost::asio::buffer(raw_status.pack()),boost::asio::transfer_all(), net_error);
-
-   cout << "Receiving..." << endl;
-   std::vector<unsigned char> indata = std::vector<unsigned char>(4096);
-   size_t bytes_read;
-
-
-   opencraft::packets::packet_stream pack_stream;
-   bytes_read = boost::asio::read(socket, boost::asio::buffer(indata,4096), boost::asio::transfer_at_least(16));
-
-   oc_client.on_recv(indata);
+    // receive packets and trigger callbacks
+    cout << "Receiving..." << endl;
+    std::vector<unsigned char> indata = std::vector<unsigned char>(4096);
+    size_t bytes_read;
+    opencraft::packets::packet_stream pack_stream;
+    bytes_read = boost::asio::read(socket, boost::asio::buffer(indata,4096), boost::asio::transfer_at_least(16));
+    
+    oc_client.on_recv(indata);
 
 
 }

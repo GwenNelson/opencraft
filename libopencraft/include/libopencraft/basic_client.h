@@ -45,12 +45,15 @@ class basic_client {
 
       void on_recv(std::vector<unsigned char> data); // call this when data is available from the socket
       std::vector<unsigned char> on_send();          // call this to get data that should be transmitted to the server
-      
-      int proto_mode;
+
+      void send_hs(std::string hostname, int port, int new_proto_mode);
+      void send_pack(opencraft::packets::opencraft_packet *pack); // call this to queue a packet for transmission on the next on_send()
 
    private:
       std::map<int32_t,std::vector<pack_callback_t> > pack_callbacks;
+      std::vector<unsigned char> sendbuf;
       opencraft::packets::packet_stream p_stream;
+      int proto_mode;
 };
 
 }
