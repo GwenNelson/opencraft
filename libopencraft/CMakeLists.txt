@@ -5,6 +5,7 @@ cmake_policy(SET CMP0004 OLD)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/CMakeFiles")
 
 FIND_PACKAGE(Boost COMPONENTS system thread log log_setup)
+FIND_PACKAGE(ZLIB REQUIRED)
 
 set (CMAKE_CXX_STANDARD 11)
 
@@ -23,7 +24,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-narrowing -fpermissive")
 
 ADD_DEFINITIONS(-DBOOST_LOG_DYN_LINK)
 
-INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/test_data)
+INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/test_data)
 
 FILE(GLOB libopencraft_src ${CMAKE_SOURCE_DIR}/src/*.cpp)
 FILE(GLOB libopencraft_test_src ${CMAKE_SOURCE_DIR}/test_src/*.cpp)
@@ -37,7 +38,7 @@ ADD_EXECUTABLE(spawn_player ${CMAKE_SOURCE_DIR}/examples/spawn_player.cpp)
 ADD_EXECUTABLE(chat_client ${CMAKE_SOURCE_DIR}/examples/chat_client.cpp)
 
 
-TARGET_LINK_LIBRARIES(opencraft pthread ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(opencraft pthread ${ZLIB_LIBRARIES} ${Boost_LIBRARIES})
 TARGET_LINK_LIBRARIES(test_opencraft pthread ${Boost_LIBRARIES} ${CMAKE_SOURCE_DIR}/build/libopencraft.so)
 TARGET_LINK_LIBRARIES(ping_server pthread ${Boost_LIBRARIES} ${CMAKE_SOURCE_DIR}/build/libopencraft.so)
 TARGET_LINK_LIBRARIES(ping_server_basic_client pthread ${Boost_LIBRARIES} ${CMAKE_SOURCE_DIR}/build/libopencraft.so)

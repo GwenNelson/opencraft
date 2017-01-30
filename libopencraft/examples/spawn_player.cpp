@@ -79,7 +79,7 @@ int main(int argc, char** argv) {
         std::vector<unsigned char> indata = std::vector<unsigned char>(4096);
         size_t bytes_read;
         opencraft::packets::packet_stream pack_stream;
-        bytes_read = boost::asio::read(socket, boost::asio::buffer(indata,4096), boost::asio::transfer_at_least(16));
+        bytes_read = boost::asio::read(socket, boost::asio::buffer(indata,4096), boost::asio::transfer_at_least(2));
     
        oc_client.on_recv(indata);
    }
