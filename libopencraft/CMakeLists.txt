@@ -34,6 +34,7 @@ ADD_EXECUTABLE(test_opencraft ${libopencraft_test_src} )
 ADD_EXECUTABLE(ping_server ${CMAKE_SOURCE_DIR}/examples/ping_server.cpp)
 ADD_EXECUTABLE(ping_server_basic_client ${CMAKE_SOURCE_DIR}/examples/ping_server_basic_client.cpp)
 ADD_EXECUTABLE(spawn_player ${CMAKE_SOURCE_DIR}/examples/spawn_player.cpp)
+ADD_EXECUTABLE(chat_client ${CMAKE_SOURCE_DIR}/examples/chat_client.cpp)
 
 
 TARGET_LINK_LIBRARIES(opencraft pthread ${Boost_LIBRARIES})
@@ -41,7 +42,7 @@ TARGET_LINK_LIBRARIES(test_opencraft pthread ${Boost_LIBRARIES} ${CMAKE_SOURCE_D
 TARGET_LINK_LIBRARIES(ping_server pthread ${Boost_LIBRARIES} ${CMAKE_SOURCE_DIR}/build/libopencraft.so)
 TARGET_LINK_LIBRARIES(ping_server_basic_client pthread ${Boost_LIBRARIES} ${CMAKE_SOURCE_DIR}/build/libopencraft.so)
 TARGET_LINK_LIBRARIES(spawn_player pthread ${Boost_LIBRARIES} ${CMAKE_SOURCE_DIR}/build/libopencraft.so)
-
+TARGET_LINK_LIBRARIES(chat_client pthread ${Boost_LIBRARIES} ${CMAKE_SOURCE_DIR}/build/libopencraft.so)
 
 ADD_CUSTOM_COMMAND( OUTPUT ${CMAKE_SOURCE_DIR}/include/version.h ${CMAKE_SOURCE_DIR}/include/packets.autogen.h ${CMAKE_SOURCE_DIR}/src/packets.autogen.cpp ${CMAKE_SOURCE_DIR}/src/unpack_packet.inc
                     COMMAND ${CMAKE_SOURCE_DIR}/autogen.sh
@@ -56,3 +57,4 @@ add_dependencies(test_opencraft opencraft)
 add_dependencies(ping_server opencraft)
 add_dependencies(ping_server_basic_client opencraft)
 add_dependencies(spawn_player opencraft)
+add_dependencies(chat_client opencraft)

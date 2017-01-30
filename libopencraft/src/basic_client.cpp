@@ -68,6 +68,12 @@ void basic_client::send_hs(std::string hostname, int port, int new_proto_mode) {
      this->proto_mode = new_proto_mode;
 }
 
+void basic_client::set_compression(int32_t new_threshold) {
+     this->compression_threshold = new_threshold;
+     this->compression_enabled = false;
+     if(new_threshold >0) this->compression_enabled = true;
+}
+
 std::vector<unsigned char> basic_client::on_send() {
      std::vector<unsigned char> retval(this->sendbuf);
      this->sendbuf.clear();

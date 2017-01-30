@@ -48,6 +48,9 @@ class basic_client {
 
       void send_hs(std::string hostname, int port, int new_proto_mode);
       void send_pack(opencraft::packets::opencraft_packet *pack); // call this to queue a packet for transmission on the next on_send()
+      
+      bool compression_enabled;
+      void set_compression(int32_t new_threshold);
    protected:
       int proto_mode;
 
@@ -55,6 +58,7 @@ class basic_client {
       std::map<int32_t,std::vector<std::tuple<void*, pack_callback_t> > > pack_callbacks;
       std::vector<unsigned char> sendbuf;
       opencraft::packets::packet_stream p_stream;
+      int32_t compression_threshold;
 };
 
 }

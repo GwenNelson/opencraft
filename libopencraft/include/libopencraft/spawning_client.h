@@ -39,7 +39,8 @@ class spawning_client: public basic_client {
    public:
       spawning_client(std::string username);
       void login_cb(opencraft::packets::login_success_login_downstream *pack);
-
+      std::string avatar_uuid;
+      std::string display_name;
    private:
 };
 
