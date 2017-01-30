@@ -32,3 +32,5 @@
 #define OPENCRAFT_STATE_STATUS      1
 #define OPENCRAFT_STATE_LOGIN       2
 #define OPENCRAFT_STATE_PLAY        3
+
+#include <libopencraft/idents.autogen.inc>

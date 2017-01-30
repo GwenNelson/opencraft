@@ -102,7 +102,7 @@ void sdl_loop_iter() {
 
 int main(int argc, char **argv) {
     int i;
-    cout << OPENCRAFT_LONG_VER << endl << "Built on " << OPENCRAFT_BUILDDATE << endl;
+    cout << OPENCRAFT_NEWVIEW_LONG_VER << endl << "Built on " << OPENCRAFT_NEWVIEW_BUILDDATE << endl;
     po::options_description desc("Options");
 
     desc.add_options() ("help,h",        "display this help")
