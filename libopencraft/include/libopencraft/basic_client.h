@@ -36,7 +36,7 @@
 namespace opencraft {
   namespace client {
 
-typedef void (*pack_callback_t)(void* ctx, int proto_mode, opencraft::packets::opencraft_packet *pack); // callbacks should NEVER delete/free the pack param lest bad things happen
+typedef void (*pack_callback_t)(void* ctx, opencraft::packets::opencraft_packet *pack); // callbacks should NEVER delete/free the pack param lest bad things happen
 
 class basic_client {
    public:

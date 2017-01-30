@@ -33,13 +33,12 @@
 namespace opencraft {
   namespace client {
 
-void spawning_client_login_cb(void* ctx, int proto_mode, opencraft::packets::login_success_login_downstream *pack) {
-     if(proto_mode != OPENCRAFT_STATE_LOGIN) return;
+void spawning_client_login_cb(void* ctx, opencraft::packets::login_success_login_downstream *pack) {
      spawning_client* client = (spawning_client*)ctx;
      client->login_cb(pack);
 }
 
-void spawning_client_compression_cb(void* ctx, int proto_mode, opencraft::packets::login_set_compression_login_downstream *pack) {
+void spawning_client_compression_cb(void* ctx, opencraft::packets::login_set_compression_login_downstream *pack) {
      spawning_client* client = (spawning_client*)ctx;
      client->set_compression(pack->a);
 }

@@ -38,8 +38,7 @@ using namespace std;
 
 using boost::asio::ip::tcp;
 
-void chat_cb(void* ctx, int proto_mode, opencraft::packets::chat_message_play_downstream *pack) {
-     if(proto_mode != OPENCRAFT_STATE_PLAY) return;
+void chat_cb(void* ctx, opencraft::packets::chat_message_play_downstream *pack) {
      cout << "Got chat: " << pack->a << endl;
 }
 
@@ -81,11 +80,11 @@ int main(int argc, char** argv) {
         }
    
         // receive packets and trigger callbacks
-        std::vector<unsigned char> indata = std::vector<unsigned char>(1024);
+        std::vector<unsigned char> indata = std::vector<unsigned char>(4096);
         size_t bytes_read;
         opencraft::packets::packet_stream pack_stream;
 
-        bytes_read = boost::asio::read(socket, boost::asio::buffer(indata,1024), boost::asio::transfer_at_least(1));
+        bytes_read = boost::asio::read(socket, boost::asio::buffer(indata,4096), boost::asio::transfer_at_least(2));
         oc_client.on_recv(indata);
         indata.clear();
    }
