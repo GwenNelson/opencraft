@@ -56,6 +56,7 @@ std::vector<raw_packet> packet_stream::on_recv(std::vector<unsigned char> data) 
 
     int32_t packlen = this->try_varint();
     while(packlen > 0) {
+       packlen = this->try_varint();
        if(packlen >0) {
           if(this->buf.size() >= packlen) {
              std::vector<unsigned char> tmpbuf = std::vector<unsigned char>();
@@ -66,7 +67,6 @@ std::vector<raw_packet> packet_stream::on_recv(std::vector<unsigned char> data) 
              retval.push_back(raw_packet(tmpbuf));
           }
        }
-       packlen = this->try_varint();
     }
     this->buf.clear();
     return retval;

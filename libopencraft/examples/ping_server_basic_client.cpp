@@ -39,7 +39,7 @@ using namespace std;
 
 using boost::asio::ip::tcp;
 
-void status_resp_cb(void* ctx, opencraft::packets::status_response_status_downstream *pack) {
+void status_resp_cb(void* ctx, int proto_mode, opencraft::packets::status_response_status_downstream *pack) {
      cout << "Got " << pack->a << endl;
 }
 

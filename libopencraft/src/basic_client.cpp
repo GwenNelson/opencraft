@@ -46,7 +46,7 @@ void basic_client::on_recv(std::vector<unsigned char> data) {
            opencraft::packets::opencraft_packet *inpack = opencraft::packets::opencraft_packet::unpack_packet(this->proto_mode,true,inpacks[a].pack());
            for(int b=0; b != this->pack_callbacks[inpacks[a].pack_ident].size(); b++) {
                if(inpack != NULL) { 
-                  std::get<1>(this->pack_callbacks[inpacks[a].pack_ident][b])(std::get<0>(this->pack_callbacks[inpacks[a].pack_ident][b]),inpack);
+                  std::get<1>(this->pack_callbacks[inpack->ident()][b])(std::get<0>(this->pack_callbacks[inpack->ident()][b]),this->proto_mode,inpack);
                }
            }
            if(inpack != NULL) { std::cout << inpack->name() << std::endl; }
