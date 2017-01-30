@@ -71,7 +71,7 @@ int main(int argc, char** argv) {
       throw boost::system::system_error(error);
 
     // we basically just sit here in a loop, transmitting and receiving
-    
+   while(true) { 
         boost::system::error_code net_error;
         boost::asio::write(socket, boost::asio::buffer(oc_client.on_send()),boost::asio::transfer_all(), net_error);
 
@@ -83,7 +83,7 @@ int main(int argc, char** argv) {
         std::vector<unsigned char> indata = std::vector<unsigned char>(4096);
         size_t bytes_read;
         opencraft::packets::packet_stream pack_stream;
-   while(true) {
+
         bytes_read = boost::asio::read(socket, boost::asio::buffer(indata,4096), boost::asio::transfer_at_least(2));
         oc_client.on_recv(indata);
         indata.clear();

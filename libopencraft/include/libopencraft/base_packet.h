@@ -44,7 +44,7 @@ class opencraft_packet {
 
       std::string dump_hex(); // return a hex dump of the packet, for debug purposes
       virtual std::string name(); // return the packet name
-      uint32_t ident(); // return the packet ident
+      virtual uint32_t ident(); // return the packet ident
 
       std::string unpack_string(); // fuck you unicode
 

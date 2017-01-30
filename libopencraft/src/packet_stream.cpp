@@ -68,6 +68,7 @@ std::vector<raw_packet> packet_stream::on_recv(std::vector<unsigned char> data) 
        }
        packlen = this->try_varint();
     }
+    this->buf.clear();
     return retval;
 }
 
