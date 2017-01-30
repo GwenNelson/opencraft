@@ -157,6 +157,10 @@ std::string opencraft_packet::unpack_string() {
      return retval;
 }
 
+std::string opencraft_packet::unpack_chatcomponent() {
+    return this->unpack_string();
+}
+
 std::string opencraft_packet::unpack_string16() {
      return this->unpack_string();
 }
@@ -214,6 +218,11 @@ void opencraft_packet::pack_string(std::string val){
          this->pack_byte(s[i]);
      }
 }
+
+void opencraft_packet::pack_chatcomponent(std::string val) {
+     this->pack_string(val);
+}
+
 void opencraft_packet::pack_string16(std::string val) {
      this->pack_string(val);
 }

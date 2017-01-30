@@ -69,7 +69,9 @@ void basic_client::send_hs(std::string hostname, int port, int new_proto_mode) {
 }
 
 std::vector<unsigned char> basic_client::on_send() {
-     return this->sendbuf;
+     std::vector<unsigned char> retval(this->sendbuf);
+     this->sendbuf.clear();
+     return retval;
 }
 
 

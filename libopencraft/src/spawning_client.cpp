@@ -18,44 +18,37 @@
 // along with OpenCraft.  If not, see <http://www.gnu.org/licenses/>.
 //
 // DESCRIPTION:
-//     A basic client
+//     A client implementation that connects and spawns an avatar
 //
 //-----------------------------------------------------------------------------
 
-#pragma once
-
 #include <libopencraft/common.h>
-#include <libopencraft/base_packet.h>
-#include <libopencraft/packet_stream.h>
-
+#include <libopencraft/spawning_client.h>
+#include <libopencraft/proto_constants.h>
+#include <libopencraft/packets.autogen.h>
 #include <string>
 #include <map>
 #include <vector>
-#include <tuple>
 
 namespace opencraft {
   namespace client {
 
-typedef void (*pack_callback_t)(void* ctx, opencraft::packets::opencraft_packet *pack); // callbacks should NEVER delete/free the pack param lest bad things happen
+void spawning_client_login_cb(void* ctx, opencraft::packets::login_success_login_downstream *pack) {
+     spawning_client* client = (spawning_client*)ctx;
+     client->login_cb(pack);
+}
 
-class basic_client {
-   public:
+spawning_client::spawning_client(std::string username) {
+    this->send_hs("127.0.0.1",25565,OPENCRAFT_STATE_LOGIN);
+    opencraft::packets::login_start_login_upstream login_start_pack(username);
+    this->register_handler(OPENCRAFT_PACKIDENT_LOGIN_SUCCESS_LOGIN_DOWNSTREAM,spawning_client_login_cb,(void*)this);
+    this->send_pack(&login_start_pack);
+}
 
-      void register_handler(int32_t pack_ident, pack_callback_t cb, void* ctx);
+void spawning_client::login_cb(opencraft::packets::login_success_login_downstream *pack) {
+     this->proto_mode = OPENCRAFT_STATE_PLAY;
+}
 
-      void on_recv(std::vector<unsigned char> data); // call this when data is available from the socket
-      std::vector<unsigned char> on_send();          // call this to get data that should be transmitted to the server
-
-      void send_hs(std::string hostname, int port, int new_proto_mode);
-      void send_pack(opencraft::packets::opencraft_packet *pack); // call this to queue a packet for transmission on the next on_send()
-   protected:
-      int proto_mode;
-
-   private:
-      std::map<int32_t,std::vector<std::tuple<void*, pack_callback_t> > > pack_callbacks;
-      std::vector<unsigned char> sendbuf;
-      opencraft::packets::packet_stream p_stream;
-};
 
 }
 }

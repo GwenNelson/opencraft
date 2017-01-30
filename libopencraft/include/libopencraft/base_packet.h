@@ -51,6 +51,7 @@ class opencraft_packet {
       bool                           unpack_boolean();
       unsigned char                  unpack_byte();
       char                           unpack_char();
+      std::string                    unpack_chatcomponent();
       std::string                    unpack_string16();
       double                         unpack_double();
       float                          unpack_float();
@@ -78,6 +79,7 @@ class opencraft_packet {
       void pack_position(std::tuple<float,float,float>);
       void pack_enum(int32_t val);
       void pack_bytes(std::vector<unsigned char>);
+      void pack_chatcomponent(std::string val);
 
       std::vector<unsigned char> packed; // buffer used for packing
       int bufpos; // current offset into the buffer for read/write operations, should be set to 0 in constructor
