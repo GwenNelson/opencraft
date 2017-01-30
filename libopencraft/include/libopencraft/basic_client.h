@@ -41,7 +41,7 @@ typedef void (*pack_callback_t)(void* ctx, opencraft::packets::opencraft_packet 
 class basic_client {
    public:
 
-      void register_handler(int32_t pack_ident, int32_t proto_mode, pack_callback_t cb, void* ctx);
+      void register_handler(int32_t pack_ident, int32_t _proto_mode, pack_callback_t cb, void* ctx);
 
       void on_recv(std::vector<unsigned char> data); // call this when data is available from the socket
       std::vector<unsigned char> on_send();          // call this to get data that should be transmitted to the server
@@ -55,7 +55,10 @@ class basic_client {
       int proto_mode;
 
    private:
-      std::map<int32_t, std::map<int32_t,std::vector<std::tuple<void*, pack_callback_t> > > > pack_callbacks;
+      std::map<int32_t,std::vector<std::tuple<void*, pack_callback_t> > > pack_callbacks_handshaking;
+      std::map<int32_t,std::vector<std::tuple<void*, pack_callback_t> > > pack_callbacks_status;
+      std::map<int32_t,std::vector<std::tuple<void*, pack_callback_t> > > pack_callbacks_login;
+      std::map<int32_t,std::vector<std::tuple<void*, pack_callback_t> > > pack_callbacks_play;
       std::vector<unsigned char> sendbuf;
       opencraft::packets::packet_stream p_stream;
       int32_t compression_threshold;

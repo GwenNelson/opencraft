@@ -35,24 +35,55 @@ namespace opencraft {
   namespace client {
 
 
-void basic_client::register_handler(int32_t pack_ident, int32_t proto_mode, pack_callback_t cb, void* ctx) {
-     this->pack_callbacks[proto_mode][pack_ident].push_back(std::tuple<void*,pack_callback_t>(ctx,cb));
+void basic_client::register_handler(int32_t pack_ident, int32_t _proto_mode, pack_callback_t cb, void* ctx) {
+    switch(_proto_mode) {
+        case OPENCRAFT_STATE_HANDSHAKING:
+          this->pack_callbacks_handshaking[pack_ident].push_back(std::tuple<void*,pack_callback_t>(ctx,cb));
+        break;
+        case OPENCRAFT_STATE_STATUS:
+          this->pack_callbacks_status[pack_ident].push_back(std::tuple<void*,pack_callback_t>(ctx,cb));
+        break;
+        case OPENCRAFT_STATE_LOGIN:
+          this->pack_callbacks_login[pack_ident].push_back(std::tuple<void*,pack_callback_t>(ctx,cb));
+        break;
+        case OPENCRAFT_STATE_PLAY:
+          this->pack_callbacks_play[pack_ident].push_back(std::tuple<void*,pack_callback_t>(ctx,cb));
+        break;
+     }
+
 }
 
 void basic_client::on_recv(std::vector<unsigned char> data) {
      std::vector<opencraft::packets::raw_packet> inpacks = this->p_stream.on_recv(data);
-     for(int a=0; a < inpacks.size(); a++) {
-        if(this->pack_callbacks[this->proto_mode].find(inpacks[a].pack_ident) != this->pack_callbacks[this->proto_mode].end()) {
-           opencraft::packets::opencraft_packet *inpack = opencraft::packets::opencraft_packet::unpack_packet(this->proto_mode,true,inpacks[a].pack());
-           for(int b=0; b != this->pack_callbacks[this->proto_mode][inpacks[a].pack_ident].size(); b++) {
-               if(inpack != NULL) { 
-                  std::get<1>(this->pack_callbacks[this->proto_mode][inpacks[a].pack_ident][b])(std::get<0>(this->pack_callbacks[this->proto_mode][inpacks[a].pack_ident][b]),inpack);
-               }
-           }
-           if(inpack != NULL) { std::cout << inpack->name() << std::endl; }
-           if(inpack != NULL) delete inpack;
-        }
+     std::map<int32_t,std::vector<std::tuple<void*, pack_callback_t> > > callbacks;
+
+     switch(this->proto_mode) {
+        case OPENCRAFT_STATE_HANDSHAKING:
+          callbacks = this->pack_callbacks_handshaking;
+        break;
+        case OPENCRAFT_STATE_STATUS:
+          callbacks = this->pack_callbacks_status;
+        break;
+        case OPENCRAFT_STATE_LOGIN:
+          callbacks = this->pack_callbacks_login;
+        break;
+        case OPENCRAFT_STATE_PLAY:
+          callbacks = this->pack_callbacks_play;
+        break;
      }
+
+     for(int pack_i=0; pack_i < inpacks.size(); pack_i++) {
+         opencraft::packets::opencraft_packet *inpack = opencraft::packets::opencraft_packet::unpack_packet(this->proto_mode,true,inpacks[pack_i].pack());
+
+         if(inpack != NULL) if(callbacks.find(inpack->ident()) != callbacks.end()) {
+               for(int cb_i=0; cb_i < callbacks[inpack->ident()].size(); cb_i++) {
+                      std::get<1>(callbacks[inpack->ident()][cb_i])(std::get<0>(callbacks[inpack->ident()][cb_i]),inpack);
+               }
+               std::cerr << inpack->name() << std::endl;
+               delete inpack;
+         }
+     }
+
 }
 
 void basic_client::send_pack(opencraft::packets::opencraft_packet *pack) {
