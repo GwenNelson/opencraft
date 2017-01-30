@@ -55,7 +55,7 @@ int main(int argc, char** argv) {
 
     // setup our client
     opencraft::client::spawning_client oc_client("TestUser");
-    oc_client.register_handler(OPENCRAFT_PACKIDENT_CHAT_MESSAGE_PLAY_DOWNSTREAM,chat_cb,NULL);
+    oc_client.register_handler(OPENCRAFT_PACKIDENT_CHAT_MESSAGE_PLAY_DOWNSTREAM,OPENCRAFT_STATE_PLAY,chat_cb,NULL);
 
     // connect
     cout << "Connecting to 127.0.0.1:25565..." << endl;

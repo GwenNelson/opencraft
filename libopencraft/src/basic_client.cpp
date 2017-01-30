@@ -35,18 +35,18 @@ namespace opencraft {
   namespace client {
 
 
-void basic_client::register_handler(int32_t pack_ident, pack_callback_t cb, void* ctx) {
-     this->pack_callbacks[pack_ident].push_back(std::tuple<void*,pack_callback_t>(ctx,cb));
+void basic_client::register_handler(int32_t pack_ident, int32_t proto_mode, pack_callback_t cb, void* ctx) {
+     this->pack_callbacks[proto_mode][pack_ident].push_back(std::tuple<void*,pack_callback_t>(ctx,cb));
 }
 
 void basic_client::on_recv(std::vector<unsigned char> data) {
      std::vector<opencraft::packets::raw_packet> inpacks = this->p_stream.on_recv(data);
      for(int a=0; a < inpacks.size(); a++) {
-        if(this->pack_callbacks.find(inpacks[a].pack_ident) != this->pack_callbacks.end()) {
+        if(this->pack_callbacks[this->proto_mode].find(inpacks[a].pack_ident) != this->pack_callbacks[this->proto_mode].end()) {
            opencraft::packets::opencraft_packet *inpack = opencraft::packets::opencraft_packet::unpack_packet(this->proto_mode,true,inpacks[a].pack());
-           for(int b=0; b != this->pack_callbacks[inpacks[a].pack_ident].size(); b++) {
+           for(int b=0; b != this->pack_callbacks[this->proto_mode][inpacks[a].pack_ident].size(); b++) {
                if(inpack != NULL) { 
-                  std::get<1>(this->pack_callbacks[inpacks[a].pack_ident][b])(std::get<0>(this->pack_callbacks[inpacks[a].pack_ident][b]),inpack);
+                  std::get<1>(this->pack_callbacks[this->proto_mode][inpacks[a].pack_ident][b])(std::get<0>(this->pack_callbacks[this->proto_mode][inpacks[a].pack_ident][b]),inpack);
                }
            }
            if(inpack != NULL) { std::cout << inpack->name() << std::endl; }

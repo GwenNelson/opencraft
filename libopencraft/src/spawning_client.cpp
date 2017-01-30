@@ -46,8 +46,8 @@ void spawning_client_compression_cb(void* ctx, opencraft::packets::login_set_com
 spawning_client::spawning_client(std::string username) {
     this->send_hs("127.0.0.1",25565,OPENCRAFT_STATE_LOGIN);
     opencraft::packets::login_start_login_upstream login_start_pack(username);
-    this->register_handler(OPENCRAFT_PACKIDENT_LOGIN_SUCCESS_LOGIN_DOWNSTREAM,spawning_client_login_cb,(void*)this);
-    this->register_handler(OPENCRAFT_PACKIDENT_LOGIN_SET_COMPRESSION_LOGIN_DOWNSTREAM,spawning_client_compression_cb,(void*)this);
+    this->register_handler(OPENCRAFT_PACKIDENT_LOGIN_SUCCESS_LOGIN_DOWNSTREAM,OPENCRAFT_STATE_LOGIN,spawning_client_login_cb,(void*)this);
+    this->register_handler(OPENCRAFT_PACKIDENT_LOGIN_SET_COMPRESSION_LOGIN_DOWNSTREAM,OPENCRAFT_STATE_LOGIN,spawning_client_compression_cb,(void*)this);
     this->send_pack(&login_start_pack);
 }
 

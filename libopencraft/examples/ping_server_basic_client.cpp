@@ -57,7 +57,7 @@ int main(int argc, char** argv) {
 
     // setup our client
     opencraft::client::basic_client oc_client;
-    oc_client.register_handler(OPENCRAFT_PACKIDENT_STATUS_RESPONSE_STATUS_DOWNSTREAM,status_resp_cb,NULL);
+    oc_client.register_handler(OPENCRAFT_PACKIDENT_STATUS_RESPONSE_STATUS_DOWNSTREAM,OPENCRAFT_STATE_STATUS,status_resp_cb,NULL);
 
     // connect
     cout << "Connecting to 127.0.0.1:25565..." << endl;
