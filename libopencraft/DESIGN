@@ -7,7 +7,7 @@ Basic client
   Provides methods for adding data received from the server socket and getting data that needs to be sent to the server
 
   Intended usage:
-    Main loop polls server socket, if data is available for reading, pass to client instance, if socket ready for sending, send data from client instance
+    Main loop polls server socket, if data is available for reading, pass to client instance
     Upon passing data for reading, if a packet is parsed, callbacks are executed
 
 Spawning client

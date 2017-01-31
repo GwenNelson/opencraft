@@ -38,8 +38,15 @@ using namespace std;
 
 using boost::asio::ip::tcp;
 
-void chat_cb(void* ctx, opencraft::packets::chat_message_play_downstream *pack) {
+int proto_mode = OPENCRAFT_STATE_LOGIN;
+
+void chat_cb(opencraft::packets::chat_message_play_downstream *pack) {
      cout << "Got chat: " << pack->a << endl;
+}
+
+void login_cb(opencraft::packets::login_success_login_downstream *pack) {
+     cout << "Logged in!" << endl;
+     proto_mode = OPENCRAFT_STATE_PLAY;
 }
 
 int main(int argc, char** argv) {
@@ -54,8 +61,7 @@ int main(int argc, char** argv) {
     tcp::resolver::iterator end;
 
     // setup our client
-    opencraft::client::spawning_client oc_client("TestUser");
-    oc_client.register_handler(OPENCRAFT_PACKIDENT_CHAT_MESSAGE_PLAY_DOWNSTREAM,OPENCRAFT_STATE_PLAY,chat_cb,NULL);
+    opencraft::client::basic_client oc_client;
 
     // connect
     cout << "Connecting to 127.0.0.1:25565..." << endl;
@@ -70,22 +76,39 @@ int main(int argc, char** argv) {
     if (error)
       throw boost::system::system_error(error);
 
-    // we basically just sit here in a loop, transmitting and receiving
-        boost::system::error_code net_error;
-        boost::asio::write(socket, boost::asio::buffer(oc_client.on_send()),boost::asio::transfer_all(), net_error);
+    boost::system::error_code net_error;
 
-        if(net_error) {
-           throw boost::system::system_error(net_error);
-        }
+
+    // send a handshake
+    boost::asio::write(socket,boost::asio::buffer(oc_client.send_hs("127.0.0.1",25565,OPENCRAFT_STATE_LOGIN)),boost::asio::transfer_all(), net_error);
+
+    // send a login start
+    opencraft::packets::login_start_login_upstream login_start_pack("TestUser");
+    boost::asio::write(socket,boost::asio::buffer(oc_client.send_pack(&login_start_pack)),boost::asio::transfer_all(), net_error);
+
    
         // receive packets and trigger callbacks
-        std::vector<unsigned char> indata = std::vector<unsigned char>(4096);
+        std::vector<unsigned char> indata = std::vector<unsigned char>(1024);
         size_t bytes_read;
-        opencraft::packets::packet_stream pack_stream;
    while(true) {
-        bytes_read = boost::asio::read(socket, boost::asio::buffer(indata,4096), boost::asio::transfer_at_least(1));
-        oc_client.on_recv(indata);
-      //  indata.clear();
+        opencraft::packets::packet_stream pack_stream;
+        bytes_read = boost::asio::read(socket, boost::asio::buffer(indata,4096), boost::asio::transfer_at_least(16));
+        vector<opencraft::packets::raw_packet> inpacks = pack_stream.on_recv(indata);
+ 
+        opencraft::packets::opencraft_packet *inpack = NULL;
+        for(int i=0; i < inpacks.size(); i++) {
+            inpack = opencraft::packets::opencraft_packet::unpack_packet(proto_mode,true,inpacks[i].pack());
+            if(inpack != NULL) {
+               if(proto_mode == OPENCRAFT_STATE_LOGIN) {
+                  if(inpack->ident() == OPENCRAFT_PACKIDENT_LOGIN_SUCCESS_LOGIN_DOWNSTREAM) login_cb(inpack);
+               }
+               if(proto_mode == OPENCRAFT_STATE_PLAY) {
+                  if(inpack->ident() == OPENCRAFT_PACKIDENT_CHAT_MESSAGE_PLAY_DOWNSTREAM) chat_cb(inpack);
+               }
+               cout << inpack->name() << endl;
+            }
+            delete inpack;
+        }
    }
 
 

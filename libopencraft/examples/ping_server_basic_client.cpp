@@ -72,19 +72,15 @@ int main(int argc, char** argv) {
     if (error)
       throw boost::system::system_error(error);
 
+    boost::system::error_code net_error;
 
     // send a handshake
-    oc_client.send_hs("127.0.0.1",25565,OPENCRAFT_STATE_STATUS);
+    boost::asio::write(socket,boost::asio::buffer(oc_client.send_hs("127.0.0.1",25565,OPENCRAFT_STATE_STATUS)),boost::asio::transfer_all(), net_error);
 
     // send a status request packet
     opencraft::packets::status_request_status_upstream status_pack;
-    oc_client.send_pack(&status_pack);
+    boost::asio::write(socket,boost::asio::buffer(oc_client.send_pack(&status_pack)),boost::asio::transfer_all(), net_error);
 
-
-
-    // transmit it all at once
-    boost::system::error_code net_error;
-    boost::asio::write(socket, boost::asio::buffer(oc_client.on_send()),boost::asio::transfer_all(), net_error);
 
     if(net_error) {
        throw boost::system::system_error(net_error);

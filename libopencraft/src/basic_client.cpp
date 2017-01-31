@@ -77,7 +77,7 @@ void basic_client::on_recv(std::vector<unsigned char> data) {
 
          if(inpack != NULL) if(callbacks.find(inpack->ident()) != callbacks.end()) {
                for(int cb_i=0; cb_i < callbacks[inpack->ident()].size(); cb_i++) {
-                      if(cb_i < callbacks[inpack->ident()].size()) std::get<1>(callbacks[inpack->ident()][cb_i])(std::get<0>(callbacks[inpack->ident()][cb_i]),inpack);
+                      std::get<1>(callbacks[inpack->ident()][cb_i])(std::get<0>(callbacks[inpack->ident()][cb_i]),inpack);
                }
                std::cerr << inpack->name() << std::endl;
                delete inpack;
@@ -86,18 +86,15 @@ void basic_client::on_recv(std::vector<unsigned char> data) {
 
 }
 
-void basic_client::send_pack(opencraft::packets::opencraft_packet *pack) {
+std::vector<unsigned char> basic_client::send_pack(opencraft::packets::opencraft_packet *pack) {
      opencraft::packets::raw_packet raw_pack(pack->ident(),pack->pack());
-     std::vector<unsigned char> packed = raw_pack.pack();
-     for(int i=0; i<packed.size(); i++) {
-         this->sendbuf.push_back(packed[i]);
-     }
+     return raw_pack.pack();
 }
 
-void basic_client::send_hs(std::string hostname, int port, int new_proto_mode) {
+std::vector<unsigned char> basic_client::send_hs(std::string hostname, int port, int new_proto_mode) {
      opencraft::packets::handshake_handshaking_upstream hspack(OPENCRAFT_PROTOCOL_VERSION,hostname,port,new_proto_mode);
-     this->send_pack(&hspack);
      this->proto_mode = new_proto_mode;
+     return this->send_pack(&hspack);
 }
 
 void basic_client::set_compression(int32_t new_threshold) {
@@ -106,11 +103,6 @@ void basic_client::set_compression(int32_t new_threshold) {
      if(new_threshold >0) this->compression_enabled = true;
 }
 
-std::vector<unsigned char> basic_client::on_send() {
-     std::vector<unsigned char> retval(this->sendbuf);
-     this->sendbuf.clear();
-     return retval;
-}
 
 
 }

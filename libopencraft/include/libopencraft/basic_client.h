@@ -44,14 +44,12 @@ class basic_client {
       void register_handler(int32_t pack_ident, int32_t _proto_mode, pack_callback_t cb, void* ctx);
 
       void on_recv(std::vector<unsigned char> data); // call this when data is available from the socket
-      std::vector<unsigned char> on_send();          // call this to get data that should be transmitted to the server
 
-      void send_hs(std::string hostname, int port, int new_proto_mode);
-      void send_pack(opencraft::packets::opencraft_packet *pack); // call this to queue a packet for transmission on the next on_send()
+      std::vector<unsigned char> send_hs(std::string hostname, int port, int new_proto_mode);
+      std::vector<unsigned char> send_pack(opencraft::packets::opencraft_packet *pack); // call this to encode a packet for transmission
       
       bool compression_enabled;
       void set_compression(int32_t new_threshold);
-   protected:
       int proto_mode;
 
    private:
