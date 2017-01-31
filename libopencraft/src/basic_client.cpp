@@ -77,7 +77,7 @@ void basic_client::on_recv(std::vector<unsigned char> data) {
 
          if(inpack != NULL) if(callbacks.find(inpack->ident()) != callbacks.end()) {
                for(int cb_i=0; cb_i < callbacks[inpack->ident()].size(); cb_i++) {
-                      std::get<1>(callbacks[inpack->ident()][cb_i])(std::get<0>(callbacks[inpack->ident()][cb_i]),inpack);
+                      if(cb_i < callbacks[inpack->ident()].size()) std::get<1>(callbacks[inpack->ident()][cb_i])(std::get<0>(callbacks[inpack->ident()][cb_i]),inpack);
                }
                std::cerr << inpack->name() << std::endl;
                delete inpack;

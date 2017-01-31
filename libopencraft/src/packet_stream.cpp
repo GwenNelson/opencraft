@@ -26,7 +26,7 @@
 #include <libopencraft/common.h>
 #include <libopencraft/packet_stream.h>
 #include <libopencraft/raw_packet.h>
-
+#include <libopencraft/base_packet.h>
 #include <vector>
 
 namespace opencraft {
@@ -37,7 +37,9 @@ packet_stream::packet_stream() {
 
 int32_t packet_stream::try_varint() {
     int retval=0;
-    for(int i=0; i < 5; ++i) {
+    if(this->buf.size()==0) return 0;
+    unsigned int i=0;
+    for(i=0; i < 5; ++i) {
         if(i > this->buf.size()) return 0;
          retval |= (this->buf[i] & 0x7F) << (i*7);
          if(!(this->buf[i] & 0x80)) {
@@ -58,9 +60,14 @@ std::vector<raw_packet> packet_stream::on_recv(std::vector<unsigned char> data) 
     while(packlen > 0) {
        packlen = this->try_varint();
        if(packlen >0) {
-          if(this->buf.size() >= packlen) {
+          if(this->buf.size() > packlen) {
              std::vector<unsigned char> tmpbuf = std::vector<unsigned char>();
-             for(int i=0; i<=packlen; i++) {
+             int packlen_len = varint_size(packlen);
+             for(int i=0; i< packlen_len; i++) {
+                 tmpbuf.push_back(this->buf.front());
+                 this->buf.pop_front();
+             }
+             for(int i=0; i< packlen; i++) {
                  tmpbuf.push_back(this->buf.front());
                  this->buf.pop_front();
              }

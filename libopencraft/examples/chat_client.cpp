@@ -85,7 +85,7 @@ int main(int argc, char** argv) {
    while(true) {
         bytes_read = boost::asio::read(socket, boost::asio::buffer(indata,4096), boost::asio::transfer_at_least(1));
         oc_client.on_recv(indata);
-        indata.clear();
+      //  indata.clear();
    }
 
 
