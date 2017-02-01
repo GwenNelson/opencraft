@@ -18,51 +18,31 @@
 // along with OpenCraft.  If not, see <http://www.gnu.org/licenses/>.
 //
 // DESCRIPTION:
-//     Packet reader class
+//     Packet writer class
 //
 //-----------------------------------------------------------------------------
 
-#include <libopencraft/packet_reader.h>
-#include <libopencraft/base_packet.h>
+#include <libopencraft/packet_writer.h>
+#include <libopencraft/raw_packet.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <vector>
-#include <iostream>
-
-using namespace std;
 
 namespace opencraft {
   namespace packets {
 
-packet_reader::packet_reader(int _sockfd, int _proto_mode, bool _is_client) {
+packet_writer::packet_writer(int _sockfd) {
     this->sockfd     = _sockfd;
-    this->proto_mode = _proto_mode;
-    this->is_client  = _is_client;
 }
 
-opencraft_packet* packet_reader::read_pack() {
-    int packsize = this->read_varint();
-    int read_bytes = recv(this->sockfd,(void*)this->recvbuf,packsize,0);
-    std::vector<unsigned char> tmpbuf;
-    
-    tmpbuf.assign(this->recvbuf, this->recvbuf+packsize);
+void packet_writer::write_pack(opencraft_packet *pack) {
+     raw_packet rawpack(pack->ident(),pack->pack());
+     std::vector<unsigned char> packed = rawpack.pack();
+     std::copy(packed.begin(), packed.end(), this->sendbuf);
 
-    return opencraft_packet::unpack_packet(this->proto_mode,this->is_client,tmpbuf);
+     send(this->sockfd,this->sendbuf,packed.size(),0);
 }
 
-int packet_reader::read_varint() {
-    int retval=0;
-    unsigned char buf[5];
-    recv(this->sockfd,buf,5,MSG_PEEK);
-    for(int i=0; i < 5; ++i) {
-        retval |= (buf[i] & 0x7F) << (i*7);
-        if(!(buf[i] & 0x80)) {
-           break;
-        }
-    }
-    return retval;
-
-}
 
 }
 }
