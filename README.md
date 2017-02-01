@@ -16,21 +16,19 @@ All game logic is handled by the server whenever possible, so both components ar
 
 First ensure you have the relevant dependencies installed, newsim requires the following C++ development packages that should be available on any modern GNU/Linux distro:
 
-* CMake version 2.8.3 or later
-* Python development headers - version 2.7 or later
+* CMake version 3.0 or later
 * Boost version 1.55 or later
 * A working C++ compiler with C++11 support - developed & tested on gcc 4.9.2-10 from Debian Jessie
+* libzmqpp - see https://github.com/zeromq/zmqpp
+* jsoncpp - see https://github.com/open-source-parsers/jsoncpp
 
-Additionally the python code needs the following at present:
-
-* pip (for installing the other packages)
-* twisted version 13.0.0 or later
-* python-cryptography version 0.9 or later
-* PyOpenSSL version 0.15.1 or later
-* Python service_identity version 14.0.0 or later
-* quarry version 0.6 or later: see https://github.com/barneygale/quarry
-
-You should use pip to install all python packages except quarry.
+You can then build the server by doing the following:
+ 1. cd newsim/
+ 2. ./autogen.sh
+ 3. mkdir -p build/
+ 4. cd build/
+ 5. cmake ..
+ 6. make
 
 ## Build instructions - client (newview)
 
@@ -41,26 +39,6 @@ The client requires the following packages in addition to what the server requir
 * SDL2
 * OpenGL development headers
 * PhysFS
-
-## Running the server
-
-The server daemon by default binds to all interfaces on port 25565 and must be available (or a compatible minecraft server) before starting the game.
-
-To run newsim the normal way as a daemon (will be the usual case once the project hits a stable release):
-1. cd newsim/build/
-2. ./newsim -r..
-
-Log files will be stored in newsim/build/ by default so you can see what the daemon is doing by monitoring that directory.
-
-It is recommended however to run in debug mode and not detach from the console - this allows you to see better what's going on.
-
-To run newsim in debug mode without detaching:
-1. cd newsim/build/
-2. ./newsim -r.. -fd
-
-Further usage options can be seen by passing the -h parameter to newsim.
-
-You must use the -r param to inform newsim where to find the install root (which is currently simply the source checkout location, eventually once ready for packaging it will be somewhere in /usr/local/share/opencraft or equivalent).
 
 ## Running the client
 

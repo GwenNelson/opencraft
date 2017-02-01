@@ -1,0 +1,18 @@
+Basic architecture
+  Multithreaded server daemon
+  1 thread per client (switch to async later)
+  Clients accepted and spawned into unique threads
+  Client threads use in-process zeromq to distribute events to listeners in other threads
+
+Threads:
+  Main thread
+   Listener thread
+   2 Thread per client
+     1 - reader
+     2 - zeromq writer
+
+Client reader thread
+  Listens for packets, passes to appropriate handlers and zeromq topics
+
+Client zeromq writer
+  Listens for zeromq messages on appropriate topics and sends packets to client 
