@@ -254,7 +254,19 @@ void opencraft_packet::pack_bytes(std::vector<unsigned char> data) {
      }
 }
 
-double  opencraft_packet::unpack_double() {this->bufpos = this->bufpos + sizeof(double);return 0;}    // dumb placeholder for now
+double  opencraft_packet::unpack_double() {
+        unsigned char arr[8];
+        arr[0] = this->unpack_byte();
+        arr[1] = this->unpack_byte();
+        arr[2] = this->unpack_byte();
+        arr[3] = this->unpack_byte();
+        arr[4] = this->unpack_byte();
+        arr[5] = this->unpack_byte();
+        arr[6] = this->unpack_byte();
+        arr[7] = this->unpack_byte();
+        return *((double *)arr);
+}
+
 float   opencraft_packet::unpack_float()  {this->bufpos = this->bufpos + sizeof(float); return 0.0f;} // dumb placeholder for now
 int32_t opencraft_packet::unpack_int()    {this->bufpos+=4; return 0;}                 // dumb placeholder for now
 int64_t opencraft_packet::unpack_long()   {this->bufpos+=8; return 0;}                 // dumb placeholder for now
