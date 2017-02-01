@@ -85,7 +85,9 @@ int main(int argc, char** argv) {
        opencraft_packet* inpack = NULL;
        inpack = client_reader.read_pack();
        if(inpack != NULL) {
-          cout << inpack->name() << " ident " << inpack->ident() << endl;
+          if(inpack->name().compare("unknown")!=0) {
+             cout << inpack->name() << " ident " << inpack->ident() << endl;
+          }
           delete inpack;
        }
        
