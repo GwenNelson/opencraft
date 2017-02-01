@@ -77,6 +77,7 @@ int main(int argc, char** argv) {
     client_reader.proto_mode = OPENCRAFT_STATE_PLAY;
 
     // read packets and spit out chat messages
+    int32_t teleport_id;
     while(true) {
        usleep(50000);
        player_play_upstream play(true);
@@ -86,7 +87,16 @@ int main(int argc, char** argv) {
        inpack = client_reader.read_pack();
        if(inpack != NULL) {
           if(inpack->name().compare("unknown")!=0) {
-             cout << inpack->name() << " ident " << inpack->ident() << endl;
+//             cout << inpack->name() << " ident " << inpack->ident() << endl;
+             if(inpack->ident()==OPENCRAFT_PACKIDENT_PLAYER_POSITION_AND_LOOK_PLAY_DOWNSTREAM) {
+                     teleport_id = ((player_position_and_look_play_downstream*)inpack)->g;
+                     teleport_confirm_play_upstream teleport_pack(teleport_id);
+                     client_writer.write_pack(&teleport_pack);
+             }
+             if(inpack->ident()==OPENCRAFT_PACKIDENT_CHAT_MESSAGE_PLAY_DOWNSTREAM) {
+                     std::string msg = ((chat_message_play_downstream*)inpack)->a;
+                     cout << msg << endl;
+             }
           }
           delete inpack;
        }
