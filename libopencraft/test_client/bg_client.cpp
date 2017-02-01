@@ -81,16 +81,15 @@ void bg_client::reader_thread() {
      this->proto_mode                = OPENCRAFT_STATE_PLAY;
      
      while(this->active) {
+        usleep(50000);
+        player_play_upstream play(true);
+        this->client_writer->write_pack(&play);
+
         opencraft_packet* inpack = NULL;
         inpack = this->client_reader->read_pack();
         if(inpack != NULL) {
              if(inpack->name().compare("unknown")!=0) {
                 cout << inpack->name() << endl;
-                if(inpack->ident()==OPENCRAFT_PACKIDENT_KEEP_ALIVE_PLAY_DOWNSTREAM) {
-                   int32_t ackval = ((keep_alive_play_downstream*)inpack)->a;
-                   keep_alive_play_upstream ack_pack(ackval);
-                   this->client_writer->write_pack(&ack_pack);
-                }
                 if(inpack->ident()==OPENCRAFT_PACKIDENT_PLAYER_POSITION_AND_LOOK_PLAY_DOWNSTREAM) {
                      int32_t teleport_id = ((player_position_and_look_play_downstream*)inpack)->g;
                      teleport_confirm_play_upstream teleport_pack(teleport_id);
@@ -100,7 +99,7 @@ void bg_client::reader_thread() {
                       std::string msg = ((chat_message_play_downstream*)inpack)->a;
                      cout << msg << endl;
                 }
-          }
+             }
 
           delete inpack;
         }

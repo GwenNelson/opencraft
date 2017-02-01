@@ -256,14 +256,14 @@ void opencraft_packet::pack_bytes(std::vector<unsigned char> data) {
 
 double  opencraft_packet::unpack_double() {
         unsigned char arr[8];
-        arr[0] = this->unpack_byte();
-        arr[1] = this->unpack_byte();
-        arr[2] = this->unpack_byte();
-        arr[3] = this->unpack_byte();
-        arr[4] = this->unpack_byte();
-        arr[5] = this->unpack_byte();
-        arr[6] = this->unpack_byte();
         arr[7] = this->unpack_byte();
+        arr[6] = this->unpack_byte();
+        arr[5] = this->unpack_byte();
+        arr[4] = this->unpack_byte();
+        arr[3] = this->unpack_byte();
+        arr[2] = this->unpack_byte();
+        arr[1] = this->unpack_byte();
+        arr[0] = this->unpack_byte();
         return *((double *)arr);
 }
 

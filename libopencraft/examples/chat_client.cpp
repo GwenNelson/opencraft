@@ -105,7 +105,7 @@ int main(int argc, char** argv) {
     // read packets and spit out chat messages
     boost::thread t{chat_in};
     while(running) {
-       usleep(50000);
+       usleep(40000);
        player_play_upstream play(true);
        client_writer.write_pack(&play);
 
@@ -117,8 +117,12 @@ int main(int argc, char** argv) {
           if(inpack->name().compare("unknown")!=0) {
              if(inpack->ident()==OPENCRAFT_PACKIDENT_PLAYER_POSITION_AND_LOOK_PLAY_DOWNSTREAM) {
                      int32_t teleport_id = ((player_position_and_look_play_downstream*)inpack)->g;
+                     double  x           = ((player_position_and_look_play_downstream*)inpack)->a;
+                     double  y           = ((player_position_and_look_play_downstream*)inpack)->b;
+                     double  z           = ((player_position_and_look_play_downstream*)inpack)->c;
                      teleport_confirm_play_upstream teleport_pack(teleport_id);
                      client_writer.write_pack(&teleport_pack);
+                     cout << "[" << x << "," << y << "," << z << "]\n";
              }
              if(inpack->ident()==OPENCRAFT_PACKIDENT_CHAT_MESSAGE_PLAY_DOWNSTREAM) {
                      std::string msg = ((chat_message_play_downstream*)inpack)->a;

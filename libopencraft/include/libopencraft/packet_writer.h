@@ -25,6 +25,7 @@
 #pragma once
 
 #include <libopencraft/base_packet.h>
+#include <boost/thread.hpp>
 
 namespace opencraft {
   namespace packets {
@@ -35,6 +36,7 @@ class packet_writer {
       void write_pack(opencraft_packet* pack);
    private:
       int  sockfd;
+      boost::mutex _mtx;
       unsigned char sendbuf[4096];
 };
 
