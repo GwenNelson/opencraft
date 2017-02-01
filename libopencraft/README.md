@@ -8,12 +8,15 @@ See DESIGN for a very stream of conciousness style overview of the design.
 
 To build the library do the following:
 
- 1. mkdir -p build
- 2. ./autogen.sh
- 3. cd build
- 4. cmake ..
- 5. make
+ 1. cd build
+ 2. ./build.sh
 
 By default this will compile the actual library (libopencraft.so) as well as an executable named test_opencraft. Simply run the file to execute a test suite.
+
+For faster compiles during development, do this instead:
+
+ 1. cd build
+ 2. cmake ..
+ 3. make -j
 
 A few examples are also available in examples/
