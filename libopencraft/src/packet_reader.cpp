@@ -18,31 +18,45 @@
 // along with OpenCraft.  If not, see <http://www.gnu.org/licenses/>.
 //
 // DESCRIPTION:
-//     A client implementation that connects and spawns an avatar
+//     Packet reader class
 //
 //-----------------------------------------------------------------------------
 
-#pragma once
-
-#include <libopencraft/common.h>
-#include <libopencraft/basic_client.h>
-#include <libopencraft/packets.autogen.h>
-
-#include <string>
-#include <map>
+#include <libopencraft/packet_reader.h>
+#include <sys/types.h>
+#include <sys/socket.h>
 #include <vector>
 
 namespace opencraft {
-  namespace client {
+  namespace packets {
 
-class spawning_client: public basic_client {
-   public:
-      spawning_client(std::string username);
-      void login_cb(opencraft::packets::login_success_login_downstream *pack);
-      std::string avatar_uuid;
-      std::string display_name;
-   private:
-};
+packet_reader::packet_reader(int _sockfd, int _proto_mode, bool _is_client) {
+    this->sockfd     = _sockfd;
+    this->proto_mode = _proto_mode;
+    this->is_client  = _is_client;
+}
+
+opencraft_packet* packet_reader::read_pack() {
+    int packsize = this->read_varint();
+    recv(this->sockfd,(void*)this->recvbuf,packsize,0);
+    std::vector<unsigned char> tmpbuf;
+    tmpbuf.assign(this->recvbuf, this->recvbuf+packsize);
+    return opencraft_packet::unpack_packet(this->proto_mode,this->is_client,tmpbuf);
+}
+
+int packet_reader::read_varint() {
+    int retval=0;
+    unsigned char buf;
+    for(int i=0; i < 5; ++i) {
+        if(recv(this->sockfd,&buf,1,0)!=1) return retval;
+        retval |= (buf & 0x7F) << (i*7);
+        if(!(buf & 0x80)) {
+           break;
+        }
+    }
+    return retval;
+
+}
 
 }
 }

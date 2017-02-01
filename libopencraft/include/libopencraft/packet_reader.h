@@ -18,33 +18,27 @@
 // along with OpenCraft.  If not, see <http://www.gnu.org/licenses/>.
 //
 // DESCRIPTION:
-//     Packet stream: a facility for turning streams of bytes into streams
-//     of packets
+//     Packet reader class
 //
 //-----------------------------------------------------------------------------
 
 #pragma once
 
-#include <libopencraft/common.h>
 #include <libopencraft/base_packet.h>
-#include <libopencraft/raw_packet.h>
-#include <deque>
 
 namespace opencraft {
   namespace packets {
 
-
-// this class is intended to be used as the building block for higher level async goodness
-// basically, when data comes in from the socket, pass it to on_recv and get back a vector of packets, which may be 0-length
-// note that there's no way to save packets inbetween calls to on_recv
-class packet_stream {
+class packet_reader {
    public:
-      packet_stream();
-
-      std::vector<raw_packet> on_recv(std::vector<unsigned char> data);
+      packet_reader(int _sockfd, int _proto_mode, bool _is_client);
+      opencraft_packet* read_pack();
+      int read_varint();
    private:
-      std::deque<unsigned char> buf;
-      int32_t try_varint();
+      int  sockfd;
+      int  proto_mode;
+      bool is_client;
+      unsigned char recvbuf[4096];
 };
 
 }
