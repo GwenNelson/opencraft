@@ -75,18 +75,15 @@ int main(int argc, char** argv) {
     // switch to play mode
     client_reader.proto_mode = OPENCRAFT_STATE_PLAY;
 
-    // read a packet so we can transmit easily
-//    opencraft_packet* pack = client_reader.read_pack();
-//    cout << pack->name() << endl;
-//    cout << pack->ident() << endl;
-
-    // create client settings packet and write it
-//    client_settings_play_upstream client_settings(std::string("en_GB"),4,0,true,0xFF,0);
-//    client_writer.write_pack(&client_settings);
-
-
     // read packets and spit out chat messages
+    std::string chatline("");
     while(true) {
+       cout << "Chat> ";
+       cin >> chatline;
+
+       chat_message_play_upstream upchat(chatline);
+       client_writer.write_pack(&upchat);
+
        opencraft_packet* inpack = NULL;
        inpack = client_reader.read_pack();
        if(inpack != NULL) {
@@ -96,6 +93,7 @@ int main(int argc, char** argv) {
           }
           delete inpack;
        }
+       
     }
 }
 
