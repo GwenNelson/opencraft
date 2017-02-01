@@ -50,16 +50,21 @@ using namespace opencraft::packets;
 
 std::string chat_input;
 
+bool running;
 int sockfd;
 
 void chat_in() {
      opencraft::packets::packet_writer chat_writer(sockfd);
-     while(true) {
+     while(running) {
         cout << "Chat> ";
         getline(cin,chat_input);
         if(chat_input.size()>0) {
-          chat_message_play_upstream chat_msg(chat_input);
-          chat_writer.write_pack(&chat_msg);
+          if(chat_input.compare("/quit")==0) { 
+             running=false;
+          } else {
+             chat_message_play_upstream chat_msg(chat_input);
+             chat_writer.write_pack(&chat_msg);
+          }
           chat_input.erase();
        }
      }
@@ -67,6 +72,7 @@ void chat_in() {
 
 int main(int argc, char** argv) {
     // setup socket
+    running = true;
     sockfd = socket(AF_INET, SOCK_STREAM,0);
     struct sockaddr_in server_addr;
     memset(&server_addr, 0, sizeof(server_addr));
@@ -98,7 +104,7 @@ int main(int argc, char** argv) {
 
     // read packets and spit out chat messages
     boost::thread t{chat_in};
-    while(true) {
+    while(running) {
        usleep(50000);
        player_play_upstream play(true);
        client_writer.write_pack(&play);
