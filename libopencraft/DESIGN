@@ -19,3 +19,7 @@ Basic usage:
   Create packets by passing relevant fields to the relevant classe's constructor then pack it and send it across the TCP socket
   Fields are assigned alphabetical names (i.e first is a, second is b and so on) unless proper field names have been defined
   Packets are all subclasses of opencraft_packet and so pointers can be cast after checking the return value of ident() or name()
+
+Examples
+  chat_client: implements a simple chat client - doesn't even parse the JSON, that's your job
+  ping_server: pings a server and gets back the status response details, spitting it out on stdout
