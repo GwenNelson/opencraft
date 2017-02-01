@@ -14,7 +14,8 @@ raw_packet encapsulation
   raw packets may then be wrapped inside of zlib compression etc before final transmission
 
 Basic usage:
-  Create a TCP socket and a packet_stream instance
-  Read from TCP socket, pass to packet_stream on_recv, iterate through the returned vector and handle the packets
+  Create a TCP socket, a packet_reader and a packet_writer
+  Use packet_reader to read packets and packet_writer to transmit
   Create packets by passing relevant fields to the relevant classe's constructor then pack it and send it across the TCP socket
   Fields are assigned alphabetical names (i.e first is a, second is b and so on) unless proper field names have been defined
+  Packets are all subclasses of opencraft_packet and so pointers can be cast after checking the return value of ident() or name()
