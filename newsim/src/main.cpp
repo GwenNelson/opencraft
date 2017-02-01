@@ -115,21 +115,20 @@ void client_handler(int client_fd,struct sockaddr_in client_addr) {
         if(inpack != NULL) {
            if(inpack->name().compare("unknown")!=0) {
              int32_t pack_ident = inpack->ident();
-             switch(pack_ident) {
-                 case OPENCRAFT_PACKIDENT_STATUS_REQUEST_STATUS_UPSTREAM: {
-                    status_response_status_downstream status_resp(get_status_json());
-                    client_writer.write_pack(&status_resp);
-                 break;
+             if(client_reader.proto_mode == OPENCRAFT_STATE_STATUS) {
+                switch(pack_ident) {
+                    case OPENCRAFT_PACKIDENT_STATUS_REQUEST_STATUS_UPSTREAM: {
+                         status_response_status_downstream status_resp(get_status_json());
+                         client_writer.write_pack(&status_resp);
+                    break;}
+                    case OPENCRAFT_PACKIDENT_STATUS_PING_STATUS_UPSTREAM: {
+                         int32_t ack = ((status_ping_status_upstream*)inpack)->a;
+                         status_pong_status_downstream ack_pack(ack);
+                         client_writer.write_pack(&ack_pack);
+                         close(client_fd);
+                         return;
+                    break;}
                  }
-                 case OPENCRAFT_PACKIDENT_STATUS_PING_STATUS_UPSTREAM: {
-                    int32_t ack = ((status_ping_status_upstream*)inpack)->a;
-                    status_pong_status_downstream ack_pack(ack);
-                    client_writer.write_pack(&ack_pack);
-                    close(client_fd);
-                    return;
-                 break;
-                 }
-                 
              }
            }
         }
