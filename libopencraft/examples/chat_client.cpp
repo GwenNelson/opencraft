@@ -64,7 +64,8 @@ int main(int argc, char** argv) {
     client_writer.write_pack(&hspack);
 
     // create a login packet and write it
-    login_start_login_upstream login_req(std::string("TestUser"));
+    std::string name = argv[1];
+    login_start_login_upstream login_req(name);
     client_writer.write_pack(&login_req);
 
     // read the login success packet and dump it
@@ -76,21 +77,21 @@ int main(int argc, char** argv) {
     client_reader.proto_mode = OPENCRAFT_STATE_PLAY;
 
     // read packets and spit out chat messages
-    std::string chatline("");
+    std::string chatline("Hello");
     while(true) {
        cout << "Chat> ";
-       cin >> chatline;
+       std::getline(std::cin, chatline);
 
        chat_message_play_upstream upchat(chatline);
        client_writer.write_pack(&upchat);
+
+       player_play_upstream play(true);
+       client_writer.write_pack(&play);
 
        opencraft_packet* inpack = NULL;
        inpack = client_reader.read_pack();
        if(inpack != NULL) {
           cout << inpack->name() << " ident " << inpack->ident() << endl;
-          if(inpack->name().compare("chat_message") ==0) {
-             cout << ((chat_message_play_downstream*)inpack)->a << endl;
-          }
           delete inpack;
        }
        
