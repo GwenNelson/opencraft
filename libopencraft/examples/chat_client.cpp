@@ -59,7 +59,7 @@ int sockfd;
 
 void chat_in() {
      opencraft::packets::packet_writer chat_writer(sockfd);
-     while(!ingame) usleep(10000);
+     while(!ingame) usleep(1000);
      while(running) {
         cout << "Chat> ";
         getline(cin,chat_input);
@@ -78,7 +78,7 @@ void chat_in() {
 
 void player_tick() {
      opencraft::packets::packet_writer tick_writer(sockfd);
-     while(!ingame) usleep(10000);
+     while(!ingame) usleep(1000);
      while(running) {
        usleep(50000);
        player_play_upstream play(true);
@@ -130,7 +130,9 @@ int main(int argc, char** argv) {
        inpack = client_reader.read_pack();
        if(inpack != NULL) {
           if(inpack->name().compare("unknown")!=0) {
-             if(inpack->ident()==OPENCRAFT_PACKIDENT_PLAYER_POSITION_AND_LOOK_PLAY_DOWNSTREAM) {
+             int32_t pack_ident = inpack->ident();
+             switch(pack_ident) {
+                case OPENCRAFT_PACKIDENT_PLAYER_POSITION_AND_LOOK_PLAY_DOWNSTREAM: {
                      int32_t teleport_id = ((player_position_and_look_play_downstream*)inpack)->g;
                      double  x           = ((player_position_and_look_play_downstream*)inpack)->a;
                      double  y           = ((player_position_and_look_play_downstream*)inpack)->b;
@@ -138,17 +140,23 @@ int main(int argc, char** argv) {
                      teleport_confirm_play_upstream teleport_pack(teleport_id);
                      client_writer.write_pack(&teleport_pack);
                      ingame = true;
-             } else if(inpack->ident()==OPENCRAFT_PACKIDENT_CHAT_MESSAGE_PLAY_DOWNSTREAM) {
+                     break;
+                }
+                case OPENCRAFT_PACKIDENT_CHAT_MESSAGE_PLAY_DOWNSTREAM: {
                      std::string msg = ((chat_message_play_downstream*)inpack)->a;
                      Json::Value chatmsg;
                      std::stringstream json_stream;
                      json_stream << msg;
                      json_stream >> chatmsg;
                      cout << chatmsg["extra"][0]["text"].asString() << endl;
-             } else if(inpack->ident()==OPENCRAFT_PACKIDENT_KEEP_ALIVE_PLAY_DOWNSTREAM)  {
+                     break;
+                }
+                case OPENCRAFT_PACKIDENT_KEEP_ALIVE_PLAY_DOWNSTREAM: {
                      int32_t ack_id = ((keep_alive_play_downstream*)inpack)->a;
                      keep_alive_play_upstream ack_pack(ack_id);
                      client_writer.write_pack(&ack_pack);
+                     break;
+                }
              }
           }
           delete inpack;
