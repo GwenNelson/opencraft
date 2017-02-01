@@ -59,7 +59,7 @@ int sockfd;
 
 void chat_in() {
      opencraft::packets::packet_writer chat_writer(sockfd);
-     while(!ingame) usleep(50000);
+     while(!ingame) usleep(10000);
      while(running) {
         cout << "Chat> ";
         getline(cin,chat_input);
@@ -74,6 +74,17 @@ void chat_in() {
           chat_input.erase();
        }
      }
+}
+
+void player_tick() {
+     opencraft::packets::packet_writer tick_writer(sockfd);
+     while(!ingame) usleep(10000);
+     while(running) {
+       usleep(50000);
+       player_play_upstream play(true);
+       tick_writer.write_pack(&play);
+    }
+
 }
 
 int main(int argc, char** argv) {
@@ -110,16 +121,11 @@ int main(int argc, char** argv) {
 
     // read packets and spit out chat messages
     ingame = false;
-    boost::thread t{chat_in};
+    boost::thread chat_t{chat_in};
+    boost::thread tick_t{player_tick};
 
     cout << "Waiting for avatar spawn..." << endl;
     while(running) {
-       usleep(30000);
-       player_play_upstream play(true);
-       client_writer.write_pack(&play);
-
-
-
        opencraft_packet* inpack = NULL;
        inpack = client_reader.read_pack();
        if(inpack != NULL) {
@@ -131,16 +137,18 @@ int main(int argc, char** argv) {
                      double  z           = ((player_position_and_look_play_downstream*)inpack)->c;
                      teleport_confirm_play_upstream teleport_pack(teleport_id);
                      client_writer.write_pack(&teleport_pack);
-                     cout << "Avatar is at [" << x << "," << y << "," << z << "]\n";
                      ingame = true;
-             }
-             if(inpack->ident()==OPENCRAFT_PACKIDENT_CHAT_MESSAGE_PLAY_DOWNSTREAM) {
+             } else if(inpack->ident()==OPENCRAFT_PACKIDENT_CHAT_MESSAGE_PLAY_DOWNSTREAM) {
                      std::string msg = ((chat_message_play_downstream*)inpack)->a;
                      Json::Value chatmsg;
                      std::stringstream json_stream;
                      json_stream << msg;
                      json_stream >> chatmsg;
                      cout << chatmsg["extra"][0]["text"].asString() << endl;
+             } else if(inpack->ident()==OPENCRAFT_PACKIDENT_KEEP_ALIVE_PLAY_DOWNSTREAM)  {
+                     int32_t ack_id = ((keep_alive_play_downstream*)inpack)->a;
+                     keep_alive_play_upstream ack_pack(ack_id);
+                     client_writer.write_pack(&ack_pack);
              }
           }
           delete inpack;
