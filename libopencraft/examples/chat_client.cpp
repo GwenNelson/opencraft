@@ -90,9 +90,10 @@ int main(int argc, char** argv) {
         // receive packets and trigger callbacks
         std::vector<unsigned char> indata = std::vector<unsigned char>(1024);
         size_t bytes_read;
+    opencraft::packets::packet_stream pack_stream;
    while(true) {
-        opencraft::packets::packet_stream pack_stream;
-        bytes_read = boost::asio::read(socket, boost::asio::buffer(indata,4096), boost::asio::transfer_at_least(16));
+        std::vector<unsigned char> indata = std::vector<unsigned char>(1024);
+        bytes_read = boost::asio::read(socket, boost::asio::buffer(indata,1024), boost::asio::transfer_at_least(1));
         vector<opencraft::packets::raw_packet> inpacks = pack_stream.on_recv(indata);
  
         opencraft::packets::opencraft_packet *inpack = NULL;

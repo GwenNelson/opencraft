@@ -32,16 +32,16 @@ FILE(GLOB libopencraft_test_src ${CMAKE_SOURCE_DIR}/test_src/*.cpp)
 ADD_LIBRARY(opencraft SHARED ${libopencraft_src} ${CMAKE_SOURCE_DIR}/src/packets.autogen.cpp)
 ADD_EXECUTABLE(bin2c ${CMAKE_SOURCE_DIR}/test_src/bin2c.c)
 ADD_EXECUTABLE(test_opencraft ${libopencraft_test_src} )
-ADD_EXECUTABLE(ping_server ${CMAKE_SOURCE_DIR}/examples/ping_server.cpp)
-ADD_EXECUTABLE(ping_server_basic_client ${CMAKE_SOURCE_DIR}/examples/ping_server_basic_client.cpp)
-ADD_EXECUTABLE(chat_client ${CMAKE_SOURCE_DIR}/examples/chat_client.cpp)
+#ADD_EXECUTABLE(ping_server ${CMAKE_SOURCE_DIR}/examples/ping_server.cpp)
+#ADD_EXECUTABLE(ping_server_basic_client ${CMAKE_SOURCE_DIR}/examples/ping_server_basic_client.cpp)
+#ADD_EXECUTABLE(chat_client ${CMAKE_SOURCE_DIR}/examples/chat_client.cpp)
 
 
 TARGET_LINK_LIBRARIES(opencraft pthread ${ZLIB_LIBRARIES} ${Boost_LIBRARIES})
 TARGET_LINK_LIBRARIES(test_opencraft pthread ${Boost_LIBRARIES} ${CMAKE_SOURCE_DIR}/build/libopencraft.so)
-TARGET_LINK_LIBRARIES(ping_server pthread ${Boost_LIBRARIES} ${CMAKE_SOURCE_DIR}/build/libopencraft.so)
-TARGET_LINK_LIBRARIES(ping_server_basic_client pthread ${Boost_LIBRARIES} ${CMAKE_SOURCE_DIR}/build/libopencraft.so)
-TARGET_LINK_LIBRARIES(chat_client pthread ${Boost_LIBRARIES} ${CMAKE_SOURCE_DIR}/build/libopencraft.so)
+#TARGET_LINK_LIBRARIES(ping_server pthread ${Boost_LIBRARIES} ${CMAKE_SOURCE_DIR}/build/libopencraft.so)
+#TARGET_LINK_LIBRARIES(ping_server_basic_client pthread ${Boost_LIBRARIES} ${CMAKE_SOURCE_DIR}/build/libopencraft.so)
+#TARGET_LINK_LIBRARIES(chat_client pthread ${Boost_LIBRARIES} ${CMAKE_SOURCE_DIR}/build/libopencraft.so)
 
 ADD_CUSTOM_COMMAND( OUTPUT ${CMAKE_SOURCE_DIR}/include/version.h ${CMAKE_SOURCE_DIR}/include/packets.autogen.h ${CMAKE_SOURCE_DIR}/src/packets.autogen.cpp ${CMAKE_SOURCE_DIR}/src/unpack_packet.inc
                     COMMAND ${CMAKE_SOURCE_DIR}/autogen.sh
@@ -53,6 +53,6 @@ add_custom_target(autogen_headers
 
 add_dependencies(opencraft autogen_headers)
 add_dependencies(test_opencraft opencraft)
-add_dependencies(ping_server opencraft)
-add_dependencies(ping_server_basic_client opencraft)
-add_dependencies(chat_client opencraft)
+#add_dependencies(ping_server opencraft)
+#add_dependencies(ping_server_basic_client opencraft)
+#add_dependencies(chat_client opencraft)
