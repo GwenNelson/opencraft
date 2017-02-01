@@ -112,7 +112,7 @@ for k,v in packets_fields.items():
        # write out the header first
        header_fd.write("class %s : public opencraft_packet {\n" % k)
        header_fd.write("  public:\n")
-       header_fd.write("    %s(std::vector<unsigned char> packdata);\n" % k)      # constructor from data, not including the ident field at the start, used by static unpack() method
+       header_fd.write("    %s(const std::vector<unsigned char>& packdata);\n" % k)      # constructor from data, not including the ident field at the start, used by static unpack() method
        header_fd.write("    %s(%s);\n" % (k,','.join(params))) # constructor from values
        header_fd.write("    std::string name() { return \"%s\"; }\n" % packets_names[k])
        header_fd.write("    uint32_t ident() { return %s; }\n" % packets_idents[k])
@@ -124,7 +124,7 @@ for k,v in packets_fields.items():
        idents_fd.write('#define OPENCRAFT_PACKIDENT_%s %s\n' % (k.upper(), packets_idents[k]))
 
        # then write out the class implementation
-       cpp_fd.write("%s::%s(std::vector<unsigned char> packdata) {\n" % (k,k)) # constructor from data
+       cpp_fd.write("%s::%s(const std::vector<unsigned char>& packdata) {\n" % (k,k)) # constructor from data
        cpp_fd.write("   this->packed = packdata;\n")
        cpp_fd.write("   this->bufpos = 0;\n")
        for f in xrange(len(v)): # constructor from data
