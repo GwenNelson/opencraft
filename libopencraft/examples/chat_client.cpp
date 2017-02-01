@@ -78,7 +78,7 @@ int main(int argc, char** argv) {
 
     // read packets and spit out chat messages
     while(true) {
-       sleep(1);
+       usleep(50000);
        player_play_upstream play(true);
        client_writer.write_pack(&play);
 
