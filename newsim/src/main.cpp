@@ -27,6 +27,8 @@
 #include <boost/thread.hpp>
 #include <boost/bind.hpp>
 
+#include <zmqpp/zmqpp.hpp>
+
 #include <libopencraft/version.h>
 #include <libopencraft/packet_reader.h>
 #include <libopencraft/packet_writer.h>
