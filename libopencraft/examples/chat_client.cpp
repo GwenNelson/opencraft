@@ -29,11 +29,14 @@
 #include <libopencraft/packet_writer.h>
 #include <libopencraft/proto_constants.h>
 
+#include <boost/thread.hpp>
+
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <string.h>
+#include <fcntl.h>
 
 #include <string>
 #include <sstream>
@@ -45,9 +48,26 @@
 using namespace std;
 using namespace opencraft::packets;
 
+std::string chat_input;
+
+int sockfd;
+
+void chat_in() {
+     opencraft::packets::packet_writer chat_writer(sockfd);
+     while(true) {
+        cout << "Chat> ";
+        getline(cin,chat_input);
+        if(chat_input.size()>0) {
+          chat_message_play_upstream chat_msg(chat_input);
+          chat_writer.write_pack(&chat_msg);
+          chat_input.erase();
+       }
+     }
+}
+
 int main(int argc, char** argv) {
     // setup socket
-    int sockfd = socket(AF_INET, SOCK_STREAM,0);
+    sockfd = socket(AF_INET, SOCK_STREAM,0);
     struct sockaddr_in server_addr;
     memset(&server_addr, 0, sizeof(server_addr));
     server_addr.sin_family = AF_INET;
@@ -77,19 +97,20 @@ int main(int argc, char** argv) {
     client_reader.proto_mode = OPENCRAFT_STATE_PLAY;
 
     // read packets and spit out chat messages
-    int32_t teleport_id;
+    boost::thread t{chat_in};
     while(true) {
        usleep(50000);
        player_play_upstream play(true);
        client_writer.write_pack(&play);
 
+
+
        opencraft_packet* inpack = NULL;
        inpack = client_reader.read_pack();
        if(inpack != NULL) {
           if(inpack->name().compare("unknown")!=0) {
-//             cout << inpack->name() << " ident " << inpack->ident() << endl;
              if(inpack->ident()==OPENCRAFT_PACKIDENT_PLAYER_POSITION_AND_LOOK_PLAY_DOWNSTREAM) {
-                     teleport_id = ((player_position_and_look_play_downstream*)inpack)->g;
+                     int32_t teleport_id = ((player_position_and_look_play_downstream*)inpack)->g;
                      teleport_confirm_play_upstream teleport_pack(teleport_id);
                      client_writer.write_pack(&teleport_pack);
              }
