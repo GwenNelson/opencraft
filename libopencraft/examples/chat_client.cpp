@@ -59,6 +59,7 @@ void chat_in() {
         cout << "Chat> ";
         getline(cin,chat_input);
         if(chat_input.size()>0) {
+             
           if(chat_input.compare("/quit")==0) { 
              running=false;
           } else {

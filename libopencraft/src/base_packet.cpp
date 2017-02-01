@@ -93,7 +93,7 @@ std::vector<unsigned char> opencraft_packet::pack() {
    return retval;
 }
 
-opencraft_packet* opencraft_packet::unpack_packet(int proto_state, bool client_bound, std::vector<unsigned char> packdata) {
+opencraft_packet* opencraft_packet::unpack_packet(int proto_state, bool client_bound, const std::vector<unsigned char>& packdata) {
    raw_packet raw_pack(packdata);
 
    opencraft_packet *retval = NULL;
