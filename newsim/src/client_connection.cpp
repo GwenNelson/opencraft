@@ -60,9 +60,10 @@ std::string get_status_json() {
 
 
 
-client_connection::client_connection(int sock_fd) {
+client_connection::client_connection(int sock_fd, std::string client_addr) {
     this->proto_mode    = OPENCRAFT_STATE_HANDSHAKING;
     this->_sock_fd      = sock_fd;
+    this->_client_addr  = client_addr;
     this->client_reader = new packet_reader(sock_fd,this->proto_mode,false);
     this->client_writer = new packet_writer(sock_fd);
     this->active        = true;
@@ -83,7 +84,7 @@ void client_connection::handle_handshaking() {
      uint16_t server_port                   = hspack->c;
      int32_t next_state                     = hspack->d;
      
-     LOG(info) << "Got handshake from client";
+     LOG(info) << this->_client_addr << " Got handshake from client";
      this->proto_mode                = next_state;
      this->client_reader->proto_mode = next_state;
 }
@@ -120,7 +121,7 @@ void client_connection::handle_login() {
                 switch(pack_ident) {
                     case OPENCRAFT_PACKIDENT_LOGIN_START_LOGIN_UPSTREAM: {
                          login_start_login_upstream* login_pack = (login_start_login_upstream*)inpack;
-                         LOG(info) << "Login from " << login_pack->a;
+                         LOG(info) << this->_client_addr << " Login from " << login_pack->a;
                     break;}
                  }
            }

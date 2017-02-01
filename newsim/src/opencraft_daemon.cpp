@@ -45,6 +45,10 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 
+#include <string>
+
+using namespace std;
+
 opencraft_daemon::opencraft_daemon(bool debug_mode, bool daemon_mode, std::string pidfile, std::string install_root, int listen_port) {
    this->_debug_mode      = debug_mode;
    this->_daemon_mode     = daemon_mode;
@@ -56,7 +60,8 @@ opencraft_daemon::opencraft_daemon(bool debug_mode, bool daemon_mode, std::strin
 
 void opencraft_daemon::handle_client(int client_sock_fd, struct sockaddr_in client_addr) {
      LOG(info) << "New connection from " << inet_ntoa(client_addr.sin_addr) << ":" << ntohs(client_addr.sin_port);
-     client_connection client(client_sock_fd);
+     std::string c_addr = std::string(inet_ntoa(client_addr.sin_addr)) + ":" + to_string(client_addr.sin_port);
+     client_connection client(client_sock_fd,c_addr);
      while(client.active) client.handle_client();
      close(client_sock_fd);
 }

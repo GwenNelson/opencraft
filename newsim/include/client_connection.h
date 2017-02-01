@@ -28,9 +28,11 @@
 #include <libopencraft/packet_reader.h>
 #include <libopencraft/packet_writer.h>
 
+#include <string>
+
 class client_connection {
    public:
-     client_connection(int sock_fd);
+     client_connection(int sock_fd, std::string client_addr);
      void send_packet(opencraft::packets::opencraft_packet* pack);
      void handle_client();
      void handle_handshaking();
@@ -40,6 +42,7 @@ class client_connection {
      int proto_mode;
      bool active;
    private:
+     std::string _client_addr;
      int _sock_fd;
      opencraft::packets::packet_reader *client_reader;
      opencraft::packets::packet_writer *client_writer;
