@@ -18,103 +18,63 @@
 // along with OpenCraft.  If not, see <http://www.gnu.org/licenses/>.
 //
 // DESCRIPTION:
-//     Connects to a server, pings it and displays server info
-//     This example does everything manually
-//     Most is shamelessly ripped from the boost asio examples
+//     Grabs JSON data from a server and spits it to stdout
+//     In keeping with unix tradition, prints out nothing else
+//     This could be integrated fairly trivially with a webservice
 //
 //-----------------------------------------------------------------------------
 
 
 #include <libopencraft/packets.autogen.h>
 #include <libopencraft/version.h>
+#include <libopencraft/packet_reader.h>
+#include <libopencraft/packet_writer.h>
 #include <libopencraft/proto_constants.h>
-#include <libopencraft/raw_packet.h>
-#include <libopencraft/packet_stream.h>
-#include <iostream>
 
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <string.h>
+
+#include <string>
+#include <sstream>
 #include <iostream>
-#include <boost/array.hpp>
-#include <boost/asio.hpp>
+#include <iomanip>
+#include <exception>
+#include <vector>
 
 using namespace std;
-
-using boost::asio::ip::tcp;
-
+using namespace opencraft::packets;
 
 int main(int argc, char** argv) {
-    cout << LIBOPENCRAFT_LONG_VER << endl << "Built on " << LIBOPENCRAFT_BUILDDATE << endl << endl;
-   
-    // setup all the ASIO crap
-    boost::asio::io_service io_service;
+    // setup socket
+    int sockfd = socket(AF_INET, SOCK_STREAM,0);
+    struct sockaddr_in server_addr;
+    memset(&server_addr, 0, sizeof(server_addr));
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+    server_addr.sin_port = htons(25565);
 
-    tcp::resolver resolver(io_service);
-    tcp::resolver::query query("localhost", "25565");
-    tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
-    tcp::resolver::iterator end;
+    // connect to localhost:25565 and then setup a packet reader and writer
+    connect(sockfd, (struct sockaddr*)&server_addr, sizeof(struct sockaddr_in));
+    opencraft::packets::packet_reader client_reader(sockfd,OPENCRAFT_STATE_STATUS,true);
+    opencraft::packets::packet_writer client_writer(sockfd);
 
-    // connect
-    cout << "Connecting to 127.0.0.1:25565..." << endl;
-    tcp::socket socket(io_service);
+    // create a handshake packet and write it
+    handshake_handshaking_upstream hspack(OPENCRAFT_PROTOCOL_VERSION,std::string(OPENCRAFT_DEFAULT_SERVER),OPENCRAFT_DEFAULT_TCP_PORT,OPENCRAFT_STATE_STATUS);
+    client_writer.write_pack(&hspack);
 
-    boost::system::error_code error = boost::asio::error::host_not_found;
-    while (error && endpoint_iterator != end)
-    {
-      socket.close();
-      socket.connect(*endpoint_iterator++, error);
-    }
-    if (error)
-      throw boost::system::system_error(error);
+    // create a status request packet and write it
+    status_request_status_upstream status_req;
+    client_writer.write_pack(&status_req);
 
+    // read the next packet and dump it
+    opencraft_packet* inpack = client_reader.read_pack();
+    cout << ((status_response_status_downstream*)inpack)->a;
+    delete inpack;
 
-   cout << "Creating a handshake packet..." << endl;
-   // create a handshake packet
-   opencraft::packets::handshake_handshaking_upstream hspack(OPENCRAFT_PROTOCOL_VERSION,std::string("127.0.0.1"),25565,OPENCRAFT_STATE_STATUS);
-
-   cout << "Hex dump of handshake packet: " << hspack.dump_hex() << endl;
-
-   // wrap it in a raw packet
-   cout << "Wrapping handshake inside raw packet..." << endl;
-
-   opencraft::packets::raw_packet raw_hs(hspack.ident(),hspack.pack());
-
-   cout << "Hex dump of raw packet containing handshake packet: " << raw_hs.dump_hex() << endl;
-
-   cout << "Transmitting..." << endl;
-
-   // transmit it
-   boost::system::error_code net_error;
-   boost::asio::write(socket, boost::asio::buffer(raw_hs.pack()),boost::asio::transfer_all(), net_error);
-
-   if(net_error) {
-      throw boost::system::system_error(net_error);
-   }
-   
-   cout << "Creating a status request packet..." << endl;
-   opencraft::packets::status_request_status_upstream status_pack;
-   cout << "Hex dump of status request packet: " << status_pack.dump_hex() << endl;
-   
-   cout << "Wrapping status request inside raw packet..." << endl;
-   opencraft::packets::raw_packet raw_status(status_pack.ident(),status_pack.pack());
-
-   cout << "Hex dump of raw packet containing status request: " << raw_status.dump_hex() << endl;
-
-   cout << "Transmitting..." << endl;
-   boost::asio::write(socket, boost::asio::buffer(raw_status.pack()),boost::asio::transfer_all(), net_error);
-
-   cout << "Receiving..." << endl;
-   std::vector<unsigned char> indata = std::vector<unsigned char>(4096);
-   size_t bytes_read;
-
-
-   opencraft::packets::packet_stream pack_stream;
-   bytes_read = boost::asio::read(socket, boost::asio::buffer(indata,4096), boost::asio::transfer_at_least(16));
-
-   vector<opencraft::packets::raw_packet> inpacks = pack_stream.on_recv(indata);
-
-   // we (naively) assume there's only one packet and that it's a status response
-   opencraft::packets::status_response_status_downstream *newpack = (opencraft::packets::status_response_status_downstream*)opencraft::packets::opencraft_packet::unpack_packet(OPENCRAFT_STATE_STATUS,true,inpacks[0].pack());
-
-   cout << "Here is the JSON data from the server:\n" << newpack->a << endl;
+    close(sockfd);
 }
 
 
