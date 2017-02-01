@@ -29,6 +29,9 @@
 
 #include <zmqpp/zmqpp.hpp>
 
+#include <jsoncpp/json/value.h>
+#include <jsoncpp/json/writer.h>
+
 #include <libopencraft/version.h>
 #include <libopencraft/packet_reader.h>
 #include <libopencraft/packet_writer.h>
@@ -54,6 +57,28 @@ zmqpp::socket  *incoming_client_events;
 
 int server_sock_fd;
 bool running=true;
+
+std::string get_status_json() {
+Json::Value Version;
+     Version["name"]     = "OpenCraft newsim";
+     Version["protocol"] = OPENCRAFT_PROTOCOL_VERSION;
+     
+     Json::Value Players;
+     Players["online"]   = 0;   // TODO: fix this to actually count clients connected
+     Players["max"]      = 100; // TODO: make this a configurable variable
+
+     Json::Value Description;
+     Description["text"] = "OpenCraft server";
+
+     Json::Value resp_val;
+     resp_val["version"]     = Version;
+     resp_val["players"]     = Players;
+     resp_val["description"] = Description;
+     
+     Json::FastWriter Writer;
+     std::string resp_str = Writer.write(resp_val);
+     return resp_str;
+}
 
 void client_handler(int client_fd,struct sockaddr_in client_addr) {
      cout << "Got new connection from " << inet_ntoa(client_addr.sin_addr) << endl;
@@ -84,17 +109,29 @@ void client_handler(int client_fd,struct sockaddr_in client_addr) {
      }
 
      client_reader.proto_mode = next_state;
-     zmqpp::socket zclient(*zmq_ctx, zmqpp::socket_type::publish);
-     zclient.bind("inproc://cevents");
      while(running) {
         inpack = NULL;
         inpack = client_reader.read_pack();
         if(inpack != NULL) {
-           zmqpp::message e;
-           e << inpack->name();
-           zclient.send(e);
-           cout << "Send packet message" << endl;
-           usleep(1000);
+           if(inpack->name().compare("unknown")!=0) {
+             int32_t pack_ident = inpack->ident();
+             switch(pack_ident) {
+                 case OPENCRAFT_PACKIDENT_STATUS_REQUEST_STATUS_UPSTREAM: {
+                    status_response_status_downstream status_resp(get_status_json());
+                    client_writer.write_pack(&status_resp);
+                 break;
+                 }
+                 case OPENCRAFT_PACKIDENT_STATUS_PING_STATUS_UPSTREAM: {
+                    int32_t ack = ((status_ping_status_upstream*)inpack)->a;
+                    status_pong_status_downstream ack_pack(ack);
+                    client_writer.write_pack(&ack_pack);
+                    close(client_fd);
+                    return;
+                 break;
+                 }
+                 
+             }
+           }
         }
      }
      close(client_fd);
@@ -118,8 +155,6 @@ void client_event_listener_thread() {
      while(running) {
         zmqpp::message e;
         listener.receive(e);
-        cout << "Got packet message" << endl;
-        cout << e.get(0) << endl;
      }
 }
 

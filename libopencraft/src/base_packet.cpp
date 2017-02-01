@@ -232,7 +232,16 @@ void opencraft_packet::pack_string16(std::string val) {
 void opencraft_packet::pack_double(double val){}
 void opencraft_packet::pack_float(float val){}
 void opencraft_packet::pack_int(int32_t val){}
-void opencraft_packet::pack_long(int64_t val){}
+void opencraft_packet::pack_long(int64_t val){
+     this->pack_byte(val & 0xFF);
+     this->pack_byte((val >> 8) & 0xFF);
+     this->pack_byte((val >> 16) & 0xFF);
+     this->pack_byte((val >> 24) & 0xFF);
+     this->pack_byte((val >> 32) & 0xFF);
+     this->pack_byte((val >> 40) & 0xFF);
+     this->pack_byte((val >> 48) & 0xFF);
+     this->pack_byte(val >> 56);
+}
 void opencraft_packet::pack_short(int16_t val) {
      uint16_t netval = val;
      this->packed.push_back((unsigned char)(netval >> 8));
@@ -269,7 +278,18 @@ double  opencraft_packet::unpack_double() {
 
 float   opencraft_packet::unpack_float()  {this->bufpos = this->bufpos + sizeof(float); return 0.0f;} // dumb placeholder for now
 int32_t opencraft_packet::unpack_int()    {this->bufpos+=4; return 0;}                 // dumb placeholder for now
-int64_t opencraft_packet::unpack_long()   {this->bufpos+=8; return 0;}                 // dumb placeholder for now
+int64_t opencraft_packet::unpack_long()   {
+        unsigned char arr[8];
+        for(int i=0; i<8; i++) arr[i] = this->unpack_byte();
+        return (long long)(((unsigned long long)arr[7] << 56) |
+                           ((unsigned long long)arr[6] << 48) |
+                           ((unsigned long long)arr[5] << 40) |
+                           ((unsigned long long)arr[4] << 32) |
+                           ((unsigned long long)arr[3] << 24) |
+                           ((unsigned long long)arr[2] << 16) |
+                           ((unsigned long long)arr[1] << 8)  |
+                            (unsigned long long)arr[0]);
+}
 
 }
 }

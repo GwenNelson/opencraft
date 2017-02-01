@@ -34,5 +34,5 @@ FILE(GLOB newsim_src                    ${CMAKE_SOURCE_DIR}/src/*.cpp)
 ADD_EXECUTABLE(newsim ${newsim_src} )
 
 
-TARGET_LINK_LIBRARIES(newsim ${CMAKE_SOURCE_DIR}/../libopencraft/build/libopencraft.so pthread zmq zmqpp ${ZLIB_LIBRARIES} ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(newsim ${CMAKE_SOURCE_DIR}/../libopencraft/build/libopencraft.so pthread zmq zmqpp ${JSONCPP_LIBRARIES}  ${ZLIB_LIBRARIES} ${Boost_LIBRARIES})
 
