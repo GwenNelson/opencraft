@@ -4,7 +4,7 @@ cmake_policy(SET CMP0004 OLD)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/CMakeFiles")
 
-FIND_PACKAGE(Boost COMPONENTS system thread log log_setup)
+FIND_PACKAGE(Boost COMPONENTS system program_options thread log log_setup)
 FIND_PACKAGE(ZLIB REQUIRED)
 
 set (CMAKE_CXX_STANDARD 11)
@@ -29,6 +29,7 @@ INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIRS} ${CMAKE_SOURCE_DI
 FILE(GLOB libopencraft_src                    ${CMAKE_SOURCE_DIR}/src/*.cpp)
 FILE(GLOB libopencraft_test_src               ${CMAKE_SOURCE_DIR}/test_src/*.cpp)
 FILE(GLOB libopencraft_test_packet_reader_src ${CMAKE_SOURCE_DIR}/test_src/packet_reader/*.cpp)
+FILE(GLOB test_client_src                     ${CMAKE_SOURCE_DIR}/test_client/*.cpp)
 
 ADD_LIBRARY(opencraft SHARED ${libopencraft_src} ${CMAKE_SOURCE_DIR}/src/packets.autogen.cpp)
 ADD_EXECUTABLE(bin2c ${CMAKE_SOURCE_DIR}/test_src/bin2c.c)
@@ -36,6 +37,7 @@ ADD_EXECUTABLE(test_opencraft ${libopencraft_test_src} )
 ADD_EXECUTABLE(test_packet_reader ${libopencraft_test_packet_reader_src} )
 ADD_EXECUTABLE(ping_server ${CMAKE_SOURCE_DIR}/examples/ping_server.cpp)
 ADD_EXECUTABLE(chat_client ${CMAKE_SOURCE_DIR}/examples/chat_client.cpp)
+ADD_EXECUTABLE(test_client ${test_client_src})
 
 
 TARGET_LINK_LIBRARIES(opencraft pthread ${ZLIB_LIBRARIES} ${Boost_LIBRARIES})
@@ -43,6 +45,7 @@ TARGET_LINK_LIBRARIES(test_opencraft pthread ${Boost_LIBRARIES} ${CMAKE_SOURCE_D
 TARGET_LINK_LIBRARIES(test_packet_reader pthread ${Boost_LIBRARIES} ${CMAKE_SOURCE_DIR}/build/libopencraft.so)
 TARGET_LINK_LIBRARIES(ping_server pthread ${Boost_LIBRARIES} ${CMAKE_SOURCE_DIR}/build/libopencraft.so)
 TARGET_LINK_LIBRARIES(chat_client pthread ${Boost_LIBRARIES} ${CMAKE_SOURCE_DIR}/build/libopencraft.so)
+TARGET_LINK_LIBRARIES(test_client pthread ${Boost_LIBRARIES} ${CMAKE_SOURCE_DIR}/build/libopencraft.so)
 
 ADD_CUSTOM_COMMAND( OUTPUT ${CMAKE_SOURCE_DIR}/include/version.h ${CMAKE_SOURCE_DIR}/include/packets.autogen.h ${CMAKE_SOURCE_DIR}/src/packets.autogen.cpp ${CMAKE_SOURCE_DIR}/src/unpack_packet.inc
                     COMMAND ${CMAKE_SOURCE_DIR}/autogen.sh
@@ -57,3 +60,4 @@ add_dependencies(test_opencraft opencraft)
 add_dependencies(test_packet_reader opencraft)
 add_dependencies(ping_server opencraft)
 add_dependencies(chat_client opencraft)
+add_dependencies(test_client opencraft)
