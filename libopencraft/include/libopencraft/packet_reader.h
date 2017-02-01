@@ -34,9 +34,9 @@ class packet_reader {
       packet_reader(int _sockfd, int _proto_mode, bool _is_client);
       opencraft_packet* read_pack();
       int read_varint();
+      int proto_mode;
    private:
       int  sockfd;
-      int  proto_mode;
       bool is_client;
       unsigned char recvbuf[4096];
 };

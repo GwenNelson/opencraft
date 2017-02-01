@@ -49,6 +49,7 @@ class OpenCraftProtocol(ServerProtocol):
        self.recv_buff = self.buff_type()
        self.cipher = Cipher()
        self.tasks = Tasks()
+       self.compression_enabled = False
 
        self.logger = logger
 
@@ -57,6 +58,7 @@ class OpenCraftProtocol(ServerProtocol):
             self.connection_timed_out)
 
        self.setup()
+       self.compression_enabled = False
    def player_joined(self):
        self.in_game = True
        self.switch_protocol_mode("play")

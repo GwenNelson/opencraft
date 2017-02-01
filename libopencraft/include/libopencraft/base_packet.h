@@ -64,6 +64,8 @@ class opencraft_packet {
       int32_t                        unpack_enum();
       std::vector<unsigned char>     unpack_bytes();
 
+      uint32_t	_unknown_ident;
+
       void pack_boolean(bool val);
       void pack_byte(unsigned char val);
       void pack_char(char val);

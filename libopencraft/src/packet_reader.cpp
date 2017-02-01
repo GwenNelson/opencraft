@@ -29,6 +29,8 @@
 #include <vector>
 #include <iostream>
 
+#include <string.h>
+
 using namespace std;
 
 namespace opencraft {
@@ -42,10 +44,12 @@ packet_reader::packet_reader(int _sockfd, int _proto_mode, bool _is_client) {
 
 opencraft_packet* packet_reader::read_pack() {
     int packsize = this->read_varint();
-    int read_bytes = recv(this->sockfd,(void*)this->recvbuf,packsize,0);
+    memset((void*)this->recvbuf,0,sizeof(this->recvbuf));
+    int read_bytes = recv(this->sockfd,(void*)this->recvbuf,packsize+1,MSG_WAITALL);
+    if(read_bytes == -1) return NULL;
     std::vector<unsigned char> tmpbuf;
     
-    tmpbuf.assign(this->recvbuf, this->recvbuf+packsize);
+    tmpbuf.assign(this->recvbuf, this->recvbuf+packsize+1);
 
     return opencraft_packet::unpack_packet(this->proto_mode,this->is_client,tmpbuf);
 }
@@ -53,8 +57,8 @@ opencraft_packet* packet_reader::read_pack() {
 int packet_reader::read_varint() {
     int retval=0;
     unsigned char buf[5];
-    recv(this->sockfd,buf,5,MSG_PEEK);
-    for(int i=0; i < 5; ++i) {
+    int read_bytes = recv(this->sockfd,buf,5,MSG_PEEK);
+    for(int i=0; i < read_bytes; ++i) {
         retval |= (buf[i] & 0x7F) << (i*7);
         if(!(buf[i] & 0x80)) {
            break;

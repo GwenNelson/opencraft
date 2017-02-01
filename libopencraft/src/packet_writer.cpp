@@ -27,6 +27,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <vector>
+#include <string.h>
 
 namespace opencraft {
   namespace packets {
@@ -38,9 +39,12 @@ packet_writer::packet_writer(int _sockfd) {
 void packet_writer::write_pack(opencraft_packet *pack) {
      raw_packet rawpack(pack->ident(),pack->pack());
      std::vector<unsigned char> packed = rawpack.pack();
+
+     memset((void*)this->sendbuf,0,sizeof(this->sendbuf));
+     
      std::copy(packed.begin(), packed.end(), this->sendbuf);
 
-     send(this->sockfd,this->sendbuf,packed.size(),0);
+     send(this->sockfd,this->sendbuf,packed.size()+1,0);
 }
 
 

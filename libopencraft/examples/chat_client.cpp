@@ -18,101 +18,85 @@
 // along with OpenCraft.  If not, see <http://www.gnu.org/licenses/>.
 //
 // DESCRIPTION:
-//     Uses spawning_client to implement a simple chat client
+//     Connects to server using name specified on command line and allows chat
 //
 //-----------------------------------------------------------------------------
 
 
 #include <libopencraft/packets.autogen.h>
 #include <libopencraft/version.h>
+#include <libopencraft/packet_reader.h>
+#include <libopencraft/packet_writer.h>
 #include <libopencraft/proto_constants.h>
-#include <libopencraft/spawning_client.h>
 
-#include <iostream>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <string.h>
 
+#include <string>
+#include <sstream>
 #include <iostream>
-#include <boost/array.hpp>
-#include <boost/asio.hpp>
+#include <iomanip>
+#include <exception>
+#include <vector>
 
 using namespace std;
-
-using boost::asio::ip::tcp;
-
-int proto_mode = OPENCRAFT_STATE_LOGIN;
-
-void chat_cb(opencraft::packets::chat_message_play_downstream *pack) {
-     cout << "Got chat: " << pack->a << endl;
-}
-
-void login_cb(opencraft::packets::login_success_login_downstream *pack) {
-     cout << "Logged in!" << endl;
-     proto_mode = OPENCRAFT_STATE_PLAY;
-}
+using namespace opencraft::packets;
 
 int main(int argc, char** argv) {
-    cout << LIBOPENCRAFT_LONG_VER << endl << "Built on " << LIBOPENCRAFT_BUILDDATE << endl << endl;
-   
-    // setup all the ASIO crap
-    boost::asio::io_service io_service;
+    // setup socket
+    int sockfd = socket(AF_INET, SOCK_STREAM,0);
+    struct sockaddr_in server_addr;
+    memset(&server_addr, 0, sizeof(server_addr));
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+    server_addr.sin_port = htons(25565);
 
-    tcp::resolver resolver(io_service);
-    tcp::resolver::query query("localhost", "25565");
-    tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
-    tcp::resolver::iterator end;
+    // connect to localhost:25565 and then setup a packet reader and writer
+    connect(sockfd, (struct sockaddr*)&server_addr, sizeof(struct sockaddr_in));
+    opencraft::packets::packet_reader client_reader(sockfd,OPENCRAFT_STATE_LOGIN,true);
+    opencraft::packets::packet_writer client_writer(sockfd);
 
-    // setup our client
-    opencraft::client::basic_client oc_client;
+    // create a handshake packet and write it
+    handshake_handshaking_upstream hspack(OPENCRAFT_PROTOCOL_VERSION,std::string(OPENCRAFT_DEFAULT_SERVER),OPENCRAFT_DEFAULT_TCP_PORT,OPENCRAFT_STATE_LOGIN);
+    client_writer.write_pack(&hspack);
 
-    // connect
-    cout << "Connecting to 127.0.0.1:25565..." << endl;
-    tcp::socket socket(io_service);
+    // create a login packet and write it
+    login_start_login_upstream login_req(std::string("TestUser"));
+    client_writer.write_pack(&login_req);
 
-    boost::system::error_code error = boost::asio::error::host_not_found;
-    while (error && endpoint_iterator != end)
-    {
-      socket.close();
-      socket.connect(*endpoint_iterator++, error);
+    // read the login success packet and dump it
+    login_success_login_downstream *login_succ = client_reader.read_pack();
+
+    cout << "Got UUID " << login_succ->a << endl;
+
+    // switch to play mode
+    client_reader.proto_mode = OPENCRAFT_STATE_PLAY;
+
+    // read a packet so we can transmit easily
+//    opencraft_packet* pack = client_reader.read_pack();
+//    cout << pack->name() << endl;
+//    cout << pack->ident() << endl;
+
+    // create client settings packet and write it
+//    client_settings_play_upstream client_settings(std::string("en_GB"),4,0,true,0xFF,0);
+//    client_writer.write_pack(&client_settings);
+
+
+    // read packets and spit out chat messages
+    while(true) {
+       opencraft_packet* inpack = NULL;
+       inpack = client_reader.read_pack();
+       if(inpack != NULL) {
+          cout << inpack->name() << " ident " << inpack->ident() << endl;
+          if(inpack->name().compare("chat_message") ==0) {
+             cout << ((chat_message_play_downstream*)inpack)->a << endl;
+          }
+          delete inpack;
+       }
     }
-    if (error)
-      throw boost::system::system_error(error);
-
-    boost::system::error_code net_error;
-
-
-    // send a handshake
-    boost::asio::write(socket,boost::asio::buffer(oc_client.send_hs("127.0.0.1",25565,OPENCRAFT_STATE_LOGIN)),boost::asio::transfer_all(), net_error);
-
-    // send a login start
-    opencraft::packets::login_start_login_upstream login_start_pack("TestUser");
-    boost::asio::write(socket,boost::asio::buffer(oc_client.send_pack(&login_start_pack)),boost::asio::transfer_all(), net_error);
-
-   
-        // receive packets and trigger callbacks
-        std::vector<unsigned char> indata = std::vector<unsigned char>(1024);
-        size_t bytes_read;
-    opencraft::packets::packet_stream pack_stream;
-   while(true) {
-        std::vector<unsigned char> indata = std::vector<unsigned char>(1024);
-        bytes_read = boost::asio::read(socket, boost::asio::buffer(indata,1024), boost::asio::transfer_at_least(1));
-        vector<opencraft::packets::raw_packet> inpacks = pack_stream.on_recv(indata);
- 
-        opencraft::packets::opencraft_packet *inpack = NULL;
-        for(int i=0; i < inpacks.size(); i++) {
-            inpack = opencraft::packets::opencraft_packet::unpack_packet(proto_mode,true,inpacks[i].pack());
-            if(inpack != NULL) {
-               if(proto_mode == OPENCRAFT_STATE_LOGIN) {
-                  if(inpack->ident() == OPENCRAFT_PACKIDENT_LOGIN_SUCCESS_LOGIN_DOWNSTREAM) login_cb(inpack);
-               }
-               if(proto_mode == OPENCRAFT_STATE_PLAY) {
-                  if(inpack->ident() == OPENCRAFT_PACKIDENT_CHAT_MESSAGE_PLAY_DOWNSTREAM) chat_cb(inpack);
-               }
-               cout << inpack->name() << endl;
-            }
-            delete inpack;
-        }
-   }
-
-
 }
 
 
