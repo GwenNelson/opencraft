@@ -38,6 +38,7 @@ class client_connection {
      void handle_login();
      void handle_play();
      int proto_mode;
+     bool active;
    private:
      int _sock_fd;
      opencraft::packets::packet_reader *client_reader;

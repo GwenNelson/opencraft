@@ -28,15 +28,44 @@
 #include <libopencraft/proto_constants.h>
 #include <libopencraft/packets.autogen.h>
 
+#include <jsoncpp/json/value.h>
+#include <jsoncpp/json/writer.h>
+
 #include <client_connection.h>
 
 using namespace opencraft::packets;
+
+// TODO - move this elsewhere
+std::string get_status_json() {
+     Json::Value Version;
+     Version["name"]     = "OpenCraft newsim";
+     Version["protocol"] = OPENCRAFT_PROTOCOL_VERSION;
+     
+     Json::Value Players;
+     Players["online"]   = 0;   // TODO: fix this to actually count clients connected
+     Players["max"]      = 100; // TODO: make this a configurable variable
+
+     Json::Value Description;
+     Description["text"] = "OpenCraft server";
+
+     Json::Value resp_val;
+     resp_val["version"]     = Version;
+     resp_val["players"]     = Players;
+     resp_val["description"] = Description;
+     
+     Json::FastWriter Writer;
+     std::string resp_str = Writer.write(resp_val);
+     return resp_str;
+}
+
+
 
 client_connection::client_connection(int sock_fd) {
     this->proto_mode    = OPENCRAFT_STATE_HANDSHAKING;
     this->_sock_fd      = sock_fd;
     this->client_reader = new packet_reader(sock_fd,this->proto_mode,false);
     this->client_writer = new packet_writer(sock_fd);
+    this->active        = true;
 }
 
 void client_connection::send_packet(opencraft::packets::opencraft_packet* pack) {
@@ -60,9 +89,43 @@ void client_connection::handle_handshaking() {
 }
 
 void client_connection::handle_status() {
+     opencraft_packet *inpack = NULL;
+     inpack = this->client_reader->read_pack();
+        if(inpack != NULL) {
+           if(inpack->name().compare("unknown")!=0) {
+             int32_t pack_ident = inpack->ident();
+                switch(pack_ident) {
+                    case OPENCRAFT_PACKIDENT_STATUS_REQUEST_STATUS_UPSTREAM: {
+                         status_response_status_downstream status_resp(get_status_json());
+                         this->client_writer->write_pack(&status_resp);
+                    break;}
+                    case OPENCRAFT_PACKIDENT_STATUS_PING_STATUS_UPSTREAM: {
+                         int32_t ack = ((status_ping_status_upstream*)inpack)->a;
+                         status_pong_status_downstream ack_pack(ack);
+                         this->client_writer->write_pack(&ack_pack);
+                         this->active=false; // close the connection
+                         return;
+                    break;}
+                 }
+           }
+        }
 }
 
 void client_connection::handle_login() {
+    opencraft_packet *inpack = NULL;
+     inpack = this->client_reader->read_pack();
+        if(inpack != NULL) {
+           if(inpack->name().compare("unknown")!=0) {
+             int32_t pack_ident = inpack->ident();
+                switch(pack_ident) {
+                    case OPENCRAFT_PACKIDENT_LOGIN_START_LOGIN_UPSTREAM: {
+                         login_start_login_upstream* login_pack = (login_start_login_upstream*)inpack;
+                         LOG(info) << "Login from " << login_pack->a;
+                    break;}
+                 }
+           }
+        }
+
 }
 
 void client_connection::handle_play() {

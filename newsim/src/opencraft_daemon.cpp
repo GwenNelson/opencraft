@@ -57,7 +57,8 @@ opencraft_daemon::opencraft_daemon(bool debug_mode, bool daemon_mode, std::strin
 void opencraft_daemon::handle_client(int client_sock_fd, struct sockaddr_in client_addr) {
      LOG(info) << "New connection from " << inet_ntoa(client_addr.sin_addr) << ":" << ntohs(client_addr.sin_port);
      client_connection client(client_sock_fd);
-     for(;;) client.handle_client();
+     while(client.active) client.handle_client();
+     close(client_sock_fd);
 }
 
 void opencraft_daemon::accept_clients() {
