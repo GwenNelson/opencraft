@@ -49,6 +49,9 @@
 using namespace std;
 using namespace opencraft::packets;
 
+zmqpp::context *zmq_ctx;
+zmqpp::socket  *incoming_client_events;
+
 int server_sock_fd;
 bool running=true;
 
@@ -73,6 +76,7 @@ void client_handler(int client_fd,struct sockaddr_in client_addr) {
      uint16_t server_port                   = hspack->c;
      int32_t next_state                     = hspack->d;
 
+     cout << "Got handshake!" << endl;
      if(client_proto_version != OPENCRAFT_PROTOCOL_VERSION) {
         cerr << "Unsupported protocol version from " << inet_ntoa(client_addr.sin_addr) << endl;
         close(client_fd);
@@ -80,10 +84,18 @@ void client_handler(int client_fd,struct sockaddr_in client_addr) {
      }
 
      client_reader.proto_mode = next_state;
+     zmqpp::socket zclient(*zmq_ctx, zmqpp::socket_type::publish);
+     zclient.bind("inproc://cevents");
      while(running) {
         inpack = NULL;
         inpack = client_reader.read_pack();
-        if(inpack != NULL) cout << inpack->name() << endl;
+        if(inpack != NULL) {
+           zmqpp::message e;
+           e << inpack->name();
+           zclient.send(e);
+           cout << "Send packet message" << endl;
+           usleep(1000);
+        }
      }
      close(client_fd);
 }
@@ -99,6 +111,18 @@ void accept_client_thread() {
      }
 }
 
+void client_event_listener_thread() {
+     zmqpp::socket listener(*zmq_ctx, zmqpp::socket_type::subscribe);
+     listener.connect("inproc://cevents");
+     listener.subscribe("");
+     while(running) {
+        zmqpp::message e;
+        listener.receive(e);
+        cout << "Got packet message" << endl;
+        cout << e.get(0) << endl;
+     }
+}
+
 void init_server_sock() {
      struct sockaddr_in serv;
      socklen_t socksize = sizeof(struct sockaddr_in);
@@ -108,15 +132,23 @@ void init_server_sock() {
      serv.sin_port        = htons(PORTNUM);
 
      server_sock_fd = socket(AF_INET,SOCK_STREAM,0);
-     bind(server_sock_fd, (struct sockaddr*)&serv, sizeof(struct sockaddr));
+     setsockopt(server_sock_fd, SOL_SOCKET, SO_REUSEADDR, &(int){ 1 }, sizeof(int));
+     bind(server_sock_fd, (struct sockaddr*)&serv, sizeof(struct sockaddr_in));
      listen(server_sock_fd,1);
+}
+
+void init_zmq_ctx() {
+     zmq_ctx                = new zmqpp::context();
+     usleep(5000);
 }
 
 int main(int argc, char** argv) {
     cout << LIBOPENCRAFT_LONG_VER << endl << "Built on " << LIBOPENCRAFT_BUILDDATE << endl << endl;
 
+    init_zmq_ctx();
     init_server_sock();
-    
+   
     boost::thread accept_thr{accept_client_thread};
-    for(;;);
+    boost::thread events_thr{client_event_listener_thread};
+    for(;;) sleep(1);
 }
