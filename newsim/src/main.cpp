@@ -23,166 +23,93 @@
 //-----------------------------------------------------------------------------
 
 #include <iostream>
+#include <string>
 
-#include <boost/thread.hpp>
-#include <boost/bind.hpp>
+#include <boost/program_options.hpp>
 
-#include <zmqpp/zmqpp.hpp>
+#include <boost/log/core.hpp>
+#include <boost/log/trivial.hpp>
 
-#include <jsoncpp/json/value.h>
-#include <jsoncpp/json/writer.h>
+#include <boost/log/utility/setup/file.hpp>
+#include <boost/log/utility/setup/common_attributes.hpp>
 
+#include <opencraft_daemon.h>
 #include <libopencraft/version.h>
-#include <libopencraft/packet_reader.h>
-#include <libopencraft/packet_writer.h>
-#include <libopencraft/packets.autogen.h>
-#include <libopencraft/proto_constants.h>
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <arpa/inet.h>
-#include <sys/types.h>
-#include <netinet/in.h>
-#include <sys/socket.h>
 
-#define PORTNUM 25565
+opencraft_daemon *oc_daemon = NULL;
 
 using namespace std;
-using namespace opencraft::packets;
+namespace po      = boost::program_options;
+namespace logging = boost::log;
 
-zmqpp::context *zmq_ctx;
-zmqpp::socket  *incoming_client_events;
-
-int server_sock_fd;
-bool running=true;
-
-std::string get_status_json() {
-Json::Value Version;
-     Version["name"]     = "OpenCraft newsim";
-     Version["protocol"] = OPENCRAFT_PROTOCOL_VERSION;
-     
-     Json::Value Players;
-     Players["online"]   = 0;   // TODO: fix this to actually count clients connected
-     Players["max"]      = 100; // TODO: make this a configurable variable
-
-     Json::Value Description;
-     Description["text"] = "OpenCraft server";
-
-     Json::Value resp_val;
-     resp_val["version"]     = Version;
-     resp_val["players"]     = Players;
-     resp_val["description"] = Description;
-     
-     Json::FastWriter Writer;
-     std::string resp_str = Writer.write(resp_val);
-     return resp_str;
-}
-
-void client_handler(int client_fd,struct sockaddr_in client_addr) {
-     cout << "Got new connection from " << inet_ntoa(client_addr.sin_addr) << endl;
-
-     packet_reader client_reader(client_fd,OPENCRAFT_STATE_HANDSHAKING,false);
-     packet_writer client_writer(client_fd);
-
-     // first packet must ALWAYS be handshake
-     opencraft_packet* inpack = NULL;
-     inpack = client_reader.read_pack();
-     if(inpack->ident() != OPENCRAFT_PACKIDENT_HANDSHAKE_HANDSHAKING_UPSTREAM) {
-        cerr << "Bad packet from " << inet_ntoa(client_addr.sin_addr) << endl;
-        close(client_fd);
-        return;
+void configure_logging(std::string logfile, bool debug_mode) {
+     if(!debug_mode) {
+       logging::add_file_log(logging::keywords::file_name = logfile,
+                             logging::keywords::rotation_size = 10 * 1024 * 1024,
+                             logging::keywords::time_based_rotation = logging::sinks::file::rotation_at_time_point(0, 0, 0),
+                             logging::keywords::format = "[%TimeStamp%]: %Message%");
      }
-
-     handshake_handshaking_upstream* hspack = inpack;
-     int32_t client_proto_version           = hspack->a;
-     std::string server_addr                = hspack->b;
-     uint16_t server_port                   = hspack->c;
-     int32_t next_state                     = hspack->d;
-
-     cout << "Got handshake!" << endl;
-     if(client_proto_version != OPENCRAFT_PROTOCOL_VERSION) {
-        cerr << "Unsupported protocol version from " << inet_ntoa(client_addr.sin_addr) << endl;
-        close(client_fd);
-        return;
+     if(debug_mode) {
+        logging::core::get()->set_filter(logging::trivial::severity >= logging::trivial::debug);
+     } else {
+        logging::core::get()->set_filter(logging::trivial::severity >= logging::trivial::info);
      }
-
-     client_reader.proto_mode = next_state;
-     while(running) {
-        inpack = NULL;
-        inpack = client_reader.read_pack();
-        if(inpack != NULL) {
-           if(inpack->name().compare("unknown")!=0) {
-             int32_t pack_ident = inpack->ident();
-             if(client_reader.proto_mode == OPENCRAFT_STATE_STATUS) {
-                switch(pack_ident) {
-                    case OPENCRAFT_PACKIDENT_STATUS_REQUEST_STATUS_UPSTREAM: {
-                         status_response_status_downstream status_resp(get_status_json());
-                         client_writer.write_pack(&status_resp);
-                    break;}
-                    case OPENCRAFT_PACKIDENT_STATUS_PING_STATUS_UPSTREAM: {
-                         int32_t ack = ((status_ping_status_upstream*)inpack)->a;
-                         status_pong_status_downstream ack_pack(ack);
-                         client_writer.write_pack(&ack_pack);
-                         close(client_fd);
-                         return;
-                    break;}
-                 }
-             }
-           }
-        }
-     }
-     close(client_fd);
+     logging::add_common_attributes();
 }
 
-void accept_client_thread() {
-     cout << "Awaiting clients\n";
-     socklen_t socksize = sizeof(struct sockaddr_in);
-     while(running) {
-        struct sockaddr_in client_addr;
-        int client_sock = accept(server_sock_fd, (struct sockaddr*)&client_addr,&socksize);
-        boost::thread client_t{boost::bind(client_handler,client_sock,client_addr)};
-
-     }
-}
-
-void client_event_listener_thread() {
-     zmqpp::socket listener(*zmq_ctx, zmqpp::socket_type::subscribe);
-     listener.connect("inproc://cevents");
-     listener.subscribe("");
-     while(running) {
-        zmqpp::message e;
-        listener.receive(e);
-     }
-}
-
-void init_server_sock() {
-     struct sockaddr_in serv;
-     socklen_t socksize = sizeof(struct sockaddr_in);
-     memset(&serv,0,sizeof(serv));
-     serv.sin_family      = AF_INET;
-     serv.sin_addr.s_addr = htonl(INADDR_ANY);
-     serv.sin_port        = htons(PORTNUM);
-
-     server_sock_fd = socket(AF_INET,SOCK_STREAM,0);
-     setsockopt(server_sock_fd, SOL_SOCKET, SO_REUSEADDR, &(int){ 1 }, sizeof(int));
-     bind(server_sock_fd, (struct sockaddr*)&serv, sizeof(struct sockaddr_in));
-     listen(server_sock_fd,1);
-}
-
-void init_zmq_ctx() {
-     zmq_ctx                = new zmqpp::context();
-     usleep(5000);
-}
 
 int main(int argc, char** argv) {
     cout << LIBOPENCRAFT_LONG_VER << endl << "Built on " << LIBOPENCRAFT_BUILDDATE << endl << endl;
 
-    init_zmq_ctx();
-    init_server_sock();
-   
-    boost::thread accept_thr{accept_client_thread};
-    boost::thread events_thr{client_event_listener_thread};
+    po::options_description desc("Options");
+
+    desc.add_options() ("help,h",       "display this help")
+                       ("foreground,f", "don't daemonize")
+                       ("debug,d",      "run in debug mode")
+                       ("logfile,l",    po::value<string>()->default_value("./opencraftd.log.%N"),
+                                        "log to file")
+                       ("port,p",       po::value<int>()->default_value(25565),
+                                        "port to listen on")
+                       ("root,r",       po::value<string>()->default_value("."),
+                                        "path to install root");
+
+    po::variables_map vm;
+    
+    bool parse_error = false;
+
+    try {
+        po::store(po::parse_command_line(argc, argv, desc), vm);
+        po::notify(vm);
+    } catch (po::error &error) {
+        parse_error = true;
+    }
+
+    if(parse_error || vm.count("help")==1) {
+       cout << "Usage: " << argv[0] << " [options]\n" << desc << endl;
+       return 0;
+    }
+
+    bool debug_mode = false;      
+    if(vm.count("debug")==1) {
+       debug_mode = true;
+    }
+
+    bool daemon_mode = true;
+    if(vm.count("foreground")==1) {
+       daemon_mode = false;
+    }
+
+    std::string logfilename = vm["logfile"].as<string>();
+    configure_logging(logfilename,debug_mode);
+
+    std::string install_root = vm["root"].as<string>();
+    std::string pidfile      = std::string("~/.opencraftd.pid");
+
+    int listen_port = vm["port"].as<int>();
+
+    oc_daemon = new opencraft_daemon(debug_mode, daemon_mode, pidfile, install_root, listen_port);
+    oc_daemon->run();
+
     for(;;) sleep(1);
 }
