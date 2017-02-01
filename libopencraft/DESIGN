@@ -23,3 +23,16 @@ Basic usage:
 Examples
   chat_client: implements a simple chat client - doesn't even parse the JSON, that's your job
   ping_server: pings a server and gets back the status response details, spitting it out on stdout
+
+
+Stuff not done / brainstorming / random ideas:
+  Data on blocktypes/entities/biomes etc in header files
+  Async client
+    Read from socket only when data is waiting to be read
+  libsl-style TestClient
+    Command line interface for fully testing the library
+  Abstraction of chunks/blocks/map
+    Should provide facilities for both parsing and serialisation of chunk data
+  Simplified movement/physics
+    Track player position in single class, allow moving in set vectors, TP etc etc
+
