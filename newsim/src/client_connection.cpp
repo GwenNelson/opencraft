@@ -96,7 +96,8 @@ void client_connection::handle_status() {
      inpack = this->client_reader->read_pack();
         if(inpack != NULL) {
            if(inpack->name().compare("unknown")!=0) {
-             int32_t pack_ident = inpack->ident();
+                LOG(debug) << this->_client_addr << " Received " << inpack->name();
+                int32_t pack_ident = inpack->ident();
                 switch(pack_ident) {
                     case OPENCRAFT_PACKIDENT_STATUS_REQUEST_STATUS_UPSTREAM: {
                          status_response_status_downstream status_resp(get_status_json());
@@ -119,7 +120,8 @@ void client_connection::handle_login() {
      inpack = this->client_reader->read_pack();
         if(inpack != NULL) {
            if(inpack->name().compare("unknown")!=0) {
-             int32_t pack_ident = inpack->ident();
+                LOG(debug) << this->_client_addr << " Received " << inpack->name();
+                int32_t pack_ident = inpack->ident();
                 switch(pack_ident) {
                     case OPENCRAFT_PACKIDENT_LOGIN_START_LOGIN_UPSTREAM: {
                          login_start_login_upstream* login_pack = (login_start_login_upstream*)inpack;
@@ -150,6 +152,7 @@ void client_connection::handle_play() {
      inpack = this->client_reader->read_pack();
         if(inpack != NULL) {
            if(inpack->name().compare("unknown")!=0) {
+             LOG(debug) << this->_client_addr << " Received " << inpack->name();
              int32_t pack_ident = inpack->ident();
                 switch(pack_ident) {
                     case OPENCRAFT_PACKIDENT_LOGIN_START_LOGIN_UPSTREAM: {
