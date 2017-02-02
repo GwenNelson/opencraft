@@ -229,9 +229,30 @@ void opencraft_packet::pack_string16(std::string val) {
      this->pack_string(val);
 }
 
-void opencraft_packet::pack_double(double val){}
-void opencraft_packet::pack_float(float val){}
-void opencraft_packet::pack_int(int32_t val){}
+void opencraft_packet::pack_double(double val){
+     unsigned char arr[8];
+     *((double*)arr) = val;
+     this->pack_byte(arr[7]);
+     this->pack_byte(arr[6]);
+     this->pack_byte(arr[5]);
+     this->pack_byte(arr[4]);
+     this->pack_byte(arr[3]);
+     this->pack_byte(arr[2]);
+     this->pack_byte(arr[1]);
+     this->pack_byte(arr[0]);
+}
+
+void opencraft_packet::pack_float(float val){
+     unsigned int vali = *((unsigned int *)&val);
+     this->pack_byte(vali >> 24);
+     this->pack_byte((vali >> 16) & 0xFF);
+     this->pack_byte((vali >> 8) & 0xFF);
+     this->pack_byte(vali & 0xFF);
+}
+
+void opencraft_packet::pack_int(int32_t val){
+}
+
 void opencraft_packet::pack_long(int64_t val){
      this->pack_byte(val & 0xFF);
      this->pack_byte((val >> 8) & 0xFF);

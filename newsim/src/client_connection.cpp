@@ -72,6 +72,7 @@ client_connection::client_connection(int sock_fd, std::string client_addr) {
 void client_connection::send_packet(opencraft::packets::opencraft_packet* pack) {
     packet_writer tmp_writer(this->_sock_fd);
     tmp_writer.write_pack(pack);
+    LOG(debug) << this->_client_addr << " Sent " << pack->name();
 }
 
 void client_connection::handle_handshaking() {
@@ -99,12 +100,12 @@ void client_connection::handle_status() {
                 switch(pack_ident) {
                     case OPENCRAFT_PACKIDENT_STATUS_REQUEST_STATUS_UPSTREAM: {
                          status_response_status_downstream status_resp(get_status_json());
-                         this->client_writer->write_pack(&status_resp);
+                         this->send_packet(&status_resp);
                     break;}
                     case OPENCRAFT_PACKIDENT_STATUS_PING_STATUS_UPSTREAM: {
                          int32_t ack = ((status_ping_status_upstream*)inpack)->a;
                          status_pong_status_downstream ack_pack(ack);
-                         this->client_writer->write_pack(&ack_pack);
+                         this->send_packet(&ack_pack);
                          this->active=false; // close the connection
                     break;}
                  }
@@ -130,6 +131,9 @@ void client_connection::handle_login() {
                          this->send_packet(&succ_pack);
                          this->client_reader->proto_mode = OPENCRAFT_STATE_PLAY;
                          this->proto_mode = OPENCRAFT_STATE_PLAY;
+
+                         player_position_and_look_play_downstream initial_pos(100.0, 63.0, 100.0,0.0f,0.0f,0,666);
+                         this->send_packet(&initial_pos);
                     break;}
                  }
            }
@@ -139,6 +143,27 @@ void client_connection::handle_login() {
 }
 
 void client_connection::handle_play() {
+    opencraft_packet *inpack = NULL;
+     inpack = this->client_reader->read_pack();
+        if(inpack != NULL) {
+           if(inpack->name().compare("unknown")!=0) {
+             int32_t pack_ident = inpack->ident();
+                switch(pack_ident) {
+                    case OPENCRAFT_PACKIDENT_LOGIN_START_LOGIN_UPSTREAM: {
+                         login_start_login_upstream* login_pack = (login_start_login_upstream*)inpack;
+                         LOG(info) << this->_client_addr << " Login from " << login_pack->a;
+                         this->uuid     = boost::uuids::random_generator()();
+                         this->username = std::string(login_pack->a);
+                         LOG(info) << this->_client_addr << " User allocated UUID " << this->uuid;
+                         login_success_login_downstream succ_pack(boost::uuids::to_string(this->uuid),this->username);
+                         this->send_packet(&succ_pack);
+                         this->client_reader->proto_mode = OPENCRAFT_STATE_PLAY;
+                         this->proto_mode = OPENCRAFT_STATE_PLAY;
+                    break;}
+                 }
+           }
+        delete inpack;
+        }
 }
 
 void client_connection::handle_client() {

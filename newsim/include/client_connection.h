@@ -48,6 +48,10 @@ class client_connection {
    private:
      std::string _client_addr;
      int _sock_fd;
+     int entity_id;
+     unsigned char game_mode;
+     int dimension;
+     unsigned char difficulty;
      boost::uuids::uuid uuid;
      std::string username;
      opencraft::packets::packet_reader *client_reader;
