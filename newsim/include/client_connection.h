@@ -28,6 +28,10 @@
 #include <libopencraft/packet_reader.h>
 #include <libopencraft/packet_writer.h>
 
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid_io.hpp> 
+
 #include <string>
 
 class client_connection {
@@ -44,6 +48,8 @@ class client_connection {
    private:
      std::string _client_addr;
      int _sock_fd;
+     boost::uuids::uuid uuid;
+     std::string username;
      opencraft::packets::packet_reader *client_reader;
      opencraft::packets::packet_writer *client_writer;
 

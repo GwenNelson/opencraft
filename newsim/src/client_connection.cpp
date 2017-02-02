@@ -87,6 +87,7 @@ void client_connection::handle_handshaking() {
      LOG(info) << this->_client_addr << " Got handshake from client";
      this->proto_mode                = next_state;
      this->client_reader->proto_mode = next_state;
+     delete inpack;
 }
 
 void client_connection::handle_status() {
@@ -105,10 +106,10 @@ void client_connection::handle_status() {
                          status_pong_status_downstream ack_pack(ack);
                          this->client_writer->write_pack(&ack_pack);
                          this->active=false; // close the connection
-                         return;
                     break;}
                  }
            }
+        delete inpack;  
         }
 }
 
@@ -122,9 +123,17 @@ void client_connection::handle_login() {
                     case OPENCRAFT_PACKIDENT_LOGIN_START_LOGIN_UPSTREAM: {
                          login_start_login_upstream* login_pack = (login_start_login_upstream*)inpack;
                          LOG(info) << this->_client_addr << " Login from " << login_pack->a;
+                         this->uuid     = boost::uuids::random_generator()();
+                         this->username = std::string(login_pack->a);
+                         LOG(info) << this->_client_addr << " User allocated UUID " << this->uuid;
+                         login_success_login_downstream succ_pack(boost::uuids::to_string(this->uuid),this->username);
+                         this->send_packet(&succ_pack);
+                         this->client_reader->proto_mode = OPENCRAFT_STATE_PLAY;
+                         this->proto_mode = OPENCRAFT_STATE_PLAY;
                     break;}
                  }
            }
+        delete inpack;
         }
 
 }

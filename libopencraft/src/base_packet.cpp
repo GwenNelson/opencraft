@@ -247,7 +247,9 @@ void opencraft_packet::pack_short(int16_t val) {
      this->packed.push_back((unsigned char)(netval >> 8));
      this->packed.push_back((unsigned char)(netval &  0xFF));
 }
-void opencraft_packet::pack_string8(std::string val){}
+void opencraft_packet::pack_string8(std::string val){
+     this->pack_string(val);
+}
 void opencraft_packet::pack_varint(int32_t val) {
      unsigned char buf[4];
      unparse_varint(val,buf);

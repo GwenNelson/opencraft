@@ -71,6 +71,7 @@ cpp_fd.write("namespace opencraft {\n namespace packets {\n")
 
 # we need this cos burger isn't perfect
 # basically we override what burger said with manually defined types
+#overrides  = {}
 overrides = {'login_success_login_downstream':('login_success',0x02,['string8','string8'])}
 
 for k,v in overrides.items():
