@@ -91,7 +91,7 @@ mctypes = {'boolean' :'bool',
            'short'   :'int16_t',
            'string8' :'std::string',
            'varint'  :'int32_t',
-           'position':'std::tuple<float,float,float>',
+           'position':'std::tuple<int,int,int>',
            'enum'    :'int32_t',
            'bytes'   :'std::vector<unsigned char>'}
 

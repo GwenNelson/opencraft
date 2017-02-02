@@ -132,6 +132,9 @@ void client_connection::handle_login() {
                          this->client_reader->proto_mode = OPENCRAFT_STATE_PLAY;
                          this->proto_mode = OPENCRAFT_STATE_PLAY;
 
+                         spawn_position_play_downstream spawn_pos(std::tuple<int,int,int>(100,63,100));
+                         this->send_packet(&spawn_pos);
+
                          player_position_and_look_play_downstream initial_pos(100.0, 63.0, 100.0,0.0f,0.0f,0,666);
                          this->send_packet(&initial_pos);
                     break;}

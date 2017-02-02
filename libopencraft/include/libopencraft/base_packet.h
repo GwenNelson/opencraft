@@ -78,7 +78,7 @@ class opencraft_packet {
       void pack_short(int16_t val);
       void pack_string8(std::string val);
       void pack_varint(int32_t val);
-      void pack_position(std::tuple<float,float,float>);
+      void pack_position(std::tuple<int,int,int>);
       void pack_enum(int32_t val);
       void pack_bytes(std::vector<unsigned char>);
       void pack_chatcomponent(std::string val);
