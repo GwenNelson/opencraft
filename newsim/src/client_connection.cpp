@@ -28,6 +28,11 @@
 #include <libopencraft/proto_constants.h>
 #include <libopencraft/packets.autogen.h>
 
+#include <boost/random.hpp>
+#include <iostream>
+#include <ctime>
+#include <cstdint>
+
 #include <jsoncpp/json/value.h>
 #include <jsoncpp/json/writer.h>
 
@@ -133,6 +138,16 @@ void client_connection::handle_login() {
                          this->send_packet(&succ_pack);
                          this->client_reader->proto_mode = OPENCRAFT_STATE_PLAY;
                          this->proto_mode = OPENCRAFT_STATE_PLAY;
+
+                         std::time_t now = std::time(0);
+                         boost::random::mt19937 gen{static_cast<std::uint32_t>(now)};
+
+                         this->entity_id  = gen();
+                         this->game_mode  = OPENCRAFT_GAMEMODE_CREATIVE;
+                         this->dimension  = OPENCRAFT_DIMENSION_OVERWORLD;
+                         this->difficulty = OPENCRAFT_DIFFICULTY_PEACEFUL;
+                         join_game_play_downstream join_pack(this->entity_id,this->game_mode,this->dimension,this->difficulty,100,"default",false);
+                         this->send_packet(&join_pack);
 
                          spawn_position_play_downstream spawn_pos(std::tuple<int,int,int>(100,63,100));
                          this->send_packet(&spawn_pos);
