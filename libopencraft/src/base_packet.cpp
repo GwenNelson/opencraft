@@ -251,6 +251,11 @@ void opencraft_packet::pack_float(float val){
 }
 
 void opencraft_packet::pack_int(int32_t val){
+     this->pack_byte(val >> 24);
+     this->pack_byte((val >> 16) & 0xFF);
+     this->pack_byte((val >> 8) & 0xFF);
+     this->pack_byte(val & 0xFF);
+
 }
 
 void opencraft_packet::pack_long(int64_t val){
@@ -286,7 +291,10 @@ void opencraft_packet::pack_position(std::tuple<int,int,int> pos){
       ((long long)(y & 0xFFF) << 26) | (z & 0x3FFFFFF));
 }
 
-void opencraft_packet::pack_enum(int32_t val){}
+void opencraft_packet::pack_enum(int32_t val) {
+     this->pack_int(val);
+}
+
 void opencraft_packet::pack_bytes(std::vector<unsigned char> data) {
      for(int i=0; i<data.size(); i++) {
          this->pack_byte(data[i]);

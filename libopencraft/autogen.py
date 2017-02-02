@@ -71,9 +71,8 @@ cpp_fd.write("namespace opencraft {\n namespace packets {\n")
 
 # we need this cos burger isn't perfect
 # basically we override what burger said with manually defined types
-#overrides  = {}
 overrides = {'login_success_login_downstream':('login_success',0x02,['string8','string8']),
-             'join_game_play_downstream':('join_game',0x23,['int','byte','enum','byte','byte','string8','bool'])}
+             'join_game_play_downstream':('join_game',0x23,['int','byte','enum','byte','byte','string8','boolean'])}
 
 for k,v in overrides.items():
     packets_names[k]  = v[0]

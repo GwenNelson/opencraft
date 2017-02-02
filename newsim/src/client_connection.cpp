@@ -170,17 +170,6 @@ void client_connection::handle_play() {
              LOG(debug) << this->_client_addr << " Received " << inpack->name();
              int32_t pack_ident = inpack->ident();
                 switch(pack_ident) {
-                    case OPENCRAFT_PACKIDENT_LOGIN_START_LOGIN_UPSTREAM: {
-                         login_start_login_upstream* login_pack = (login_start_login_upstream*)inpack;
-                         LOG(info) << this->_client_addr << " Login from " << login_pack->a;
-                         this->uuid     = boost::uuids::random_generator()();
-                         this->username = std::string(login_pack->a);
-                         LOG(info) << this->_client_addr << " User allocated UUID " << this->uuid;
-                         login_success_login_downstream succ_pack(boost::uuids::to_string(this->uuid),this->username);
-                         this->send_packet(&succ_pack);
-                         this->client_reader->proto_mode = OPENCRAFT_STATE_PLAY;
-                         this->proto_mode = OPENCRAFT_STATE_PLAY;
-                    break;}
                  }
            }
         delete inpack;
