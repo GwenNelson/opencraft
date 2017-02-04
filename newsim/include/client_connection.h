@@ -38,7 +38,7 @@ class client_connection {
    public:
      client_connection(int sock_fd, std::string client_addr);
      void send_packet(opencraft::packets::opencraft_packet* pack);
-     void pinger_thread();
+     void handle_client_sending();
      void handle_client();
      void handle_handshaking();
      void handle_status();
@@ -50,6 +50,10 @@ class client_connection {
    private:
      double last_sent_ping;
      double last_recv_ping;
+     double x;
+     double y;
+     double z;
+
      int _sock_fd;
      int entity_id;
      unsigned char game_mode;

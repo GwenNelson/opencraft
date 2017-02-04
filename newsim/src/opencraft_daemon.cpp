@@ -62,7 +62,7 @@ void opencraft_daemon::handle_client(int client_sock_fd, struct sockaddr_in clie
      LOG(info) << "New connection from " << inet_ntoa(client_addr.sin_addr) << ":" << ntohs(client_addr.sin_port);
      std::string c_addr = std::string(inet_ntoa(client_addr.sin_addr)) + ":" + to_string(client_addr.sin_port);
      client_connection *client = new client_connection(client_sock_fd,c_addr);
-     boost::thread ping_t{boost::bind(&client_connection::pinger_thread,client)};
+
      while(client->active) client->handle_client();
      LOG(info) << client->_client_addr << " Client disconnected";
      delete client;

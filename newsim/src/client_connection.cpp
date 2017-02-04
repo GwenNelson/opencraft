@@ -29,6 +29,8 @@
 #include <libopencraft/packets.autogen.h>
 
 #include <boost/random.hpp>
+#include <boost/bind.hpp>
+#include <boost/thread.hpp>
 
 #include <exception>
 #include <chrono>
@@ -98,20 +100,23 @@ void client_connection::send_packet(opencraft::packets::opencraft_packet* pack) 
     LOG(debug) << this->_client_addr << " Sent " << pack->name();
 }
 
-void client_connection::pinger_thread() {
+void client_connection::handle_client_sending() {
+     this->last_sent_ping = mticks();
      while(this->active) {
-        usleep(5000);
+        usleep(50000); // client tick
         if(!this->active) return;
-        if((mticks() - this->last_sent_ping) > 500) {
+        if((mticks() - this->last_sent_ping) > 2000) {
            keep_alive_play_downstream ping_pack(666);
            this->send_packet(&ping_pack);
            this->last_sent_ping = mticks();
         }
-        if((mticks() - this->last_recv_ping) > 2000) {
+        if((mticks() - this->last_recv_ping) > 4000) {
            LOG(info) << this->_client_addr << " Timed out";
            this->active = false;
            return;
         }
+        entity_play_downstream ent_pack(this->entity_id);
+        this->send_packet(&ent_pack);
      }
 }
 
@@ -189,6 +194,7 @@ void client_connection::handle_login() {
 
                          player_position_and_look_play_downstream initial_pos(100.0, 63.0, 100.0,0.0f,0.0f,0,666);
                          this->send_packet(&initial_pos);
+                         boost::thread ping_t{boost::bind(&client_connection::handle_client_sending,this)};
                     break;}
                  }
            }
@@ -198,10 +204,9 @@ void client_connection::handle_login() {
 }
 
 void client_connection::handle_play() {
-    
-    opencraft_packet *inpack = NULL;
-    inpack = this->client_reader->read_pack();
-    if(inpack == NULL) this->active=false;
+     opencraft_packet *inpack = NULL;
+     inpack = this->client_reader->read_pack();
+     if(inpack == NULL) this->active=false;
         if(inpack != NULL) {
            if(inpack->name().compare("unknown")!=0) {
              LOG(debug) << this->_client_addr << " Received " << inpack->name();
@@ -209,6 +214,14 @@ void client_connection::handle_play() {
                 switch(pack_ident) {
                    case OPENCRAFT_PACKIDENT_KEEP_ALIVE_PLAY_UPSTREAM: {
                         this->last_recv_ping = mticks();
+                   break;}
+                   case OPENCRAFT_PACKIDENT_PLAYER_POSITION_AND_LOOK_PLAY_UPSTREAM: {
+                        player_position_and_look_play_upstream* pos_pack = (player_position_and_look_play_upstream*)inpack;
+                        this->x = pos_pack->a;
+                        this->y = pos_pack->b;
+                        this->z = pos_pack->c;
+                        player_position_and_look_play_downstream initial_pos(this->x, this->y, this->z,0.0f,0.0f,0,666);
+                        this->send_packet(&initial_pos);
                    break;}
                 }
            }
