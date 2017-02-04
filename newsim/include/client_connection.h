@@ -38,6 +38,7 @@ class client_connection {
    public:
      client_connection(int sock_fd, std::string client_addr);
      void send_packet(opencraft::packets::opencraft_packet* pack);
+     void pinger_thread();
      void handle_client();
      void handle_handshaking();
      void handle_status();

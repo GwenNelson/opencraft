@@ -53,6 +53,7 @@ double mticks() {
     return elapsed.count();
 }
 
+
 // TODO - move this elsewhere
 std::string get_status_json() {
      Json::Value Version;
@@ -95,6 +96,23 @@ void client_connection::send_packet(opencraft::packets::opencraft_packet* pack) 
         LOG(error) << this->_client_addr << e.what();
     }
     LOG(debug) << this->_client_addr << " Sent " << pack->name();
+}
+
+void client_connection::pinger_thread() {
+     while(this->active) {
+        usleep(5000);
+        if(!this->active) return;
+        if((mticks() - this->last_sent_ping) > 500) {
+           keep_alive_play_downstream ping_pack(666);
+           this->send_packet(&ping_pack);
+           this->last_sent_ping = mticks();
+        }
+        if((mticks() - this->last_recv_ping) > 2000) {
+           LOG(info) << this->_client_addr << " Timed out";
+           this->active = false;
+           return;
+        }
+     }
 }
 
 void client_connection::handle_handshaking() {
@@ -180,18 +198,10 @@ void client_connection::handle_login() {
 }
 
 void client_connection::handle_play() {
-     if((mticks() - this->last_sent_ping) > 500) {
-        keep_alive_play_downstream ping_pack(666);
-        this->send_packet(&ping_pack);
-        this->last_sent_ping = mticks();
-     }
-    if((this->last_recv_ping - this->last_sent_ping) > 1000) {
-            LOG(info) << this->_client_addr << " Timed out";
-//            this->active = false;
-    }
     
     opencraft_packet *inpack = NULL;
-     inpack = this->client_reader->read_pack();
+    inpack = this->client_reader->read_pack();
+    if(inpack == NULL) this->active=false;
         if(inpack != NULL) {
            if(inpack->name().compare("unknown")!=0) {
              LOG(debug) << this->_client_addr << " Received " << inpack->name();
@@ -207,6 +217,10 @@ void client_connection::handle_play() {
 }
 
 void client_connection::handle_client() {
+     if(!this->active) {
+       sleep(1);
+       return;
+     }
      switch(this->proto_mode) {
         case OPENCRAFT_STATE_HANDSHAKING:
           this->handle_handshaking();

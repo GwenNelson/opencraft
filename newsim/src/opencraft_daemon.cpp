@@ -62,6 +62,7 @@ void opencraft_daemon::handle_client(int client_sock_fd, struct sockaddr_in clie
      LOG(info) << "New connection from " << inet_ntoa(client_addr.sin_addr) << ":" << ntohs(client_addr.sin_port);
      std::string c_addr = std::string(inet_ntoa(client_addr.sin_addr)) + ":" + to_string(client_addr.sin_port);
      client_connection *client = new client_connection(client_sock_fd,c_addr);
+     boost::thread ping_t{boost::bind(&client_connection::pinger_thread,client)};
      while(client->active) client->handle_client();
      LOG(info) << client->_client_addr << " Client disconnected";
      delete client;
@@ -70,12 +71,12 @@ void opencraft_daemon::handle_client(int client_sock_fd, struct sockaddr_in clie
 
 void opencraft_daemon::accept_clients() {
      socklen_t socksize = sizeof(struct sockaddr_in);
+     boost::thread_group client_threads;
      while(this->_active) {
         struct sockaddr_in client_addr;
         int client_sock = accept(this->_server_sock_fd, (struct sockaddr*)&client_addr,&socksize);
 
-        boost::thread client_t{boost::bind(&opencraft_daemon::handle_client,this,client_sock,client_addr)};
-        client_t.detach();
+        client_threads.create_thread(boost::bind(&opencraft_daemon::handle_client,this,client_sock,client_addr));
      }
      LOG(debug) << "We should not be here, we are the thing that should not be, get in touch with lovecraft now";
 }
@@ -146,6 +147,7 @@ void opencraft_daemon::configure_signals() {
      sigaddset(&signal_set, SIGTSTP);
      sigaddset(&signal_set, SIGTTOU);
      sigaddset(&signal_set, SIGTTIN);
+     sigaddset(&signal_set, SIGPIPE);
      sigprocmask(SIG_BLOCK, &signal_set, NULL);
 
      // TODO: implement the below properly and add a signal handler with a static reference or something
