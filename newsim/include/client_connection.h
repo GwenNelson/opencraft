@@ -45,8 +45,10 @@ class client_connection {
      void handle_play();
      int proto_mode;
      bool active;
-   private:
      std::string _client_addr;
+   private:
+     double last_sent_ping;
+     double last_recv_ping;
      int _sock_fd;
      int entity_id;
      unsigned char game_mode;

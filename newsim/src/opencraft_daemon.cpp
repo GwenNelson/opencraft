@@ -61,8 +61,10 @@ opencraft_daemon::opencraft_daemon(bool debug_mode, bool daemon_mode, std::strin
 void opencraft_daemon::handle_client(int client_sock_fd, struct sockaddr_in client_addr) {
      LOG(info) << "New connection from " << inet_ntoa(client_addr.sin_addr) << ":" << ntohs(client_addr.sin_port);
      std::string c_addr = std::string(inet_ntoa(client_addr.sin_addr)) + ":" + to_string(client_addr.sin_port);
-     client_connection client(client_sock_fd,c_addr);
-     while(client.active) client.handle_client();
+     client_connection *client = new client_connection(client_sock_fd,c_addr);
+     while(client->active) client->handle_client();
+     LOG(info) << client->_client_addr << " Client disconnected";
+     delete client;
      close(client_sock_fd);
 }
 
@@ -73,9 +75,9 @@ void opencraft_daemon::accept_clients() {
         int client_sock = accept(this->_server_sock_fd, (struct sockaddr*)&client_addr,&socksize);
 
         boost::thread client_t{boost::bind(&opencraft_daemon::handle_client,this,client_sock,client_addr)};
-
+        client_t.detach();
      }
-
+     LOG(debug) << "We should not be here, we are the thing that should not be, get in touch with lovecraft now";
 }
 
 void opencraft_daemon::run() {

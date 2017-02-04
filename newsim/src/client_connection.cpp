@@ -29,6 +29,9 @@
 #include <libopencraft/packets.autogen.h>
 
 #include <boost/random.hpp>
+
+#include <exception>
+#include <chrono>
 #include <iostream>
 #include <ctime>
 #include <cstdint>
@@ -39,6 +42,16 @@
 #include <client_connection.h>
 
 using namespace opencraft::packets;
+using namespace std;
+
+double mticks() {
+    typedef std::chrono::high_resolution_clock clock;
+    typedef std::chrono::duration<float, std::milli> duration;
+
+    static clock::time_point start = clock::now();
+    duration elapsed = clock::now() - start;
+    return elapsed.count();
+}
 
 // TODO - move this elsewhere
 std::string get_status_json() {
@@ -66,17 +79,21 @@ std::string get_status_json() {
 
 
 client_connection::client_connection(int sock_fd, std::string client_addr) {
-    this->proto_mode    = OPENCRAFT_STATE_HANDSHAKING;
-    this->_sock_fd      = sock_fd;
-    this->_client_addr  = client_addr;
-    this->client_reader = new packet_reader(sock_fd,this->proto_mode,false);
-    this->client_writer = new packet_writer(sock_fd);
-    this->active        = true;
+    this->proto_mode     = OPENCRAFT_STATE_HANDSHAKING;
+    this->_sock_fd       = sock_fd;
+    this->_client_addr   = client_addr;
+    this->client_reader  = new packet_reader(sock_fd,this->proto_mode,false);
+    this->client_writer  = new packet_writer(sock_fd);
+    this->active         = true;
 }
 
 void client_connection::send_packet(opencraft::packets::opencraft_packet* pack) {
     packet_writer tmp_writer(this->_sock_fd);
-    tmp_writer.write_pack(pack);
+    try {
+        tmp_writer.write_pack(pack);
+    } catch(exception& e) {
+        LOG(error) << this->_client_addr << e.what();
+    }
     LOG(debug) << this->_client_addr << " Sent " << pack->name();
 }
 
@@ -163,6 +180,16 @@ void client_connection::handle_login() {
 }
 
 void client_connection::handle_play() {
+     if((mticks() - this->last_sent_ping) > 500) {
+        keep_alive_play_downstream ping_pack(666);
+        this->send_packet(&ping_pack);
+        this->last_sent_ping = mticks();
+     }
+    if((this->last_recv_ping - this->last_sent_ping) > 1000) {
+            LOG(info) << this->_client_addr << " Timed out";
+//            this->active = false;
+    }
+    
     opencraft_packet *inpack = NULL;
      inpack = this->client_reader->read_pack();
         if(inpack != NULL) {
@@ -170,7 +197,10 @@ void client_connection::handle_play() {
              LOG(debug) << this->_client_addr << " Received " << inpack->name();
              int32_t pack_ident = inpack->ident();
                 switch(pack_ident) {
-                 }
+                   case OPENCRAFT_PACKIDENT_KEEP_ALIVE_PLAY_UPSTREAM: {
+                        this->last_recv_ping = mticks();
+                   break;}
+                }
            }
         delete inpack;
         }
