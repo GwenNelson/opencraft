@@ -28,6 +28,13 @@
 #include <boost/bind.hpp>
 #include <boost/thread.hpp>
 
+#include <exception>
+#include <chrono>
+#include <iostream>
+#include <ctime>
+#include <cstdint>
+
+
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -44,6 +51,12 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 
+#include <event2/event.h>
+#include <event2/thread.h>
+#include <event2/listener.h>
+#include <event2/bufferevent.h>
+#include <event2/buffer.h>
+
 #include <string>
 
 using namespace std;
@@ -57,10 +70,25 @@ opencraft_daemon::opencraft_daemon(bool debug_mode, bool daemon_mode, std::strin
    this->_active          = false;
 }
 
-void opencraft_daemon::handle_client(int client_sock_fd, struct sockaddr_in client_addr) {
+double opencraft_daemon::mticks() {
+    typedef std::chrono::high_resolution_clock clock;
+    typedef std::chrono::duration<float, std::milli> duration;
+
+    static clock::time_point start = clock::now();
+    duration elapsed = clock::now() - start;
+
+    return elapsed.count();
 }
 
-void opencraft_daemon::accept_clients() {
+void accept_conn_cb(struct evconnlistener *listener, evutil_socket_t fd, struct sockaddr *address, int socklen, void *ctx) {
+     opencraft_daemon* d = (opencraft_daemon*)ctx;
+     d->accept_client_cb(listener,fd,address,socklen);
+}
+
+void opencraft_daemon::accept_client_cb(struct evconnlistener *listener, evutil_socket_t fd, struct sockaddr *address, int socklen) {
+     struct bufferevent *bev = bufferevent_socket_new(this->ev_base, fd, BEV_OPT_CLOSE_ON_FREE);
+     bufferevent_setcb(bev, echo_read_cb, NULL, echo_event_cb, NULL);
+     bufferevent_enable(bev, EV_READ|EV_WRITE);
 }
 
 void opencraft_daemon::run() {
@@ -72,9 +100,50 @@ void opencraft_daemon::run() {
         this->configure_signals();
      }
      
-     LOG(info) << "Setting up listener port";
+     LOG(info) << "Configuring libevent...";
+     LOG(info) << "Compiled with libevent " << LIBEVENT_VERSION;
+     LOG(info) << "Running with libevent " << event_get_version();
+     if(evthread_use_pthreads()==-1) {
+        LOG(fatal) << "Could not configure pthreads for libevent!";
+        abort();
+     }
 
-     boost::thread accept_thr{boost::bind(&opencraft_daemon::accept_clients, this)};
+     this->ev_base = event_base_new();
+
+     LOG(info) << "Configuring network port...";
+     struct sockaddr_in sin;
+     memset(&sin, 0, sizeof(sin));
+     sin.sin_family = AF_INET;
+     sin.sin_addr.s_addr = htonl(0);
+     sin.sin_port = htons(this->_listen_port);
+
+     this->ev_listener = evconnlistener_new_bind(this->ev_base, accept_conn_cb, (void*)this, LEV_OPT_CLOSE_ON_FREE|LEV_OPT_REUSEABLE, -1, (struct sockaddr*)&sin, sizeof(sin));
+
+     LOG(info) << "Entering mainloop...";
+     this->_active = true;
+
+     // configure time interval for checking libevent events
+     struct timeval tick_interval;
+     tick_interval.tv_sec  = 0;
+     tick_interval.tv_usec = 25000; // half of minecraft tick interval, give plenty of time to compute stuff properly
+     event_base_loopexit(this->ev_base, &tick_interval);
+
+     
+
+     double last_tick  = mticks();
+     double tick_delta = 0.0;
+     while(this->_active) {
+        // first dispatch networking events for half a tick
+        event_base_dispatch(this->ev_base);
+
+        // calculate if it's time to run another tick yet (if not, the loop simply repeats and we do more networking events)
+        tick_delta = mticks() - last_tick;
+        if(tick_delta >= 50) { // if 50ms or more have passed since the last tick, it's time to run another one
+           last_tick = mticks();
+           // DO PER-TICK LOGIC HERE
+        }
+       
+     }
 }
 
 void opencraft_daemon::fork_me_baby() { // harder, yeah

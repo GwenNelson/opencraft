@@ -25,20 +25,24 @@
 #pragma once
 
 #include <string>
+#include <event2/event.h>
+#include <event2/listener.h>
 
 class opencraft_daemon {
    public:
      opencraft_daemon(bool debug_mode, bool daemon_mode, std::string pidfile, std::string install_root, int listen_port);
      void run();
-
+     double mticks();
+     void accept_client_cb(struct evconnlistener *listener, evutil_socket_t fd, struct sockaddr *address, int socklen);
    private:
-     void accept_clients();
-     void handle_client(int client_sock_fd, struct sockaddr_in client_addr);
      void write_pidfile(std::string filename);
      void setup_daemon();
      void configure_stdio();
      void configure_signals();
      void fork_me_baby();
+
+     struct event_base      *ev_base;
+     struct evconnlistener  *ev_listener;
 
      bool                    _active;
      bool                    _debug_mode;

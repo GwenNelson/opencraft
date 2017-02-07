@@ -9,6 +9,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/CMakeFiles")
 FIND_PACKAGE(Boost COMPONENTS system program_options thread log log_setup)
 FIND_PACKAGE(ZLIB REQUIRED)
 find_package(jsoncpp REQUIRED)
+find_package(Libevent2 REQUIRED)
 
 set (CMAKE_CXX_STANDARD 11)
 
@@ -29,10 +30,10 @@ ADD_DEFINITIONS(-DBOOST_LOG_DYN_LINK)
 
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS} ${JSONCPP_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/include ${LIBEVENT2_INCLUDE_DIR} ${CMAKE_SOURCE_DIR}/../libopencraft/include)
 
-FILE(GLOB newsim_src                    ${CMAKE_SOURCE_DIR}/src/*.cpp)
+FILE(GLOB opencraftd_src                    ${CMAKE_SOURCE_DIR}/src/*.cpp)
 
-ADD_EXECUTABLE(newsim ${newsim_src} )
+ADD_EXECUTABLE(opencraftd ${opencraftd_src} )
 
 
-TARGET_LINK_LIBRARIES(newsim ${CMAKE_SOURCE_DIR}/../libopencraft/build/libopencraft.so pthread ${LIBEVENT2_LIBRARIES} ${JSONCPP_LIBRARIES}  ${ZLIB_LIBRARIES} ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(opencraftd ${CMAKE_SOURCE_DIR}/../libopencraft/build/libopencraft.so pthread ${LIBEVENT2_LIBRARIES}  ${JSONCPP_LIBRARIES}  ${ZLIB_LIBRARIES} ${Boost_LIBRARIES})
 

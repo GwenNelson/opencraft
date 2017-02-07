@@ -35,29 +35,12 @@
 
 #include <opencraft_daemon.h>
 #include <libopencraft/version.h>
-
+#include <logging.h>
 
 opencraft_daemon *oc_daemon = NULL;
 
 using namespace std;
 namespace po      = boost::program_options;
-namespace logging = boost::log;
-
-void configure_logging(std::string logfile, bool debug_mode) {
-     if(!debug_mode) {
-       logging::add_file_log(logging::keywords::file_name = logfile,
-                             logging::keywords::rotation_size = 10 * 1024 * 1024,
-                             logging::keywords::time_based_rotation = logging::sinks::file::rotation_at_time_point(0, 0, 0),
-                             logging::keywords::format = "[%TimeStamp%]: %Message%");
-     }
-     if(debug_mode) {
-        logging::core::get()->set_filter(logging::trivial::severity >= logging::trivial::debug);
-     } else {
-        logging::core::get()->set_filter(logging::trivial::severity >= logging::trivial::info);
-     }
-     logging::add_common_attributes();
-}
-
 
 int main(int argc, char** argv) {
     cout << LIBOPENCRAFT_LONG_VER << endl << "Built on " << LIBOPENCRAFT_BUILDDATE << endl << endl;
