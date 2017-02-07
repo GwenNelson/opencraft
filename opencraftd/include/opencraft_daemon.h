@@ -51,6 +51,7 @@ class opencraft_daemon {
      boost::asio::io_service _io_service;
 
      std::map<std::string, client_connection*> _clients;
+     std::vector<std::string> _inactive_clients;
    private:
      void write_pidfile(std::string filename);
      void setup_daemon();

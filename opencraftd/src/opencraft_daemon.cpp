@@ -187,6 +187,13 @@ void opencraft_daemon::run() {
         // first dispatch networking events for half a tick
         event_base_dispatch(this->ev_base);
 
+        // cleanup any inactive clients
+        for(int i=0; i < this->_inactive_clients.size(); i++) {
+               delete this->_clients[this->_inactive_clients[i]];
+               this->_clients.erase(this->_inactive_clients[i]);
+        }
+        this->_inactive_clients.clear();
+
         // calculate if it's time to run another tick yet (if not, the loop simply repeats and we do more networking events)
         tick_delta = mticks() - last_tick;
         if(tick_delta >= 50) { // if 50ms or more have passed since the last tick, it's time to run another one
