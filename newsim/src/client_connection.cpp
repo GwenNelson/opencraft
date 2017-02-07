@@ -87,6 +87,7 @@ client_connection::client_connection(int sock_fd, std::string client_addr) {
     this->_client_addr   = client_addr;
     this->client_reader  = new packet_reader(sock_fd,this->proto_mode,false);
     this->client_writer  = new packet_writer(sock_fd);
+    this->sent_initpos   = false;
     this->active         = true;
 }
 
@@ -101,9 +102,11 @@ void client_connection::send_packet(opencraft::packets::opencraft_packet* pack) 
 }
 
 void client_connection::handle_client_sending() {
+     std::time_t now = std::time(0);
+     boost::random::mt19937 gen{static_cast<std::uint32_t>(now)};
      this->last_sent_ping = mticks();
      while(this->active) {
-        usleep(50000); // client tick
+        usleep(500000); // client tick
         if(!this->active) return;
         if((mticks() - this->last_sent_ping) > 2000) {
            keep_alive_play_downstream ping_pack(666);
@@ -115,8 +118,15 @@ void client_connection::handle_client_sending() {
            this->active = false;
            return;
         }
-        entity_play_downstream ent_pack(this->entity_id);
-        this->send_packet(&ent_pack);
+        if(this->dirty_pos) {
+           player_position_and_look_play_downstream initial_pos(this->x, this->y, this->z,this->yaw,this->pitch,this->on_ground,666);
+           this->send_packet(&initial_pos);
+           this->dirty_pos = false;
+           if(!this->sent_initpos) this->sent_initpos = true;
+        } else {
+           entity_play_downstream entity_pack(this->entity_id);
+           this->send_packet(&entity_pack);
+        }
      }
 }
 
@@ -191,10 +201,16 @@ void client_connection::handle_login() {
 
                          spawn_position_play_downstream spawn_pos(std::tuple<int,int,int>(100,63,100));
                          this->send_packet(&spawn_pos);
-
-                         player_position_and_look_play_downstream initial_pos(100.0, 63.0, 100.0,0.0f,0.0f,0,666);
-                         this->send_packet(&initial_pos);
+			
+                         this->dirty_pos = true;
+			 this->x = 100.0;
+			 this->y = 63.0;
+			 this->z = 100.0;
+			 this->yaw = 0.0f;
+			 this->pitch = 0.0f;
+			 this->on_ground = true;
                          boost::thread ping_t{boost::bind(&client_connection::handle_client_sending,this)};
+                         while(!this->sent_initpos) usleep(500);
                     break;}
                  }
            }
@@ -216,12 +232,16 @@ void client_connection::handle_play() {
                         this->last_recv_ping = mticks();
                    break;}
                    case OPENCRAFT_PACKIDENT_PLAYER_POSITION_AND_LOOK_PLAY_UPSTREAM: {
-                        player_position_and_look_play_upstream* pos_pack = (player_position_and_look_play_upstream*)inpack;
-                        this->x = pos_pack->a;
-                        this->y = pos_pack->b;
-                        this->z = pos_pack->c;
-                        player_position_and_look_play_downstream initial_pos(this->x, this->y, this->z,0.0f,0.0f,0,666);
-                        this->send_packet(&initial_pos);
+                        if(this->sent_initpos) {
+                           player_position_and_look_play_upstream* pos_pack = (player_position_and_look_play_upstream*)inpack;
+                           this->x         = pos_pack->a;
+                           this->y         = pos_pack->b;
+                           this->z         = pos_pack->c;
+                           this->yaw       = pos_pack->d;
+                           this->pitch     = pos_pack->e;
+                           this->on_ground = pos_pack->f;
+                         //  this->dirty_pos = true;
+                        }
                    break;}
                 }
            }

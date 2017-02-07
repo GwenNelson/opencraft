@@ -31,6 +31,7 @@
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp> 
+#include <boost/thread.hpp>
 
 #include <string>
 
@@ -53,7 +54,12 @@ class client_connection {
      double x;
      double y;
      double z;
-
+     float yaw;
+     float pitch;
+     bool on_ground;
+     bool dirty_pos;
+     bool sent_initpos;
+     boost::mutex _pos_mtx;
      int _sock_fd;
      int entity_id;
      unsigned char game_mode;
