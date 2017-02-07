@@ -83,7 +83,7 @@ void configure_logging(std::string logfile, bool debug_mode) {
      logging::add_common_attributes();
      event_set_log_callback(libevent_log_cb);
      event_set_fatal_callback(_libevent_fatal_cb);
-     event_enable_debug_logging(EVENT_DBG_ALL);
+     event_enable_debug_logging(EVENT_DBG_NONE); // TODO: Make this configurable
 
 }
 

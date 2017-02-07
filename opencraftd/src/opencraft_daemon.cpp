@@ -86,8 +86,13 @@ void accept_conn_cb(struct evconnlistener *listener, evutil_socket_t fd, struct 
 }
 
 void read_ready_cb(evutil_socket_t fd, short what, void* arg) {
-     opencraft_daemon* d = (opencraft_daemon*)arg;
-     d->_io_service.post(boost::bind(&opencraft_daemon::read_client_cb, d, fd));     
+     client_connection* client = (client_connection*)arg;
+     client->_daemon->_io_service.post(boost::bind(&client_connection::read_cb, client, fd));
+}
+
+void write_ready_cb(evutil_socket_t fd, short what, void* arg) {
+     client_connection* client = (client_connection*)arg;
+     client->_daemon->_io_service.post(boost::bind(&client_connection::write_cb, client, fd));
 }
 
 void opencraft_daemon::accept_client_cb(struct evconnlistener *listener, evutil_socket_t fd, struct sockaddr *address, int socklen) {
@@ -95,14 +100,17 @@ void opencraft_daemon::accept_client_cb(struct evconnlistener *listener, evutil_
      evutil_inet_ntop(AF_INET, &(((sockaddr_in*)address)->sin_addr), addr_ip, 200); 
      uint16_t addr_port = ntohs( ((struct sockaddr_in*)address)->sin_port);
 
-     LOG(info) << "New connection from " << addr_ip << ":" <<  to_string(addr_port);
+     std::string client_addr = std::string(addr_ip) + ":" + to_string(addr_port);
 
-     // TODO - put the event, socket address and other stuff into a client_connection class, have read_client_cb pass packets to it for handling
-     struct event *read_ev = event_new(this->ev_base,fd,EV_READ|EV_PERSIST,read_ready_cb,this);
-     event_add(read_ev,NULL);
-}
+     client_connection *new_conn  = new client_connection(client_addr,this);
+     this->_clients[client_addr] = new_conn;
 
-void opencraft_daemon::read_client_cb(evutil_socket_t fd) {
+     LOG(info) << "New connection from " << client_addr;
+
+     new_conn->read_ev  = event_new(this->ev_base,fd,EV_READ|EV_PERSIST,read_ready_cb,new_conn);
+     new_conn->write_ev = event_new(this->ev_base,fd,EV_WRITE|EV_PERSIST,write_ready_cb,new_conn);
+     event_add(new_conn->read_ev,NULL);
+     event_add(new_conn->write_ev,NULL);
 }
 
 void opencraft_daemon::run() {
