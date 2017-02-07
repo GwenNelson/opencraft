@@ -38,6 +38,7 @@ class opencraft_daemon {
      void run();
      double mticks();
      void accept_client_cb(struct evconnlistener *listener, evutil_socket_t fd, struct sockaddr *address, int socklen);
+     void read_client_cb(evutil_socket_t fd);
      boost::asio::io_service _io_service;
    private:
      void write_pidfile(std::string filename);

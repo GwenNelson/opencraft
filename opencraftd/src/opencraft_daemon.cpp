@@ -85,14 +85,24 @@ void accept_conn_cb(struct evconnlistener *listener, evutil_socket_t fd, struct 
      d->_io_service.post(boost::bind(&opencraft_daemon::accept_client_cb, d, listener, fd, address, socklen));
 }
 
+void read_ready_cb(evutil_socket_t fd, short what, void* arg) {
+     opencraft_daemon* d = (opencraft_daemon*)arg;
+     d->_io_service.post(boost::bind(&opencraft_daemon::read_client_cb, d, fd));     
+}
+
 void opencraft_daemon::accept_client_cb(struct evconnlistener *listener, evutil_socket_t fd, struct sockaddr *address, int socklen) {
      char addr_ip[200];
      evutil_inet_ntop(AF_INET, &(((sockaddr_in*)address)->sin_addr), addr_ip, 200); 
      uint16_t addr_port = ntohs( ((struct sockaddr_in*)address)->sin_port);
+
      LOG(info) << "New connection from " << addr_ip << ":" <<  to_string(addr_port);
-/*     struct bufferevent *bev = bufferevent_socket_new(this->ev_base, fd, BEV_OPT_CLOSE_ON_FREE);
-     bufferevent_setcb(bev, echo_read_cb, NULL, echo_event_cb, NULL);
-     bufferevent_enable(bev, EV_READ|EV_WRITE);*/
+
+     // TODO - put the event, socket address and other stuff into a client_connection class, have read_client_cb pass packets to it for handling
+     struct event *read_ev = event_new(this->ev_base,fd,EV_READ|EV_PERSIST,read_ready_cb,this);
+     event_add(read_ev,NULL);
+}
+
+void opencraft_daemon::read_client_cb(evutil_socket_t fd) {
 }
 
 void opencraft_daemon::run() {
