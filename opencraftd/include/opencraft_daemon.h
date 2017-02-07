@@ -28,12 +28,17 @@
 #include <event2/event.h>
 #include <event2/listener.h>
 
+#include <boost/asio.hpp>
+#include <boost/thread.hpp>
+#include <boost/bind.hpp>
+
 class opencraft_daemon {
    public:
      opencraft_daemon(bool debug_mode, bool daemon_mode, std::string pidfile, std::string install_root, int listen_port);
      void run();
      double mticks();
      void accept_client_cb(struct evconnlistener *listener, evutil_socket_t fd, struct sockaddr *address, int socklen);
+     boost::asio::io_service _io_service;
    private:
      void write_pidfile(std::string filename);
      void setup_daemon();
@@ -43,6 +48,9 @@ class opencraft_daemon {
 
      struct event_base      *ev_base;
      struct evconnlistener  *ev_listener;
+
+
+     boost::thread_group     _thread_pool;
 
      bool                    _active;
      bool                    _debug_mode;

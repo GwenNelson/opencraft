@@ -33,7 +33,7 @@
 #include <iostream>
 #include <ctime>
 #include <cstdint>
-
+#include <string>
 
 #include <unistd.h>
 #include <stdlib.h>
@@ -82,13 +82,17 @@ double opencraft_daemon::mticks() {
 
 void accept_conn_cb(struct evconnlistener *listener, evutil_socket_t fd, struct sockaddr *address, int socklen, void *ctx) {
      opencraft_daemon* d = (opencraft_daemon*)ctx;
-     d->accept_client_cb(listener,fd,address,socklen);
+     d->_io_service.post(boost::bind(&opencraft_daemon::accept_client_cb, d, listener, fd, address, socklen));
 }
 
 void opencraft_daemon::accept_client_cb(struct evconnlistener *listener, evutil_socket_t fd, struct sockaddr *address, int socklen) {
-     struct bufferevent *bev = bufferevent_socket_new(this->ev_base, fd, BEV_OPT_CLOSE_ON_FREE);
+     char addr_ip[200];
+     evutil_inet_ntop(AF_INET, &(((sockaddr_in*)address)->sin_addr), addr_ip, 200); 
+     uint16_t addr_port = ntohs( ((struct sockaddr_in*)address)->sin_port);
+     LOG(info) << "New connection from " << addr_ip << ":" <<  to_string(addr_port);
+/*     struct bufferevent *bev = bufferevent_socket_new(this->ev_base, fd, BEV_OPT_CLOSE_ON_FREE);
      bufferevent_setcb(bev, echo_read_cb, NULL, echo_event_cb, NULL);
-     bufferevent_enable(bev, EV_READ|EV_WRITE);
+     bufferevent_enable(bev, EV_READ|EV_WRITE);*/
 }
 
 void opencraft_daemon::run() {
@@ -100,6 +104,12 @@ void opencraft_daemon::run() {
         this->configure_signals();
      }
      
+     LOG(info) << "Configuring threadpool with 8 threads...";
+     boost::asio::io_service::work work(this->_io_service);
+     for (std::size_t i = 0; i < 8; ++i) { // TODO: make this configurable again
+         this->_thread_pool.create_thread(boost::bind(&boost::asio::io_service::run, &(this->_io_service)));
+     }
+
      LOG(info) << "Configuring libevent...";
      LOG(info) << "Compiled with libevent " << LIBEVENT_VERSION;
      LOG(info) << "Running with libevent " << event_get_version();
