@@ -176,7 +176,7 @@ void opencraft_daemon::run() {
      // configure time interval for checking libevent events
      struct timeval tick_interval;
      tick_interval.tv_sec  = 0;
-     tick_interval.tv_usec = 49000;
+     tick_interval.tv_usec = 25000;
      event_base_loopexit(this->ev_base, &tick_interval);
 
      
