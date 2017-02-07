@@ -204,6 +204,15 @@ void opencraft_daemon::run() {
      }
 }
 
+std::tuple<int,int,int> opencraft_daemon::get_spawn_pos() {
+    return std::tuple<int,int,int>(100,63,100); // TODO - make configurable
+}
+
+// at some point this should be switched to use a database or similar
+user_profile* opencraft_daemon::profile_from_username(std::string username) {
+    return new user_profile(username, this);
+}
+
 void opencraft_daemon::fork_me_baby() { // harder, yeah
      if(fork() >0) exit(0);
 }

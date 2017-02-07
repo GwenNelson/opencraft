@@ -33,12 +33,14 @@
 #include <boost/bind.hpp>
 
 #include <map>
+#include <tuple>
 
 #include <client_connection.h>
 
 #include <jsoncpp/json/value.h>
 #include <jsoncpp/json/writer.h>
 
+class user_profile;
 
 class opencraft_daemon {
    public:
@@ -52,6 +54,9 @@ class opencraft_daemon {
 
      std::map<std::string, client_connection*> _clients;
      std::vector<std::string> _inactive_clients;
+
+     std::tuple<int,int,int> get_spawn_pos();
+     user_profile* profile_from_username(std::string username);
    private:
      void write_pidfile(std::string filename);
      void setup_daemon();
