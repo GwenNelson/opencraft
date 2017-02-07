@@ -147,7 +147,7 @@ void opencraft_daemon::run() {
      
      LOG(info) << "Configuring threadpool...";
      boost::asio::io_service::work work(this->_io_service);
-     for (std::size_t i = 0; i < 4; ++i) { // TODO: make this configurable again
+     for (std::size_t i = 0; i < 8; ++i) { // TODO: make this configurable again
          this->_thread_pool.create_thread(boost::bind(&boost::asio::io_service::run, &(this->_io_service)));
      }
 
@@ -168,7 +168,7 @@ void opencraft_daemon::run() {
      sin.sin_addr.s_addr = htonl(0);
      sin.sin_port = htons(this->_listen_port);
 
-     this->ev_listener = evconnlistener_new_bind(this->ev_base, accept_conn_cb, (void*)this, LEV_OPT_CLOSE_ON_FREE|LEV_OPT_REUSEABLE, -1, (struct sockaddr*)&sin, sizeof(sin));
+     this->ev_listener = evconnlistener_new_bind(this->ev_base, accept_conn_cb, (void*)this, LEV_OPT_THREADSAFE|LEV_OPT_CLOSE_ON_FREE|LEV_OPT_REUSEABLE, -1, (struct sockaddr*)&sin, sizeof(sin));
 
      LOG(info) << "Entering mainloop...";
      this->_active = true;
