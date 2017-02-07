@@ -36,13 +36,21 @@
 
 #include <client_connection.h>
 
+#include <jsoncpp/json/value.h>
+#include <jsoncpp/json/writer.h>
+
+
 class opencraft_daemon {
    public:
      opencraft_daemon(bool debug_mode, bool daemon_mode, std::string pidfile, std::string install_root, int listen_port);
      void run();
      double mticks();
      void accept_client_cb(struct evconnlistener *listener, evutil_socket_t fd, struct sockaddr *address, int socklen);
+
+     std::string get_status_json();
      boost::asio::io_service _io_service;
+
+     std::map<std::string, client_connection*> _clients;
    private:
      void write_pidfile(std::string filename);
      void setup_daemon();
@@ -52,7 +60,7 @@ class opencraft_daemon {
 
      struct event_base      *ev_base;
      struct evconnlistener  *ev_listener;
-     std::map<std::string, client_connection*> _clients;
+
 
      boost::thread_group     _thread_pool;
 

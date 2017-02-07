@@ -71,6 +71,7 @@ int main(int argc, char** argv) {
 
     // read the next packet and dump it
     opencraft_packet* inpack = client_reader.read_pack();
+    cout << inpack->name() << endl;
     cout << ((status_response_status_downstream*)inpack)->a;
     delete inpack;
 

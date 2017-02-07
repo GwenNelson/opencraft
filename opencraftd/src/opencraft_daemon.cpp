@@ -95,6 +95,29 @@ void write_ready_cb(evutil_socket_t fd, short what, void* arg) {
      client->_daemon->_io_service.post(boost::bind(&client_connection::write_cb, client, fd));
 }
 
+std::string opencraft_daemon::get_status_json() {
+     Json::Value Version;
+     Version["name"]     = "OpenCraft";
+     Version["protocol"] = OPENCRAFT_PROTOCOL_VERSION;
+     
+     Json::Value Players;
+     Players["online"]   = 0;   // TODO: fix this to actually count clients connected
+     Players["max"]      = 100; // TODO: make this a configurable variable
+
+     Json::Value Description;
+     Description["text"] = "OpenCraft server";
+
+     Json::Value resp_val;
+     resp_val["version"]     = Version;
+     resp_val["players"]     = Players;
+     resp_val["description"] = Description;
+     
+     Json::FastWriter Writer;
+     std::string resp_str = Writer.write(resp_val);
+     return resp_str;
+}
+
+
 void opencraft_daemon::accept_client_cb(struct evconnlistener *listener, evutil_socket_t fd, struct sockaddr *address, int socklen) {
      char addr_ip[200];
      evutil_inet_ntop(AF_INET, &(((sockaddr_in*)address)->sin_addr), addr_ip, 200); 
@@ -122,9 +145,9 @@ void opencraft_daemon::run() {
         this->configure_signals();
      }
      
-     LOG(info) << "Configuring threadpool with 8 threads...";
+     LOG(info) << "Configuring threadpool...";
      boost::asio::io_service::work work(this->_io_service);
-     for (std::size_t i = 0; i < 8; ++i) { // TODO: make this configurable again
+     for (std::size_t i = 0; i < 4; ++i) { // TODO: make this configurable again
          this->_thread_pool.create_thread(boost::bind(&boost::asio::io_service::run, &(this->_io_service)));
      }
 
@@ -153,7 +176,7 @@ void opencraft_daemon::run() {
      // configure time interval for checking libevent events
      struct timeval tick_interval;
      tick_interval.tv_sec  = 0;
-     tick_interval.tv_usec = 25000; // half of minecraft tick interval, give plenty of time to compute stuff properly
+     tick_interval.tv_usec = 49000;
      event_base_loopexit(this->ev_base, &tick_interval);
 
      
