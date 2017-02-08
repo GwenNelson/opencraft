@@ -119,11 +119,10 @@ std::string opencraft_daemon::get_status_json() {
 
 
 void opencraft_daemon::accept_client_cb(struct evconnlistener *listener, evutil_socket_t fd, struct sockaddr *address, int socklen) {
-     char addr_ip[200];
-     evutil_inet_ntop(AF_INET, &(((sockaddr_in*)address)->sin_addr), addr_ip, 200); 
      uint16_t addr_port = ntohs( ((struct sockaddr_in*)address)->sin_port);
+     std::string client_addr = std::string(inet_ntoa(((struct sockaddr_in*)address)->sin_addr)) + ":" + to_string(addr_port);
 
-     std::string client_addr = std::string(addr_ip) + ":" + to_string(addr_port);
+
 
      client_connection *new_conn  = new client_connection(client_addr,this);
      this->_clients[client_addr] = new_conn;
