@@ -24,6 +24,7 @@
 
 #include <common.h>
 #include <opencraft_appstate_joingame.h>
+#include <opencraft_appstate_ingame.h>
 #include <opencraft_video.h>
 #include <r_2d.h>
 
@@ -31,6 +32,7 @@
 
 extern opencraft_video *oc_video;
 extern void* default_font;
+extern opencraft_appstate *oc_appstate;
 
 opencraft_appstate_joingame::opencraft_appstate_joingame() {
     oc_video->enter_2d();
@@ -105,7 +107,8 @@ void opencraft_appstate_joingame::update_state(SDL_Event *ev) {
      }
      switch(ev->type) {
         case SDL_MOUSEBUTTONDOWN:
-          LOG(info) << "Trying to connect to " << this->connect_to;
+          oc_appstate = new opencraft_appstate_ingame(this->connect_to);
+          delete this;
         break;
      }
 }

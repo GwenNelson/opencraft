@@ -57,7 +57,7 @@ void opencraft_appstate_ingame::load_stuff() {
      this->loading_text_h = text_h;
      this->loading_tex_id = tex_id;
      this->loading_x = (oc_video->res_w/2) - (this->loading_text_w/2);
-     this->loading_y = 10.0f;
+     this->loading_y = (oc_video->res_h/2) - (this->loading_text_h/2);
 
 
      this->dirtblock_gl_tex_id  = load_texture(std::string("blocks/dirt.png"));
