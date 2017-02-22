@@ -68,7 +68,7 @@ void console_defcmd(int argc, char** argv) {
 
 void cmd_cb(OGLCONSOLE_Console console, char* cmdline) {
      if(strlen(cmdline)==0) return;
-     LOG(info) << "Console command: " << cmdline;
+     LOG(debug) << "Console command: " << cmdline;
      int i;
      char **argv = NULL;
      int argc;
@@ -135,5 +135,5 @@ void console_printf(const char* fmt, ...) {
      vsnprintf(buf,1024,fmt,args);
      va_end(args);
      OGLCONSOLE_Print(buf);
-     LOG(info) << std::string(buf);
+//     LOG(info) << std::string(buf);
 }
