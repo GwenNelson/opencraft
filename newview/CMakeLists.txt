@@ -4,15 +4,17 @@ cmake_policy(SET CMP0004 OLD)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/CMakeFiles")
 
-FIND_PACKAGE(PythonInterp 2.7 REQUIRED)
-FIND_PACKAGE(PythonLibs   2.7 REQUIRED)
 
-FIND_PACKAGE(Boost COMPONENTS system program_options thread log log_setup python)
+FIND_PACKAGE(Boost COMPONENTS system program_options thread log log_setup)
 
 find_package(SDL2 REQUIRED)
 INCLUDE(FindPkgConfig)
 PKG_SEARCH_MODULE(FREETYPE2 REQUIRED freetype2)
 find_package(SDL2TTF REQUIRED)
+
+find_package(jsoncpp REQUIRED)
+find_package(Libevent2 REQUIRED)
+
 
 set (CMAKE_CXX_STANDARD 11)
 
@@ -30,7 +32,7 @@ endif()
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-narrowing")
 
 ADD_DEFINITIONS(-DBOOST_LOG_DYN_LINK)
-INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS} ${PYTHON_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS} ${SDL2TTF_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/soil ${CMAKE_SOURCE_DIR}/oglconsole  ${CMAKE_SOURCE_DIR}/../libopencraft/include)
+INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS} ${SDL2TTF_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/soil ${CMAKE_SOURCE_DIR}/oglconsole  ${CMAKE_SOURCE_DIR}/../libopencraft/include)
 
 FILE(GLOB newview_src     ${CMAKE_SOURCE_DIR}/src/*.cpp)
 FILE(GLOB soil_src        ${CMAKE_SOURCE_DIR}/soil/*.c)
@@ -43,7 +45,7 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 endif()
 
 
-TARGET_LINK_LIBRARIES(newview physfs pthread  ${CMAKE_SOURCE_DIR}/../libopencraft/build/libopencraft.so ${EXTRA_GL}  ${FREETYPE2_LIBRARIES} ${SDL2_LIBRARIES} ${SDL2TTF_LIBRARY} ${PYTHON_LIBRARIES} ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(newview physfs pthread  ${CMAKE_SOURCE_DIR}/../libopencraft/build/libopencraft.so ${EXTRA_GL}  ${FREETYPE2_LIBRARIES} ${SDL2_LIBRARIES} ${SDL2TTF_LIBRARY}  ${Boost_LIBRARIES})
 
 ADD_CUSTOM_COMMAND( OUTPUT ${CMAKE_SOURCE_DIR}/include/version.h
                     COMMAND ${CMAKE_SOURCE_DIR}/autogen.sh
