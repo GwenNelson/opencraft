@@ -26,6 +26,10 @@
 #include <opencraft_console_cmds.h>
 #include <opencraft_console.h>
 #include <opencraft_video.h>
+#include <opencraft_cvars.h>
+#include <physfs.h>
+
+extern opencraft_cvars* oc_cvars;
 
 static struct cons_cmd builtin_commands[] = {
   {"help", "Displays usage information",
@@ -125,6 +129,32 @@ void cmd_mount(int argc, char** argv) {
 }
 
 void cmd_set(int argc, char** argv) {
+     if(argc==1) {
+        oc_cvars->dump_cvars();
+        return;
+     }
+     switch(argv[1][0]) {
+         case 's':
+            oc_cvars->set_cvar_s(argv[2],argv[3]);
+            console_printf("%s=\"%s\"\n",argv[2],argv[3]);
+         break;
+         case 'i':
+            oc_cvars->set_cvar_i(argv[2],atoi(argv[3]));
+            console_printf("%s=%d\n",argv[2],atoi(argv[3]));
+         break;
+         case 'f':
+            oc_cvars->set_cvar_f(argv[2],((float)atof(argv[3])));
+            console_printf("%s=%f\n",argv[2],atof(argv[3]));
+         break;
+         case 'b':
+            if(strcmp(argv[3],"true")==0)  oc_cvars->set_cvar_b(argv[2],true);
+            if(strcmp(argv[3],"false")==0) oc_cvars->set_cvar_b(argv[2],false);
+            console_printf("%s=%s",argv[2],argv[3]);
+         break;
+         default:
+            console_printf("Error: invalid data type %s\n",argv[1]);
+         break;
+     }
 }
 
 void cmd_help(int argc, char** argv) {

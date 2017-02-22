@@ -39,6 +39,7 @@
 #include <opencraft_appstate_menu.h>
 #include <opencraft_console.h>
 #include <opencraft_console_cmds.h>
+#include <opencraft_cvars.h>
 #include <r_2d.h>
 
 #include <oglconsole.h>
@@ -58,6 +59,7 @@ namespace logging = boost::log;
 
 opencraft_video    *oc_video     = NULL;
 opencraft_appstate *oc_appstate  = NULL;
+opencraft_cvars    *oc_cvars     = NULL;
 opencraft_console  *oc_console   = NULL;
 void*               default_font = NULL;
 bool is_running                  = true;
@@ -148,6 +150,8 @@ int main(int argc, char **argv) {
 
     unsigned int res_w = vm["width"].as<unsigned int>();
     unsigned int res_h = vm["height"].as<unsigned int>();
+
+    oc_cvars = new opencraft_cvars();
 
     oc_video = new opencraft_video(fullscreen_mode,res_w,res_h);
     oc_video->init_video();
