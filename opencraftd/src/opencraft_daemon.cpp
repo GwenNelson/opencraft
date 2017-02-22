@@ -122,8 +122,6 @@ void opencraft_daemon::accept_client_cb(struct evconnlistener *listener, evutil_
      uint16_t addr_port = ntohs( ((struct sockaddr_in*)address)->sin_port);
      std::string client_addr = std::string(inet_ntoa(((struct sockaddr_in*)address)->sin_addr)) + ":" + to_string(addr_port);
 
-
-
      client_connection *new_conn  = new client_connection(client_addr,this);
      this->_clients[client_addr] = new_conn;
 
