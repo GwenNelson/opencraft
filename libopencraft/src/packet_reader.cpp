@@ -44,13 +44,14 @@ packet_reader::packet_reader(int _sockfd, int _proto_mode, bool _is_client) {
 
 opencraft_packet* packet_reader::read_pack() {
     int packsize = this->read_varint();
-    packsize += varint_size(packsize)-1;
+    unsigned char buf[5];
+    recv(this->sockfd,(void*)buf,varint_size(packsize),MSG_WAITALL);
     memset((void*)this->recvbuf,0,sizeof(this->recvbuf));
     int read_bytes = recv(this->sockfd,(void*)this->recvbuf,packsize,MSG_WAITALL);
     if(read_bytes == -1) return NULL;
     std::vector<unsigned char> tmpbuf;
     
-    tmpbuf.assign(this->recvbuf, this->recvbuf+read_bytes);
+    tmpbuf.assign(this->recvbuf, this->recvbuf+packsize);
 
     return opencraft_packet::unpack_packet(this->proto_mode,this->is_client,tmpbuf);
 }
@@ -59,6 +60,7 @@ int packet_reader::read_varint() {
     int retval=0;
     unsigned char buf[5];
     int read_bytes = recv(this->sockfd,buf,5,MSG_PEEK);
+    if(buf[0]==0) return 0;
     for(int i=0; i < 5; ++i) {
         retval |= (buf[i] & 0x7F) << (i*7);
         if(!(buf[i] & 0x80)) {

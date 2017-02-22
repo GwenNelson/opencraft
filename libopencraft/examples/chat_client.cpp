@@ -125,6 +125,8 @@ int main(int argc, char** argv) {
     bool waiting = true;
     // read the login success packet and dump it
     opencraft_packet *_inpack = NULL;
+    login_success_login_downstream *login_succ = NULL;
+
     while(waiting) {
       _inpack = NULL;
       _inpack = client_reader.read_pack();
@@ -138,10 +140,13 @@ int main(int argc, char** argv) {
            cout << p->a << endl;
            abort();
          break;}
+         case OPENCRAFT_PACKIDENT_LOGIN_SUCCESS_LOGIN_DOWNSTREAM: {
+           login_succ = (login_success_login_downstream*)_inpack;
+           waiting = false;
+         break;}
       }
     }
 
-    login_success_login_downstream *login_succ = (login_success_login_downstream*)_inpack;
     
     cout << "Got UUID " << login_succ->a << endl;
 
