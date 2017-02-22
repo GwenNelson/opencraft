@@ -1,0 +1,33 @@
+Simple launcher app
+
+Features:
+  Multiple servers and clients via modular design
+  Choose server to run
+    Cuberite
+    opencraftd
+    Others
+  Choose client to run
+    Opencraft client
+    Mojang client - until a totally free replacement is stable
+    others
+  Choose API servers to use
+    Used for publishing servers, getting user skins etc
+    Offer ability to download user skins from API A and publish server on API B and C etc
+    Mojang servers - until totally free replacement is stable
+  Profiles
+    Each profile configures username, preferred server(s) and preferred client
+    Multiple server/client versions - 1 per profile
+
+Downloads:
+  For each client/server an installer may be provided that downloads a binary and installs it
+   Optional compile from source option
+
+
+Split core/UI:
+  Per-platform UI module + header file
+  Core in main code
+
+Targeted platforms (in order of intended development):
+  GNU/Linux
+  OS X
+  Windows
