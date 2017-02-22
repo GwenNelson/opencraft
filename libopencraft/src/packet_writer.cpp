@@ -44,7 +44,7 @@ void packet_writer::write_pack(opencraft_packet *pack) {
      
      std::copy(packed.begin(), packed.end(), this->sendbuf);
 
-     send(this->sockfd,this->sendbuf,packed.size()+1,MSG_NOSIGNAL);
+     send(this->sockfd,this->sendbuf,packed.size(),MSG_NOSIGNAL);
 }
 
 

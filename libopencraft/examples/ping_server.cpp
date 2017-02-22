@@ -65,13 +65,16 @@ int main(int argc, char** argv) {
     handshake_handshaking_upstream hspack(OPENCRAFT_PROTOCOL_VERSION,std::string(OPENCRAFT_DEFAULT_SERVER),OPENCRAFT_DEFAULT_TCP_PORT,OPENCRAFT_STATE_STATUS);
     client_writer.write_pack(&hspack);
 
+
     // create a status request packet and write it
     status_request_status_upstream status_req;
     client_writer.write_pack(&status_req);
 
+
+    client_reader.proto_mode = OPENCRAFT_STATE_STATUS;
+ 
     // read the next packet and dump it
     opencraft_packet* inpack = client_reader.read_pack();
-    cout << inpack->name() << endl;
     cout << ((status_response_status_downstream*)inpack)->a;
     delete inpack;
 

@@ -57,6 +57,8 @@ bool running;
 bool ingame = false;
 int sockfd;
 
+
+
 void chat_in() {
      opencraft::packets::packet_writer chat_writer(sockfd);
      while(!ingame) usleep(1000);
@@ -100,20 +102,47 @@ int main(int argc, char** argv) {
     // connect to localhost:25565 and then setup a packet reader and writer
     connect(sockfd, (struct sockaddr*)&server_addr, sizeof(struct sockaddr_in));
     opencraft::packets::packet_reader client_reader(sockfd,OPENCRAFT_STATE_LOGIN,true);
-    opencraft::packets::packet_writer client_writer(sockfd);
+
+    opencraft::packets::packet_writer hs_writer(sockfd);
 
     // create a handshake packet and write it
     handshake_handshaking_upstream hspack(OPENCRAFT_PROTOCOL_VERSION,std::string(OPENCRAFT_DEFAULT_SERVER),OPENCRAFT_DEFAULT_TCP_PORT,OPENCRAFT_STATE_LOGIN);
-    client_writer.write_pack(&hspack);
+    hs_writer.write_pack(&hspack);
+     
+    cout << "Sent handshake" << endl;
 
     // create a login packet and write it
     std::string name = argv[1];
+
+
     login_start_login_upstream login_req(name);
-    client_writer.write_pack(&login_req);
+    opencraft::packets::packet_writer login_writer(sockfd);
+    login_writer.write_pack(&login_req);
 
+    cout << "Sent login" << endl;
+
+
+    bool waiting = true;
     // read the login success packet and dump it
-    login_success_login_downstream *login_succ = client_reader.read_pack();
+    opencraft_packet *_inpack = NULL;
+    while(waiting) {
+      _inpack = NULL;
+      _inpack = client_reader.read_pack();
+      cout << "ident " << _inpack->ident() << endl;
+      cout << "Got " << _inpack->name() << endl;
+      cout << _inpack->dump_hex() << endl;
+      int32_t pack_ident = _inpack->ident();
+      switch(pack_ident) {
+         case OPENCRAFT_PACKIDENT_LOGIN_DISCONNECT_LOGIN_DOWNSTREAM: {
+           login_disconnect_login_downstream* p=(login_disconnect_login_downstream*)_inpack;
+           cout << p->a << endl;
+           abort();
+         break;}
+      }
+    }
 
+    login_success_login_downstream *login_succ = (login_success_login_downstream*)_inpack;
+    
     cout << "Got UUID " << login_succ->a << endl;
 
     // switch to play mode
@@ -138,7 +167,7 @@ int main(int argc, char** argv) {
                      double  y           = ((player_position_and_look_play_downstream*)inpack)->b;
                      double  z           = ((player_position_and_look_play_downstream*)inpack)->c;
                      teleport_confirm_play_upstream teleport_pack(teleport_id);
-                     client_writer.write_pack(&teleport_pack);
+//                     client_writer.write_pack(&teleport_pack);
                      ingame = true;
                      break;
                 }
@@ -154,7 +183,7 @@ int main(int argc, char** argv) {
                 case OPENCRAFT_PACKIDENT_KEEP_ALIVE_PLAY_DOWNSTREAM: {
                      int32_t ack_id = ((keep_alive_play_downstream*)inpack)->a;
                      keep_alive_play_upstream ack_pack(ack_id);
-                     client_writer.write_pack(&ack_pack);
+//                     client_writer.write_pack(&ack_pack);
                      break;
                 }
              }
