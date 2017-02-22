@@ -4,7 +4,7 @@ This is an attempt to rewrite minecraft as free software, currently a work in pr
 
 It is split into 3 components (and some random old legacy stuff) named after similar components from Second Life because i'm nostalgic as hell:
 
-+ newsim: the server component, needed even for single player games
++ opencraftd: the server component, needed even for single player games
 
 + newview: the client component, this is what you run if you want to actually play the game
 
@@ -12,23 +12,23 @@ It is split into 3 components (and some random old legacy stuff) named after sim
 
 All game logic is handled by the server whenever possible, so both components are required to run the game.
 
-## Build instructions - server (newsim)
+## Build instructions - server (opencraftd)
+
+Note that opencraftd is currently not under development, it is recommended you use cuberite instead (https://www.cuberite.org).
 
 First ensure you have the relevant dependencies installed, newsim requires the following C++ development packages that should be available on any modern GNU/Linux distro:
 
 * CMake version 3.0 or later
 * Boost version 1.55 or later
 * A working C++ compiler with C++11 support - developed & tested on gcc 4.9.2-10 from Debian Jessie
-* libzmqpp - see https://github.com/zeromq/zmqpp
 * jsoncpp - see https://github.com/open-source-parsers/jsoncpp
 
 You can then build the server by doing the following:
- 1. cd newsim/
- 2. ./autogen.sh
- 3. mkdir -p build/
- 4. cd build/
- 5. cmake ..
- 6. make
+ 1. cd opencraftd/
+ 2. mkdir -p build/
+ 3. cd build/
+ 4. cmake ..
+ 5. make
 
 ## Build instructions - client (newview)
 
