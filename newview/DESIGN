@@ -1,17 +1,21 @@
 Basic architecture
   C++ main process
-  Python logging hooked to boost logging
-  Embedded python
-   Twisted/quarry
   OpenGL rendering + SDL event loop
    Game state is updated inside of python
    Renderer is implemented in C++ for speed
 
-Threads
-  Main renderer and SDL thread
-  Python thread containing quarry
+main loop:
+  get user input + handle relevant callbacks
+  get packets from network + handle callbacks
+  check for time since last tick/update and send if required
 
-Core of the client is implemented in Python for simplicity
+chunk cache:
+  in-memory cache of chunks
+  only chunks within configured draw distance shown
 
-Main loop queues up events from SDL, passes over to Python and gets back game state to render
-  
+app state and sub state:
+  overall state: menu/ingame/whatever
+  paused boolean
+  ingame:
+    flying/walking/running
+    
