@@ -31,6 +31,10 @@
 #include <tuple>
 #include <map>
 
+#include <libopencraft/packets.autogen.h>
+#include <libopencraft/version.h>
+#include <libopencraft/proto_constants.h>
+
 // loading = loading assets, connecting = duh, playing = duh, dead = dead and awaiting respawn
 
 #define INGAME_LOADING    0

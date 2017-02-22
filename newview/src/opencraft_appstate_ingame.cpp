@@ -105,6 +105,7 @@ void opencraft_appstate_ingame::update_loading(SDL_Event *ev) {
 }
 
 void opencraft_appstate_ingame::update_connecting(SDL_Event *ev) {
+     // TODO - pump appropriate network events here
 }
 
 void opencraft_appstate_ingame::update_playing(SDL_Event *ev) {
@@ -114,6 +115,7 @@ void opencraft_appstate_ingame::update_dead(SDL_Event *ev) {
 }
 
 void opencraft_appstate_ingame::render_loading() {
+     // TODO - render progress bar
      draw_tiled_quad(this->bg_dirt_x,  this->bg_dirt_y,  this->bg_dirt_w,  this->bg_dirt_h,  BLOCK_TEXTURE_SIZE, BLOCK_TEXTURE_SIZE, this->dirtblock_gl_tex_id);
      draw_tiled_quad(this->bg_grass_x, this->bg_grass_y, this->bg_grass_w, this->bg_grass_h, BLOCK_TEXTURE_SIZE, BLOCK_TEXTURE_SIZE, this->grassblock_gl_tex_id);
      glEnable(GL_BLEND);
