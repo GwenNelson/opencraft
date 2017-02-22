@@ -23,7 +23,9 @@
 //-----------------------------------------------------------------------------
 
 #include <common.h>
+#include <wordexp.h>
 #include <opencraft_console.h>
+#include <opencraft_console_cmds.h>
 #include <opencraft_video.h>
 
 #include <boost/log/core.hpp>
@@ -47,8 +49,42 @@ extern opencraft_video *oc_video;
 
 namespace logging = boost::log;
 
-void cmd_cb(OGLCONSOLE_Console console, char* cmd) {
-     LOG(debug) << "Got console input: " << cmd;
+extern struct cons_cmd *cons_commands;
+
+void console_defcmd(int argc, char** argv) {
+     int i=0;
+     if(strcmp(argv[0],"quit")==0) {
+        SDL_Event e;
+        e.type = SDL_QUIT;
+        SDL_PushEvent(&e);
+     } else {
+        for(i=0; i< get_cmd_count(); i++) {
+          if(strcmp(argv[0],cons_commands[i].cmd_str)==0) {
+              cons_commands[i].cmd_func(argc, argv);
+           }
+        }
+     }
+}
+
+void cmd_cb(OGLCONSOLE_Console console, char* cmdline) {
+     if(strlen(cmdline)==0) return;
+     LOG(info) << "Console command: " << cmdline;
+     int i;
+     char **argv = NULL;
+     int argc;
+     wordexp_t p;
+     wordexp(cmdline, &p, 0);
+     argc = p.we_wordc;
+     argv = (char**)calloc(argc, sizeof(char*));
+     for(i=0; i < p.we_wordc; i++) {
+         argv[i] = strdup(p.we_wordv[i]);
+     }
+     wordfree(&p);
+     console_defcmd(argc, argv);
+     for(i=0; i < p.we_wordc; i++) {
+         free(argv[i]);
+     }
+     free(argv);
 }
 
 opencraft_console::opencraft_console() {
@@ -79,8 +115,8 @@ bool opencraft_console::is_active() {
 }
 
 void opencraft_console::toggle() {
-//     this->active = (not this->active);
-//     OGLCONSOLE_SetVisibility((int)this->active);
+     this->active = (not this->active);
+     OGLCONSOLE_SetVisibility((int)this->active);
 }
 
 void opencraft_console::render() {
@@ -89,4 +125,15 @@ void opencraft_console::render() {
         this->stream->str("");
      }
      OGLCONSOLE_Draw();
+}
+
+void console_printf(const char* fmt, ...) {
+     char buf[1024];
+     memset((void*)buf,0,1024);
+     va_list args;
+     va_start(args, fmt);
+     vsnprintf(buf,1024,fmt,args);
+     va_end(args);
+     OGLCONSOLE_Print(buf);
+     LOG(info) << std::string(buf);
 }

@@ -38,6 +38,7 @@
 #include <opencraft_video.h>
 #include <opencraft_appstate_menu.h>
 #include <opencraft_console.h>
+#include <opencraft_console_cmds.h>
 #include <r_2d.h>
 
 #include <oglconsole.h>
@@ -190,6 +191,8 @@ int main(int argc, char **argv) {
        exit(1);
     }
 
+    LOG(debug) << "Setting up cmd table...";
+    init_cmd_table();
 
 
 

@@ -24,32 +24,27 @@
 
 #pragma once
 
-#include <common.h>
+void cmd_help(int argc, char** argv);
+void cmd_set(int argc, char** argv);
+void cmd_mount(int argc, char** argv);
+void cmd_ls(int argc, char** argv);
+void cmd_pwd(int argc, char** argv);
+void cmd_cd(int argc, char** argv);
+void cmd_cat(int argc, char** argv);
+void cmd_debug(int argc, char** argv);
 
-#include <SDL.h>
-#if defined(__APPLE__)
-#include <OpenGL/gl.h>
-#include <OpenGL/glu.h>
-#else
-#include <GL/gl.h>
-#include <GL/glu.h>
-#endif
-
-#include <oglconsole.h>
-
-#include <iostream>
-#include <sstream>
-
-class opencraft_console {
-   public:
-     opencraft_console();
-     bool is_active();
-     void toggle();
-     void render();
-     std::ostringstream *stream;
-
-   private:
-     bool active;
+struct cons_cmd {
+    char*   cmd_str;         // the actual command typed in the console
+    char*   help_str;        // description of what the command does
+    char*   param_list[3];   // list of parameters
+    char*   param_desc[3];   // description of parameters
+    char*   extra_help[3];   // extra help lines
+    void    (*cmd_func)(int argc, char** argvv); // the function to invoke
 };
 
-void console_printf(const char* fmt, ...);
+
+unsigned int get_cmd_count();
+
+void add_command(struct cons_cmd cmd);
+void init_cmd_table();
+
