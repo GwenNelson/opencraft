@@ -34,6 +34,7 @@
 
 #include <common.h>
 
+#include <libopencraft/version.h>
 #include <opencraft_video.h>
 #include <opencraft_appstate_menu.h>
 #include <opencraft_console.h>
@@ -103,6 +104,8 @@ void sdl_loop_iter() {
 int main(int argc, char **argv) {
     int i;
     cout << OPENCRAFT_NEWVIEW_LONG_VER << endl << "Built on " << OPENCRAFT_NEWVIEW_BUILDDATE << endl;
+    cout << "Compiled with " << LIBOPENCRAFT_LONG_VER << ", built on " << LIBOPENCRAFT_BUILDDATE << endl;
+    
     po::options_description desc("Options");
 
     desc.add_options() ("help,h",        "display this help")
@@ -187,8 +190,6 @@ int main(int argc, char **argv) {
        exit(1);
     }
 
-    LOG(debug) << "Setting video";
-
 
 
 
@@ -201,5 +202,5 @@ int main(int argc, char **argv) {
         oc_console->render();
        oc_video->end_frame();
     }
-    return 0;
+    _exit(0);
 }
