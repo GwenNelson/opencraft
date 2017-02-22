@@ -79,8 +79,8 @@ bool opencraft_console::is_active() {
 }
 
 void opencraft_console::toggle() {
-     this->active = (not this->active);
-     OGLCONSOLE_SetVisibility((int)this->active);
+//     this->active = (not this->active);
+//     OGLCONSOLE_SetVisibility((int)this->active);
 }
 
 void opencraft_console::render() {

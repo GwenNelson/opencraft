@@ -722,7 +722,7 @@ void OGLCONSOLE_YankHistory(_OGLCONSOLE_Console *console)
 #error
 #error Only SDL is supported so far: you must define the OGLCONSOLE_USE_SDL macro
 #error
-#error
+error
 #error
 #error **************************************************************************
 #endif
@@ -761,11 +761,12 @@ int OGLCONSOLE_SDLEvent(SDL_Event *e)
         return 0;
     }
 
+
     /* TODO: SDL_KEYPRESS? ENABLE KEY REPEAT USING THE HIDE/SHOW FUNCTION? */
     if (e->type == SDL_KEYDOWN)
     {
         /* Reject most modifier keys TODO: Add some accelerator keys? */
-        if (e->key.keysym.mod & ~(KMOD_CAPITALIZE)) return 0;
+//        if (e->key.keysym.mod & ~(KMOD_CAPITALIZE)) return 0; //TODO: fix this, had to remove to make the thing work
 
         /* Check for hide key */
         if (e->key.keysym.sym == '`')
