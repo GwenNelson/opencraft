@@ -59,16 +59,17 @@ int main(int argc, char** argv) {
     // connect to localhost:25565 and then setup a packet reader and writer
     connect(sockfd, (struct sockaddr*)&server_addr, sizeof(struct sockaddr_in));
     opencraft::packets::packet_reader client_reader(sockfd,OPENCRAFT_STATE_STATUS,true);
-    opencraft::packets::packet_writer client_writer(sockfd);
+    opencraft::packets::packet_writer hs_writer(sockfd);
 
     // create a handshake packet and write it
     handshake_handshaking_upstream hspack(OPENCRAFT_PROTOCOL_VERSION,std::string(OPENCRAFT_DEFAULT_SERVER),OPENCRAFT_DEFAULT_TCP_PORT,OPENCRAFT_STATE_STATUS);
-    client_writer.write_pack(&hspack);
+    hs_writer.write_pack(&hspack);
 
 
     // create a status request packet and write it
     status_request_status_upstream status_req;
-    client_writer.write_pack(&status_req);
+    opencraft::packets::packet_writer sreq_writer(sockfd);
+    sreq_writer.write_pack(&status_req);
 
 
     client_reader.proto_mode = OPENCRAFT_STATE_STATUS;

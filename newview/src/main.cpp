@@ -94,6 +94,9 @@ void init_vfs(char *argvz, char* install_root) {
 
 void sdl_loop_iter() {
      SDL_Event ev;
+     if(SDL_PollEvent(NULL)==0) {
+        oc_appstate->update_state(&ev);
+     }
      while (SDL_PollEvent(&ev)) {
         if(OGLCONSOLE_SDLEvent(&ev)==0) switch(ev.type) {
            case SDL_QUIT:

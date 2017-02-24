@@ -32,8 +32,8 @@ extern void* default_font;
 
 opencraft_appstate_ingame::opencraft_appstate_ingame(std::string server_addr) {
     this->cur_state    = INGAME_LOADING;
-    this->total        = 0.0;
-    this->progress     = 0.0;
+    this->total        = 10.0;
+    this->progress     = 0.1;
     this->_server_addr = server_addr;
 
     oc_video->enter_2d(); // must do this again if we go back from actual play
@@ -73,6 +73,7 @@ void opencraft_appstate_ingame::load_stuff() {
      this->bg_grass_w = oc_video->res_w;
      this->bg_grass_h = BLOCK_TEXTURE_SIZE;
 
+     this->progress_gl_tex_id = load_texture("share/progress_pixel.png");
 }
 
 void opencraft_appstate_ingame::update_state(SDL_Event *ev) {
@@ -102,6 +103,10 @@ void opencraft_appstate_ingame::add_blocks() {
 
 void opencraft_appstate_ingame::update_loading(SDL_Event *ev) {
      // TODO - load the blocks here
+     this->progress += 0.1;
+     if(this->progress >= this->total) return;
+     double progress_percent = (this->progress / this->total);
+     this->progress_w        = progress_percent * (this->loading_w);
 }
 
 void opencraft_appstate_ingame::update_connecting(SDL_Event *ev) {
@@ -115,11 +120,11 @@ void opencraft_appstate_ingame::update_dead(SDL_Event *ev) {
 }
 
 void opencraft_appstate_ingame::render_loading() {
-     // TODO - render progress bar
      draw_tiled_quad(this->bg_dirt_x,  this->bg_dirt_y,  this->bg_dirt_w,  this->bg_dirt_h,  BLOCK_TEXTURE_SIZE, BLOCK_TEXTURE_SIZE, this->dirtblock_gl_tex_id);
      draw_tiled_quad(this->bg_grass_x, this->bg_grass_y, this->bg_grass_w, this->bg_grass_h, BLOCK_TEXTURE_SIZE, BLOCK_TEXTURE_SIZE, this->grassblock_gl_tex_id);
      glEnable(GL_BLEND);
       draw_textured_quad(this->loading_x,    this->loading_y,    this->loading_w,    this->loading_h,    this->loading_tex_id);
+      draw_textured_quad(this->loading_x,    this->loading_y+(this->loading_h), this->progress_w, this->loading_h, this->progress_gl_tex_id);
      glDisable(GL_BLEND);
 }
 

@@ -44,8 +44,9 @@ packet_reader::packet_reader(int _sockfd, int _proto_mode, bool _is_client) {
 
 opencraft_packet* packet_reader::read_pack() {
     int packsize = this->read_varint();
+    int packsize_s = varint_size(packsize);
     unsigned char buf[5];
-    recv(this->sockfd,(void*)buf,varint_size(packsize),MSG_WAITALL);
+    recv(this->sockfd,(void*)buf,packsize_s,MSG_WAITALL);
     memset((void*)this->recvbuf,0,sizeof(this->recvbuf));
     int read_bytes = recv(this->sockfd,(void*)this->recvbuf,packsize,MSG_WAITALL);
     if(read_bytes == -1) return NULL;

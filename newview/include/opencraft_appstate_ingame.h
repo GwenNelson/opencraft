@@ -84,6 +84,8 @@ class opencraft_appstate_ingame : public opencraft_appstate{
 
      unsigned int dirtblock_gl_tex_id;
      unsigned int grassblock_gl_tex_id;
+     unsigned int progress_gl_tex_id;
+     double progress_w;
 
 
      float bg_dirt_x;
