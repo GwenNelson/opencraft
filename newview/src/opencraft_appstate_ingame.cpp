@@ -32,8 +32,8 @@ extern void* default_font;
 
 opencraft_appstate_ingame::opencraft_appstate_ingame(std::string server_addr) {
     this->cur_state    = INGAME_LOADING;
-    this->total        = 10.0;
-    this->progress     = 0.1;
+    this->total        = 0.0;
+    this->progress     = 0.0;
     this->_server_addr = server_addr;
 
     oc_video->enter_2d(); // must do this again if we go back from actual play
@@ -99,11 +99,23 @@ void opencraft_appstate_ingame::add_blockload(std::string texture_path, unsigned
 }
 
 void opencraft_appstate_ingame::add_blocks() {
+     #include "loadblocks.inc"
+     this->total += (this->pending_loads.size());
 }
 
 void opencraft_appstate_ingame::update_loading(SDL_Event *ev) {
-     // TODO - load the blocks here
-     this->progress += 0.1;
+     if(this->progress >= this->total) return;
+     pending_blockload_t curblockload = this->pending_loads.back();
+     this->pending_loads.pop_back();
+     
+     std::string tex_path     = std::get<0>(curblockload);
+     unsigned int curblockid  = std::get<1>(curblockload);
+
+     if(PHYSFS_exists(tex_path.c_str()) != 0) return;
+
+     this->block_tex_id[curblockid] = load_texture(tex_path);
+     
+     this->progress += 1;
      if(this->progress >= this->total) return;
      double progress_percent = (this->progress / this->total);
      this->progress_w        = progress_percent * (this->loading_w);
