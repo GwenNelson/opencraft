@@ -39,6 +39,8 @@ opencraft_appstate_ingame::opencraft_appstate_ingame(std::string server_addr) {
     oc_video->enter_2d(); // must do this again if we go back from actual play
     this->load_stuff(); // stuff that must be loaded before we can render even the loading page
     this->add_blocks();
+
+    this->conn_state = -1;
 }
 
 void opencraft_appstate_ingame::load_stuff() {
@@ -118,11 +120,15 @@ void opencraft_appstate_ingame::update_loading(SDL_Event *ev) {
      this->progress += 1;
      if(this->progress >= this->total) return;
      double progress_percent = (this->progress / this->total);
-     this->progress_w        = progress_percent * (this->loading_w);
+     this->progress_w        = progress_percent * (this->loading_w*2);
 }
 
 void opencraft_appstate_ingame::update_connecting(SDL_Event *ev) {
-     // TODO - pump appropriate network events here
+     if(this->conn_state==-1) {  // is this the first time we're updating in the connecting state?
+        this->total      = 4.0; // there's 4 basic stages when connecting
+        this->progress   = 0.0;
+        this->conn_state = INGAME_CONNECTING_HS;
+     }
 }
 
 void opencraft_appstate_ingame::update_playing(SDL_Event *ev) {
@@ -136,7 +142,7 @@ void opencraft_appstate_ingame::render_loading() {
      draw_tiled_quad(this->bg_grass_x, this->bg_grass_y, this->bg_grass_w, this->bg_grass_h, BLOCK_TEXTURE_SIZE, BLOCK_TEXTURE_SIZE, this->grassblock_gl_tex_id);
      glEnable(GL_BLEND);
       draw_textured_quad(this->loading_x,    this->loading_y,    this->loading_w,    this->loading_h,    this->loading_tex_id);
-      draw_textured_quad(this->loading_x,    this->loading_y+(this->loading_h), this->progress_w, this->loading_h, this->progress_gl_tex_id);
+      draw_textured_quad( (oc_video->res_w/2) - (this->progress_w/2),    this->loading_y+(this->loading_h), this->progress_w, this->loading_h/2, this->progress_gl_tex_id);
      glDisable(GL_BLEND);
 }
 

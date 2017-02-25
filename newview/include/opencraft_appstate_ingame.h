@@ -42,6 +42,11 @@
 #define INGAME_PLAYING    2
 #define INGAME_DEAD       3
 
+#define INGAME_CONNECTING_HS               4
+#define INGAME_CONNECTING_LOGIN_SUCC       5
+#define INGAME_CONNECTING_LOGIN_FAIL       6
+#define INGAME_CONNECTING_DOWNLOAD_TERRAIN 7
+
 typedef std::tuple<std::string, unsigned int> pending_blockload_t; // texture path, block ID
 typedef std::vector<pending_blockload_t> pending_blockloads_t;
 
@@ -52,8 +57,9 @@ class opencraft_appstate_ingame : public opencraft_appstate{
      void update_state(SDL_Event *ev);
      void update_loading();
      void render();
-     int  cur_state; // overall state: loading/connecting/play/dead etc
-   
+     int  cur_state;  // overall state: loading/connecting/play/dead etc
+     int  conn_state; // substate for connecting state 
+ 
      double  progress; // for loading and connecting, meaning should be obvious
      double  total;
    private:
