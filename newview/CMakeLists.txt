@@ -45,7 +45,7 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 endif()
 
 
-TARGET_LINK_LIBRARIES(newview physfs pthread  ${CMAKE_SOURCE_DIR}/../libopencraft/build/libopencraft.so ${EXTRA_GL}  ${FREETYPE2_LIBRARIES} ${SDL2_LIBRARIES} ${SDL2TTF_LIBRARY}  ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(newview physfs pthread  ${LIBEVENT2_LIBRARIES}  ${CMAKE_SOURCE_DIR}/../libopencraft/build/libopencraft.so ${EXTRA_GL}  ${FREETYPE2_LIBRARIES} ${SDL2_LIBRARIES} ${SDL2TTF_LIBRARY}  ${Boost_LIBRARIES})
 
 ADD_CUSTOM_COMMAND( OUTPUT ${CMAKE_SOURCE_DIR}/include/version.h
                     COMMAND ${CMAKE_SOURCE_DIR}/autogen.sh

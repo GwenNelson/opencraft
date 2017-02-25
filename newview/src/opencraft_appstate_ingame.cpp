@@ -28,6 +28,15 @@
 #include <r_2d.h>
 
 #include <unistd.h>
+#include <sstream>
+#include <vector>
+#include <iostream>
+
+#include <libopencraft/packets.autogen.h>
+#include <libopencraft/version.h>
+#include <libopencraft/packet_reader.h>
+#include <libopencraft/packet_writer.h>
+#include <libopencraft/proto_constants.h>
 
 extern opencraft_video *oc_video;
 extern void* default_font;
@@ -147,31 +156,45 @@ void opencraft_appstate_ingame::update_loading(SDL_Event *ev) {
 
 void opencraft_appstate_ingame::update_connecting(SDL_Event *ev) {
      if(this->conn_state==-1) {  // is this the first time we're updating in the connecting state?
-        this->total      = 4.0; // there's 4 basic stages when connecting
+        this->total      = 5.0; // there's 4 basic stages when connecting
         this->progress   = 0.0;
-        this->conn_state = INGAME_CONNECTING_HS;
+        this->conn_state = INGAME_CONNECTING_SOCK_CONN;
      }
-
+     
+     if(this->conn_state > INGAME_CONNECTING_SOCK_CONN) {
+        this->client_conn->pump_net();
+     }
+    
      switch(this->conn_state) {
-        case INGAME_CONNECTING_HS:{
-             this->progress      = 1.0;
-             this->conn_state = INGAME_CONNECTING_LOGIN_SUCC;
-             sleep(1);
+        case INGAME_CONNECTING_SOCK_CONN:{
+             std::string hostname;
+             std::string port_no;
+             std::istringstream sa_parsed(this->_server_addr);
+             getline(sa_parsed,hostname,':');
+             getline(sa_parsed,port_no,';');
+
+             LOG(info) << "Connecting to host " << hostname << " on port " << port_no;
+
+             this->client_conn   = new opencraft_connection(hostname,atoi(port_no.c_str()));
+             this->progress     += 1.0;
+             this->client_conn->connect();
+             this->client_conn->pump_net();
+             this->conn_state = INGAME_CONNECTING_HS;
         break;}
 
         case INGAME_CONNECTING_LOGIN_SUCC:{
-             this->progress      = 2.0;
+             this->progress      += 1.0;
              this->conn_state = INGAME_CONNECTING_DOWNLOAD_TERRAIN;
              sleep(1);
         break;}
 
         case INGAME_CONNECTING_LOGIN_FAIL:{
-             this->progress = 2.0;
+             this->progress += 1.0;
              sleep(1);
         break;}
 
         case INGAME_CONNECTING_DOWNLOAD_TERRAIN:{
-             this->progress      = 4.0;
+             this->progress      += 1.0;
         break;}
      }
 

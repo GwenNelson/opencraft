@@ -25,6 +25,7 @@
 #include <common.h>
 #include <SDL.h>
 #include <opencraft_appstate.h>
+#include <opencraft_connection.h>
 
 #include <string>
 #include <vector>
@@ -42,10 +43,13 @@
 #define INGAME_PLAYING    2
 #define INGAME_DEAD       3
 
-#define INGAME_CONNECTING_HS               4
-#define INGAME_CONNECTING_LOGIN_SUCC       5
-#define INGAME_CONNECTING_LOGIN_FAIL       6
-#define INGAME_CONNECTING_DOWNLOAD_TERRAIN 7
+// SOCK_CONN is opening the socket, HS is handshake, rest are obvious
+
+#define INGAME_CONNECTING_SOCK_CONN        4
+#define INGAME_CONNECTING_HS               5
+#define INGAME_CONNECTING_LOGIN_SUCC       6
+#define INGAME_CONNECTING_LOGIN_FAIL       7
+#define INGAME_CONNECTING_DOWNLOAD_TERRAIN 8
 
 typedef std::tuple<std::string, unsigned int> pending_blockload_t; // texture path, block ID
 typedef std::vector<pending_blockload_t> pending_blockloads_t;
@@ -62,6 +66,8 @@ class opencraft_appstate_ingame : public opencraft_appstate{
  
      double  progress; // for loading and connecting, meaning should be obvious
      double  total;
+
+     opencraft_connection *client_conn;
    private:
      void load_stuff();
 

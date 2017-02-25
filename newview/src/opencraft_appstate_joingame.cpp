@@ -74,7 +74,7 @@ void opencraft_appstate_joingame::add_entry(std::string name, std::string addres
 }
 
 void opencraft_appstate_joingame::add_entries() {
-   this->add_entry("Local minecraft server", "127.0.0.1:25565");
+   this->add_entry("Local minecraft server", "localhost:25565");
 }
 
 opencraft_appstate_joingame::~opencraft_appstate_joingame() {
