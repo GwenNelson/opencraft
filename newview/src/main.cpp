@@ -64,6 +64,8 @@ opencraft_console  *oc_console   = NULL;
 void*               default_font = NULL;
 bool is_running                  = true;
 
+uint32_t pack_event;
+
 std::string title_png_path;
 std::string texturepack_path;
 
@@ -199,6 +201,7 @@ int main(int argc, char **argv) {
     init_cmd_table();
 
     uint32_t ev_type = SDL_RegisterEvents(1);
+    pack_event       = SDL_RegisterEvents(1); // used to send incoming packets onto the SDL event queue
 
     oc_appstate = new opencraft_appstate_menu();
 

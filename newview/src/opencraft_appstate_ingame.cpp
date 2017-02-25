@@ -40,9 +40,10 @@
 
 extern opencraft_video *oc_video;
 extern void* default_font;
+extern int pack_event;
 
 opencraft_appstate_ingame::opencraft_appstate_ingame(std::string server_addr) {
-    this->cur_state    = INGAME_LOADING;
+    this->cur_state    = INGAME_CONNECTING; // TODO - switch this back to LOADING once network issues sorted
     this->total        = 0.0;
     this->progress     = 0.0;
     this->_server_addr = server_addr;
@@ -162,9 +163,28 @@ void opencraft_appstate_ingame::update_connecting(SDL_Event *ev) {
      }
      
      if(this->conn_state > INGAME_CONNECTING_SOCK_CONN) {
+        if(ev->type == pack_event) {
+           int event_proto_mode     = ev->user.code;
+           opencraft_packet *inpack = (opencraft_packet*)ev->user.data1;
+           int32_t inpack_ident     = inpack->ident();
+           switch(event_proto_mode) {
+              case OPENCRAFT_STATE_LOGIN:{
+                switch(inpack_ident) {
+                   case OPENCRAFT_PACKIDENT_LOGIN_DISCONNECT_LOGIN_DOWNSTREAM:{
+                        this->conn_state = INGAME_CONNECTING_LOGIN_FAIL;
+                        free((void*)inpack);
+                   break;}
+                   case OPENCRAFT_PACKIDENT_LOGIN_SUCCESS_LOGIN_DOWNSTREAM:{
+                        this->conn_state = INGAME_CONNECTING_LOGIN_SUCC;
+                        this->client_conn->proto_mode=OPENCRAFT_STATE_PLAY;
+                        free((void*)inpack);
+                   break;}
+                }
+              break;}
+           }
+        }
         this->client_conn->pump_net();
      }
-    
      switch(this->conn_state) {
         case INGAME_CONNECTING_SOCK_CONN:{
              std::string hostname;
@@ -178,7 +198,6 @@ void opencraft_appstate_ingame::update_connecting(SDL_Event *ev) {
              this->client_conn   = new opencraft_connection(hostname,atoi(port_no.c_str()));
              this->progress     += 1.0;
              this->client_conn->connect();
-             this->client_conn->pump_net();
              this->conn_state = INGAME_CONNECTING_HS;
         break;}
 
@@ -186,7 +205,6 @@ void opencraft_appstate_ingame::update_connecting(SDL_Event *ev) {
              LOG(info) << "Sending handshake";
              handshake_handshaking_upstream hspack(OPENCRAFT_PROTOCOL_VERSION,this->client_conn->server_hostname,this->client_conn->server_port,OPENCRAFT_STATE_LOGIN);
              this->client_conn->send_packet(&hspack);
-             this->client_conn->pump_net();
              this->progress += 1.0;
              this->conn_state = INGAME_CONNECTING_SENT_HS;
              this->client_conn->proto_mode=OPENCRAFT_STATE_LOGIN;
@@ -196,24 +214,26 @@ void opencraft_appstate_ingame::update_connecting(SDL_Event *ev) {
              LOG(info) << "Sending login";
              login_start_login_upstream login_req("OpenCraft user"); // TODO - add username option
              this->client_conn->send_packet(&login_req);
-             this->client_conn->pump_net();
              this->conn_state = INGAME_CONNECTING_SENT_LOGIN;
              this->progress  += 1.0;
         break;}
 
         case INGAME_CONNECTING_LOGIN_SUCC:{
              this->progress      += 1.0;
+             // TODO = handle the login packet and save UUID/entID etc
              this->conn_state = INGAME_CONNECTING_DOWNLOAD_TERRAIN;
-             sleep(1);
+             this->client_conn->proto_mode = OPENCRAFT_STATE_PLAY;
+             // TODO - send enough packets to get chunk data around player
         break;}
 
         case INGAME_CONNECTING_LOGIN_FAIL:{
              this->progress += 1.0;
-             sleep(1);
         break;}
 
         case INGAME_CONNECTING_DOWNLOAD_TERRAIN:{
-             this->progress      += 1.0;
+             // TODO - cache chunk data
+             this->progress  += 1.0;
+             this->cur_state  = INGAME_PLAYING;
         break;}
      }
 

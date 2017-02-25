@@ -25,9 +25,11 @@
 
 #include <common.h>
 #include <opencraft_connection.h>
+#include <SDL.h>
 
 using namespace opencraft::packets;
 
+extern int pack_event;
 
 opencraft_connection::opencraft_connection(std::string server_addr, int port_no) {
     this->server_hostname = server_addr;
@@ -41,40 +43,38 @@ void opencraft_connection::send_packet(opencraft_packet* pack) {
      raw_packet rawpack(pack->ident(),pack->pack());
      std::vector<unsigned char> packed = rawpack.pack();
      evbuffer_add(bufferevent_get_output(this->bev),packed.data(),packed.size());
-     LOG(debug) << " sent " << pack->name() << " to server";
+     LOG(debug) << "Sent " << pack->name() << " to server";
 }
 
 void opencraft_connection::read_cb(struct bufferevent *bev) {
      struct evbuffer *input = bufferevent_get_input(bev);
-     int buflen             = evbuffer_get_length(input);
+     size_t buflen          = evbuffer_get_length(input);
 
      unsigned char *n;
-     if(buflen > 5) {
+     if(buflen >= 5) {
         n = evbuffer_pullup(input, 5); // peek at the first 5 bytes
      } else {
-        n = evbuffer_pullup(input, buflen);
+        return;
      }
 
      int pack_size=0;
      
-     if(n[0]==0) {
-        pack_size=0;
-     } else {
-       for(int i=0; i<5; ++i) {
+     for(int i=0; i<5; ++i) {
            pack_size |= (n[i] & 0x7F) << (i*7);
            if(!(n[i] & 0x80)) {
                break;
            }
-        }
      }
 
-     if(buflen < pack_size) return;
+     
+     if(buflen < (pack_size)) return;
 
-
-     pack_size += varint_size(pack_size);
      // if we do it's time to build a packet
      unsigned char* packbuf = (unsigned char*)calloc(pack_size,1);
-     evbuffer_remove(input,(void*)packbuf,pack_size);
+
+     evbuffer_drain(input,varint_size(pack_size));
+     size_t bytes_recv = bufferevent_read(bev,(void*)packbuf,pack_size);
+     
 
      std::vector<unsigned char> tmpbuf;
      tmpbuf.assign(packbuf, packbuf+pack_size);
@@ -82,7 +82,19 @@ void opencraft_connection::read_cb(struct bufferevent *bev) {
 
      opencraft_packet* inpack = opencraft_packet::unpack_packet(this->proto_mode,true,tmpbuf);
 
-     LOG(debug) << "Received " << inpack->name() << " from server, hex:" << inpack->dump_hex();
+     if(inpack->name().compare("unknown")==0) return;
+
+     LOG(debug) << "Received " << inpack->name() << " from server, hex: " << inpack->dump_hex();
+
+     // deleting the packet object is up to the main appstate code
+
+     SDL_Event inpack_event;
+     SDL_memset(&inpack_event, 0, sizeof(inpack_event));
+     inpack_event.type       = pack_event;
+     inpack_event.user.code  = this->proto_mode;
+     inpack_event.user.data1 = (void*)inpack; // ident and such can be extracted from here
+     inpack_event.user.data2 = 0;
+     SDL_PushEvent(&inpack_event);
 }
 
 void readcb(struct bufferevent *bev, void *ptr) {
@@ -114,9 +126,8 @@ void opencraft_connection::connect() {
      bufferevent_enable(this->bev, EV_READ|EV_WRITE);
      bufferevent_socket_connect_hostname(this->bev, this->dns_base, AF_UNSPEC, this->server_hostname.c_str(), this->server_port);
      LOG(info) << "Sent connection request to " << this->server_hostname << ":" << std::to_string(this->server_port);
-     this->pump_net();
 }
 
 void opencraft_connection::pump_net() {
-     event_base_loop(this->base, EVLOOP_NONBLOCK|EVLOOP_ONCE);
+     event_base_loop(this->base, EVLOOP_ONCE|EVLOOP_NONBLOCK);
 }
