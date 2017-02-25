@@ -104,6 +104,14 @@ class opencraft_appstate_ingame : public opencraft_appstate{
      int        connecting_text_w;
      int        connecting_text_h;
 
+     unsigned int terrain_tex_id;
+     float        terrain_x;
+     float        terrain_y;
+     int        terrain_w;
+     int        terrain_h;
+     int        terrain_text_w;
+     int        terrain_text_h;
+
      unsigned int dirtblock_gl_tex_id;
      unsigned int grassblock_gl_tex_id;
      unsigned int progress_gl_tex_id;

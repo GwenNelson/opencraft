@@ -43,7 +43,7 @@ extern void* default_font;
 extern int pack_event;
 
 opencraft_appstate_ingame::opencraft_appstate_ingame(std::string server_addr) {
-    this->cur_state    = INGAME_CONNECTING; // TODO - switch this back to LOADING once network issues sorted
+    this->cur_state    = INGAME_LOADING;
     this->total        = 0.0;
     this->progress     = 0.0;
     this->_server_addr = server_addr;
@@ -81,6 +81,15 @@ void opencraft_appstate_ingame::load_stuff() {
      this->connecting_tex_id = tex_id;
      this->connecting_x = (oc_video->res_w/2) - (this->connecting_text_w/2);
      this->connecting_y = (oc_video->res_h/2) - (this->connecting_text_h/2);
+
+     predraw_text(default_font,255,255,255,(char*)"Loading terrain",&w,&h,&text_w,&text_h,&tex_id);
+     this->terrain_w      = w;
+     this->terrain_h      = h;
+     this->terrain_text_w = text_w;
+     this->terrain_text_h = text_h;
+     this->terrain_tex_id = tex_id;
+     this->terrain_x = (oc_video->res_w/2) - (this->terrain_text_w/2);
+     this->terrain_y = (oc_video->res_h/2) - (this->terrain_text_h/2);
 
 
 
@@ -157,7 +166,7 @@ void opencraft_appstate_ingame::update_loading(SDL_Event *ev) {
 
 void opencraft_appstate_ingame::update_connecting(SDL_Event *ev) {
      if(this->conn_state==-1) {  // is this the first time we're updating in the connecting state?
-        this->total      = 7.0; // there's 4 basic stages when connecting
+        this->total      = 4.0; // there's 4 basic stages when connecting
         this->progress   = 0.0;
         this->conn_state = INGAME_CONNECTING_SOCK_CONN;
      }
@@ -221,6 +230,8 @@ void opencraft_appstate_ingame::update_connecting(SDL_Event *ev) {
         case INGAME_CONNECTING_LOGIN_SUCC:{
              this->progress      += 1.0;
              // TODO = handle the login packet and save UUID/entID etc
+             this->progress = 0.0;
+             this->total    = 10.0;
              this->conn_state = INGAME_CONNECTING_DOWNLOAD_TERRAIN;
              this->client_conn->proto_mode = OPENCRAFT_STATE_PLAY;
              // TODO - send enough packets to get chunk data around player
@@ -232,8 +243,8 @@ void opencraft_appstate_ingame::update_connecting(SDL_Event *ev) {
 
         case INGAME_CONNECTING_DOWNLOAD_TERRAIN:{
              // TODO - cache chunk data
-             this->progress  += 1.0;
-             this->cur_state  = INGAME_PLAYING;
+             this->progress  += 0.05;
+             if(this->progress >= this->total) this->cur_state  = INGAME_PLAYING;
         break;}
      }
 
@@ -243,6 +254,7 @@ void opencraft_appstate_ingame::update_connecting(SDL_Event *ev) {
 }
 
 void opencraft_appstate_ingame::update_playing(SDL_Event *ev) {
+     this->client_conn->pump_net();
 }
 
 void opencraft_appstate_ingame::update_dead(SDL_Event *ev) {
@@ -261,8 +273,13 @@ void opencraft_appstate_ingame::render_connecting() {
      draw_tiled_quad(this->bg_dirt_x,  this->bg_dirt_y,  this->bg_dirt_w,  this->bg_dirt_h,  BLOCK_TEXTURE_SIZE, BLOCK_TEXTURE_SIZE, this->dirtblock_gl_tex_id);
      draw_tiled_quad(this->bg_grass_x, this->bg_grass_y, this->bg_grass_w, this->bg_grass_h, BLOCK_TEXTURE_SIZE, BLOCK_TEXTURE_SIZE, this->grassblock_gl_tex_id);
      glEnable(GL_BLEND);
-      draw_textured_quad(this->connecting_x,    this->connecting_y,    this->connecting_w,    this->connecting_h,    this->connecting_tex_id);
-      draw_textured_quad( (oc_video->res_w/2) - (this->progress_w/2),    this->connecting_y+(this->connecting_h), this->progress_w, this->connecting_h/2, this->progress_gl_tex_id);
+      if(this->conn_state == INGAME_CONNECTING_DOWNLOAD_TERRAIN) {
+        draw_textured_quad(this->terrain_x,    this->terrain_y,    this->terrain_w,    this->terrain_h,    this->terrain_tex_id);
+        draw_textured_quad( (oc_video->res_w/2) - (this->progress_w/2),    this->terrain_y+(this->terrain_h), this->progress_w, this->terrain_h/2, this->progress_gl_tex_id);
+      } else {
+        draw_textured_quad(this->connecting_x,    this->connecting_y,    this->connecting_w,    this->connecting_h,    this->connecting_tex_id);
+        draw_textured_quad( (oc_video->res_w/2) - (this->progress_w/2),    this->connecting_y+(this->connecting_h), this->progress_w, this->connecting_h/2, this->progress_gl_tex_id);
+      }
      glDisable(GL_BLEND);
 
 }
