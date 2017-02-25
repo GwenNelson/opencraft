@@ -94,9 +94,6 @@ void init_vfs(char *argvz, char* install_root) {
 
 void sdl_loop_iter() {
      SDL_Event ev;
-     if(SDL_PollEvent(NULL)==0) {
-        oc_appstate->update_state(&ev);
-     }
      while (SDL_PollEvent(&ev)) {
         if(OGLCONSOLE_SDLEvent(&ev)==0) switch(ev.type) {
            case SDL_QUIT:
@@ -201,12 +198,21 @@ int main(int argc, char **argv) {
     LOG(debug) << "Setting up cmd table...";
     init_cmd_table();
 
-
+    uint32_t ev_type = SDL_RegisterEvents(1);
 
     oc_appstate = new opencraft_appstate_menu();
 
+    SDL_Event event;
+    SDL_memset(&event, 0, sizeof(event));
+    event.type       = ev_type;
+    event.user.code  = 0;
+    event.user.data1 = NULL;
+    event.user.data2 = NULL;
     while(is_running) {
        oc_video->start_frame();
+
+        SDL_PushEvent(&event); // this is to ensure there's always some kind of event for the appstate to update on
+
         sdl_loop_iter();
         oc_appstate->render();
         oc_console->render();
