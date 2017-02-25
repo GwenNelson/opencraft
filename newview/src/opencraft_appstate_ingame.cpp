@@ -156,7 +156,7 @@ void opencraft_appstate_ingame::update_loading(SDL_Event *ev) {
 
 void opencraft_appstate_ingame::update_connecting(SDL_Event *ev) {
      if(this->conn_state==-1) {  // is this the first time we're updating in the connecting state?
-        this->total      = 5.0; // there's 4 basic stages when connecting
+        this->total      = 7.0; // there's 4 basic stages when connecting
         this->progress   = 0.0;
         this->conn_state = INGAME_CONNECTING_SOCK_CONN;
      }
@@ -171,7 +171,7 @@ void opencraft_appstate_ingame::update_connecting(SDL_Event *ev) {
              std::string port_no;
              std::istringstream sa_parsed(this->_server_addr);
              getline(sa_parsed,hostname,':');
-             getline(sa_parsed,port_no,';');
+             getline(sa_parsed,port_no,':');
 
              LOG(info) << "Connecting to host " << hostname << " on port " << port_no;
 
@@ -180,6 +180,21 @@ void opencraft_appstate_ingame::update_connecting(SDL_Event *ev) {
              this->client_conn->connect();
              this->client_conn->pump_net();
              this->conn_state = INGAME_CONNECTING_HS;
+        break;}
+
+        case INGAME_CONNECTING_HS:{
+             LOG(info) << "Sending handshake";
+             handshake_handshaking_upstream hspack(OPENCRAFT_PROTOCOL_VERSION,this->client_conn->server_hostname,this->client_conn->server_port,OPENCRAFT_STATE_LOGIN);
+             this->client_conn->send_packet(&hspack);
+             this->progress += 1.0;
+             this->conn_state = INGAME_CONNECTING_SENT_HS;
+        break;}
+
+        case INGAME_CONNECTING_SENT_HS:{
+             LOG(info) << "Sending login";
+             login_start_login_upstream login_req("OpenCraft user"); // TODO - add username option
+             this->client_conn->send_packet(&login_req);
+             this->conn_state = INGAME_CONNECTING_SENT_LOGIN;
         break;}
 
         case INGAME_CONNECTING_LOGIN_SUCC:{

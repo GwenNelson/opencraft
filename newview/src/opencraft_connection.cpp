@@ -26,15 +26,66 @@
 #include <common.h>
 #include <opencraft_connection.h>
 
+using namespace opencraft::packets;
+
+
 opencraft_connection::opencraft_connection(std::string server_addr, int port_no) {
     this->server_hostname = server_addr;
     this->server_port     = port_no;
     this->base            = event_base_new();
     this->dns_base        = evdns_base_new(this->base, 1);
+    this->_recvbuf        = evbuffer_new();
+    evbuffer_enable_locking(this->_recvbuf,NULL);
 }
 
+void opencraft_connection::send_packet(opencraft_packet* pack) {
+     raw_packet rawpack(pack->ident(),pack->pack());
+     std::vector<unsigned char> packed = rawpack.pack();
+     evbuffer_add(bufferevent_get_output(this->bev),packed.data(),packed.size());
+     LOG(debug) << " sent " << pack->name() << " to server";
+}
+
+void opencraft_connection::read_cb(struct bufferevent *bev) {
+     struct evbuffer *input = bufferevent_get_input(bev);
+     int buflen             = evbuffer_get_length(input);
+
+     unsigned char *n;
+     if(buflen > 5) {
+        n = evbuffer_pullup(input, 5); // peek at the first 5 bytes
+     } else {
+        n = evbuffer_pullup(input, buflen);
+     }
+
+     int pack_size=0;
+     
+     if(n[0]==0) {
+        pack_size=0;
+     } else {
+       for(int i=0; i<5; ++i) {
+           pack_size |= (n[i] & 0x7F) << (i*7);
+           if(!(n[i] & 0x80)) {
+               break;
+           }
+        }
+     }
+
+     if(buflen < pack_size) return;
+
+
+     pack_size += varint_size(pack_size);
+     // if we do it's time to build a packet
+     unsigned char* packbuf = (unsigned char*)calloc(pack_size,1);
+     evbuffer_remove(input,(void*)packbuf,pack_size);
+
+     std::vector<unsigned char> tmpbuf;
+     tmpbuf.assign(packbuf, packbuf+pack_size);
+     free(packbuf);
+
+}
 
 void readcb(struct bufferevent *bev, void *ptr) {
+     opencraft_connection* oc_conn = (opencraft_connection*)ptr;
+     oc_conn->read_cb(bev);
 }
 
 void eventcb(struct bufferevent *bev, short events, void *ptr) {
@@ -57,7 +108,7 @@ void eventcb(struct bufferevent *bev, short events, void *ptr) {
 
 void opencraft_connection::connect() {
      this->bev = bufferevent_socket_new(base, -1, BEV_OPT_CLOSE_ON_FREE);
-     bufferevent_setcb(this->bev, readcb, NULL, eventcb, base);
+     bufferevent_setcb(this->bev, readcb, NULL, eventcb, this);
      bufferevent_enable(this->bev, EV_READ|EV_WRITE);
      bufferevent_socket_connect_hostname(this->bev, this->dns_base, AF_UNSPEC, this->server_hostname.c_str(), this->server_port);
      LOG(info) << "Sent connection request to " << this->server_hostname << ":" << std::to_string(this->server_port);

@@ -47,9 +47,11 @@
 
 #define INGAME_CONNECTING_SOCK_CONN        4
 #define INGAME_CONNECTING_HS               5
-#define INGAME_CONNECTING_LOGIN_SUCC       6
-#define INGAME_CONNECTING_LOGIN_FAIL       7
-#define INGAME_CONNECTING_DOWNLOAD_TERRAIN 8
+#define INGAME_CONNECTING_SENT_HS          6
+#define INGAME_CONNECTING_SENT_LOGIN       7
+#define INGAME_CONNECTING_LOGIN_SUCC       8
+#define INGAME_CONNECTING_LOGIN_FAIL       9
+#define INGAME_CONNECTING_DOWNLOAD_TERRAIN 10
 
 typedef std::tuple<std::string, unsigned int> pending_blockload_t; // texture path, block ID
 typedef std::vector<pending_blockload_t> pending_blockloads_t;

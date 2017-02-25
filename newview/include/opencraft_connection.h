@@ -36,13 +36,26 @@
 #include <string.h>
 #include <arpa/inet.h>
 
+#include <libopencraft/base_packet.h>
+#include <libopencraft/packets.autogen.h>
+#include <libopencraft/proto_constants.h>
+#include <libopencraft/raw_packet.h>
+
+using namespace opencraft::packets;
+
 class opencraft_connection {
    public:
       opencraft_connection(std::string server_addr, int port_no);
       void connect();
       void pump_net();
+
+      void send_packet(opencraft_packet* pack);
+
+      void read_cb(struct bufferevent *bev);
       std::string server_hostname;
       int    server_port;
+      struct evbuffer* _recvbuf;
+
    private:
       struct event_base *base;
       struct evdns_base *dns_base;
