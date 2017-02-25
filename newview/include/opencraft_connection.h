@@ -56,6 +56,8 @@ class opencraft_connection {
       int    server_port;
       struct evbuffer* _recvbuf;
 
+      int proto_mode;
+
    private:
       struct event_base *base;
       struct evdns_base *dns_base;

@@ -34,8 +34,7 @@ opencraft_connection::opencraft_connection(std::string server_addr, int port_no)
     this->server_port     = port_no;
     this->base            = event_base_new();
     this->dns_base        = evdns_base_new(this->base, 1);
-    this->_recvbuf        = evbuffer_new();
-    evbuffer_enable_locking(this->_recvbuf,NULL);
+    this->proto_mode      = OPENCRAFT_STATE_HANDSHAKING;
 }
 
 void opencraft_connection::send_packet(opencraft_packet* pack) {
@@ -81,6 +80,9 @@ void opencraft_connection::read_cb(struct bufferevent *bev) {
      tmpbuf.assign(packbuf, packbuf+pack_size);
      free(packbuf);
 
+     opencraft_packet* inpack = opencraft_packet::unpack_packet(this->proto_mode,true,tmpbuf);
+
+     LOG(debug) << "Received " << inpack->name() << " from server, hex:" << inpack->dump_hex();
 }
 
 void readcb(struct bufferevent *bev, void *ptr) {

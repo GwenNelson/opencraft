@@ -186,15 +186,19 @@ void opencraft_appstate_ingame::update_connecting(SDL_Event *ev) {
              LOG(info) << "Sending handshake";
              handshake_handshaking_upstream hspack(OPENCRAFT_PROTOCOL_VERSION,this->client_conn->server_hostname,this->client_conn->server_port,OPENCRAFT_STATE_LOGIN);
              this->client_conn->send_packet(&hspack);
+             this->client_conn->pump_net();
              this->progress += 1.0;
              this->conn_state = INGAME_CONNECTING_SENT_HS;
+             this->client_conn->proto_mode=OPENCRAFT_STATE_LOGIN;
         break;}
 
         case INGAME_CONNECTING_SENT_HS:{
              LOG(info) << "Sending login";
              login_start_login_upstream login_req("OpenCraft user"); // TODO - add username option
              this->client_conn->send_packet(&login_req);
+             this->client_conn->pump_net();
              this->conn_state = INGAME_CONNECTING_SENT_LOGIN;
+             this->progress  += 1.0;
         break;}
 
         case INGAME_CONNECTING_LOGIN_SUCC:{
