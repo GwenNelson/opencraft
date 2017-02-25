@@ -27,6 +27,8 @@
 #include <opencraft_video.h>
 #include <r_2d.h>
 
+#include <unistd.h>
+
 extern opencraft_video *oc_video;
 extern void* default_font;
 
@@ -60,6 +62,17 @@ void opencraft_appstate_ingame::load_stuff() {
      this->loading_tex_id = tex_id;
      this->loading_x = (oc_video->res_w/2) - (this->loading_text_w/2);
      this->loading_y = (oc_video->res_h/2) - (this->loading_text_h/2);
+
+     predraw_text(default_font,255,255,255,(char*)"Connecting to server",&w,&h,&text_w,&text_h,&tex_id);
+     this->connecting_w      = w;
+     this->connecting_h      = h;
+     this->connecting_text_w = text_w;
+     this->connecting_text_h = text_h;
+     this->connecting_tex_id = tex_id;
+     this->connecting_x = (oc_video->res_w/2) - (this->connecting_text_w/2);
+     this->connecting_y = (oc_video->res_h/2) - (this->connecting_text_h/2);
+
+
 
 
      this->dirtblock_gl_tex_id  = load_texture(std::string("blocks/dirt.png"));
@@ -102,11 +115,20 @@ void opencraft_appstate_ingame::add_blockload(std::string texture_path, unsigned
 
 void opencraft_appstate_ingame::add_blocks() {
      #include "loadblocks.inc"
-     this->total += (this->pending_loads.size());
+     this->total = (this->pending_loads.size()-1);
 }
 
 void opencraft_appstate_ingame::update_loading(SDL_Event *ev) {
-     if(this->progress >= this->total) return;
+
+     if(this->progress >= (this->total-1)) {
+        this->total    = 4.0;
+        this->progress = 0.0;
+        LOG(info) << "Starting connection to server";
+        this->cur_state = INGAME_CONNECTING;
+        return;
+     }
+
+
      pending_blockload_t curblockload = this->pending_loads.back();
      this->pending_loads.pop_back();
      
@@ -121,7 +143,7 @@ void opencraft_appstate_ingame::update_loading(SDL_Event *ev) {
      if(this->progress >= this->total) return;
      double progress_percent = (this->progress / this->total);
      this->progress_w        = progress_percent * (this->loading_w*2);
-}
+   }
 
 void opencraft_appstate_ingame::update_connecting(SDL_Event *ev) {
      if(this->conn_state==-1) {  // is this the first time we're updating in the connecting state?
@@ -129,6 +151,33 @@ void opencraft_appstate_ingame::update_connecting(SDL_Event *ev) {
         this->progress   = 0.0;
         this->conn_state = INGAME_CONNECTING_HS;
      }
+
+     switch(this->conn_state) {
+        case INGAME_CONNECTING_HS:{
+             this->progress      = 1.0;
+             this->conn_state = INGAME_CONNECTING_LOGIN_SUCC;
+             sleep(1);
+        break;}
+
+        case INGAME_CONNECTING_LOGIN_SUCC:{
+             this->progress      = 2.0;
+             this->conn_state = INGAME_CONNECTING_DOWNLOAD_TERRAIN;
+             sleep(1);
+        break;}
+
+        case INGAME_CONNECTING_LOGIN_FAIL:{
+             this->progress = 2.0;
+             sleep(1);
+        break;}
+
+        case INGAME_CONNECTING_DOWNLOAD_TERRAIN:{
+             this->progress      = 4.0;
+        break;}
+     }
+
+
+     double progress_percent  = (this->progress / this->total);
+     this->progress_w         = progress_percent * (this->loading_w*2);
 }
 
 void opencraft_appstate_ingame::update_playing(SDL_Event *ev) {
@@ -147,6 +196,13 @@ void opencraft_appstate_ingame::render_loading() {
 }
 
 void opencraft_appstate_ingame::render_connecting() {
+     draw_tiled_quad(this->bg_dirt_x,  this->bg_dirt_y,  this->bg_dirt_w,  this->bg_dirt_h,  BLOCK_TEXTURE_SIZE, BLOCK_TEXTURE_SIZE, this->dirtblock_gl_tex_id);
+     draw_tiled_quad(this->bg_grass_x, this->bg_grass_y, this->bg_grass_w, this->bg_grass_h, BLOCK_TEXTURE_SIZE, BLOCK_TEXTURE_SIZE, this->grassblock_gl_tex_id);
+     glEnable(GL_BLEND);
+      draw_textured_quad(this->connecting_x,    this->connecting_y,    this->connecting_w,    this->connecting_h,    this->connecting_tex_id);
+      draw_textured_quad( (oc_video->res_w/2) - (this->progress_w/2),    this->connecting_y+(this->connecting_h), this->progress_w, this->connecting_h/2, this->progress_gl_tex_id);
+     glDisable(GL_BLEND);
+
 }
 
 void opencraft_appstate_ingame::render_playing() {

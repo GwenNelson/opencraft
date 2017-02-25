@@ -88,6 +88,14 @@ class opencraft_appstate_ingame : public opencraft_appstate{
      int        loading_text_w;
      int        loading_text_h;
 
+     unsigned int connecting_tex_id;
+     float        connecting_x;
+     float        connecting_y;
+     int        connecting_w;
+     int        connecting_h;
+     int        connecting_text_w;
+     int        connecting_text_h;
+
      unsigned int dirtblock_gl_tex_id;
      unsigned int grassblock_gl_tex_id;
      unsigned int progress_gl_tex_id;
