@@ -32,7 +32,7 @@ FILE(GLOB launcher_src     ${CMAKE_SOURCE_DIR}/src/*.cpp)
 ADD_EXECUTABLE(launcher ${soil_src} ${oglconsole_src} ${launcher_src})
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-   set(EXTRA_GL GL)
+   set(EXTRA_GL GL GLEW GLU)
 endif()
 
 
