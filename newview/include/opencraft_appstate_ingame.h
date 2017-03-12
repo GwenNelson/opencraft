@@ -70,6 +70,14 @@ class opencraft_appstate_ingame : public opencraft_appstate{
      double  total;
 
      opencraft_connection *client_conn;
+
+     std::string user_uuid;
+     std::string username;
+     
+     int my_ent_id;
+     int game_mode;
+     
+
    private:
      void load_stuff();
 
