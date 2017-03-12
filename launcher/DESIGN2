@@ -1,0 +1,28 @@
+API Servers
+  Part of core
+  Specify API servers to use
+    Certain game servers/clients might require certain API servers (e.g plain minecraft probably needs mojang only)
+     Display compatible client and server modules
+      Ask each module if selected API servers are compatible
+
+Server modules
+  Supply support for particular server type
+    Start
+    Stop
+    Download / Update (including any update needed for module)
+    Compile from source
+    Custom path
+    Configuration
+  Specify supported protocol versions
+  Supply per-server instance settings
+  Load/Save world
+
+Client modules
+  Supply support for particular client type
+    Start
+    Stop
+    Download / Update
+    Install mods
+    Compile from source
+    Configuration
+    Specify profile name etc 
