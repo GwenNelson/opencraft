@@ -24,21 +24,43 @@
 #include <iostream>
 #include <string>
 
-#include <common.h>
-
 #include <stdlib.h>
 #include <unistd.h>
 
 #include <nuklear_cpp.h>
+
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
 
-using std::cerr;
-using std::cout;
-using std::endl;
-using std::string;
+#include <boost/log/core.hpp>
+#include <boost/log/trivial.hpp>
+
+#include <boost/log/utility/setup/file.hpp>
+#include <boost/log/utility/setup/common_attributes.hpp>
+
+#include <glob.h>
+#include <dlfcn.h>
+#include <libgen.h>
+
+#include <common.h>
+#include <plugin_api.h>
+
+using namespace std;
+using namespace boost::filesystem;
+
+namespace logging = boost::log;
 
 bool running;
+bool debug;
+
+void configure_logging(bool debug_mode) {
+     if(debug_mode) {
+        logging::core::get()->set_filter(logging::trivial::severity >= logging::trivial::debug);
+     } else {
+        logging::core::get()->set_filter(logging::trivial::severity >= logging::trivial::info);
+     }
+     logging::add_common_attributes();
+}
 
 void handle_input(struct nk_context* ctx) {
      SDL_Event e;
@@ -80,10 +102,7 @@ void ntk_update(struct nk_context* ctx) {
      nk_end(ctx);
 }
 
-int main(int argc, char **argv) {
-    int i;
-    cout << OPENCRAFT_LAUNCHER_LONG_VER << endl << "Built on " << OPENCRAFT_LAUNCHER_BUILDDATE << endl;
-   
+void run_gui() {
     struct nk_context* nk_ctx = init_nuklear("OpenCraft Launcher ");
     running = true;
 
@@ -92,4 +111,47 @@ int main(int argc, char **argv) {
        ntk_update(nk_ctx);
        render_nuklear();
     }
+
+}
+
+void load_plugin(std::string filename) {
+     LOG(debug) << "Attempting to load " << filename;
+     void* handle=dlopen(filename.c_str(),RTLD_LAZY);
+
+     if(handle==NULL) {
+        LOG(error) << "Failed to load " << filename << ", dlerror() returned " << std::string(dlerror());
+        return;
+     }
+     
+     module_info_t* mod_info = (module_info_t*)dlsym(handle, "module_info");
+     if(mod_info==NULL) {
+        LOG(error) << "Missing module_info in " << filename << ", dlerror() returned " << std::string(dlerror());
+        dlclose(handle);
+        return;
+     }
+
+     LOG(info) << "Loaded " << basename((char*)filename.c_str()) << ": " << mod_info->module_name << ", " << mod_info->module_copyright;
+}
+
+void load_plugins() {
+     LOG(info) << "Searching for plugins...";
+
+     glob_t glob_result;
+     glob("plugins/*.so",GLOB_TILDE,NULL,&glob_result); // TODO: make this cross-platform - e.g dylib on OS X, dll on that shitty OS we all know and hate
+     for(unsigned int i=0; i<glob_result.gl_pathc; ++i){
+         LOG(debug) << "Found plugin file " << glob_result.gl_pathv[i];
+         load_plugin(std::string(glob_result.gl_pathv[i]));
+     }
+     globfree(&glob_result);
+}
+
+int main(int argc, char **argv) {
+    int i;
+    cout << OPENCRAFT_LAUNCHER_LONG_VER << endl << "Built on " << OPENCRAFT_LAUNCHER_BUILDDATE << endl;
+
+    debug = true;
+
+    configure_logging(debug);
+
+    load_plugins();   
 }
