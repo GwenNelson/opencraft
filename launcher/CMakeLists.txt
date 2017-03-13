@@ -47,6 +47,9 @@ add_custom_target(autogen_headers
                   DEPENDS ${CMAKE_SOURCE_DIR}/include/version.h)
 
 ADD_LIBRARY(dummy_plugin SHARED ${CMAKE_SOURCE_DIR}/plugins/dummy/dummy_plugin.cpp)
+set_target_properties(dummy_plugin PROPERTIES PREFIX ""
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/plugins")
 
+add_dependencies(dummy_plugin autogen_headers)
 add_dependencies(launcher autogen_headers)
 
