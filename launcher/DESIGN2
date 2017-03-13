@@ -1,3 +1,63 @@
+GUI
+   Nuklear+SDL+OpenGL based
+   Main panel
+      logo + quick profile selection + nice handy "go!" button
+   Menu layout
+     File
+       Check for updates   --> popup "pending updates" window with list of updates to download
+       Install all updates --> popup "installing updates" window with list of updates downloading + progress bar etc
+       Exit
+     Profile
+       <profile 1>
+       <profile 2>
+       <...>
+       Edit profiles
+
+CLI server tool
+  For use by server sysadmins, provide simple way to manage versions and update etc
+
+Local cache
+  Stores modules, clients, servers and profiles
+
+Module API
+  All modules dynamic libs
+  Provide a symbol module_info with the type of module and basic info
+    Module type
+    Module name
+    Module author + copyright/license info
+    Module version
+  Check for update
+    Check if a newer version is available
+
+Client module API
+  Get available versions
+    Check what versions are available from remote server
+  Get downloaded versions
+    Check what versions have been downloaded to local cache
+  Get installed versions
+    Check what versions have been downloaded and configured for use in a profile
+  Download binary
+    Return a list of HTTP URLs for files to download to local cache
+  Download source
+    Return a list of HTTP URLs for source archives OR a git repo path
+  Compile source
+    If possible, compile source code
+  Install version
+    Download if required and then configure a version for use in a profile - this means copying from cache and then setting up in a per-profile directory
+  Get supported protocols for version
+    Return supported protocols for a particular version
+  Get default configuration
+    Return a default configuration for the specified version
+  Get current configuration
+    Return the current configuration for the specified installation
+  Configure installation
+    Configure an installed version with specified settings
+  Check supported API servers
+    Return a list of supported API servers, or a single "*" URL to indicate all supported
+  Launch installation
+    Start an installed version in online or offline mode with the provided authentication details
+
+
 API Servers
   Part of core
   Specify API servers to use

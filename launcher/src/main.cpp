@@ -57,26 +57,27 @@ void handle_input(struct nk_context* ctx) {
 void ntk_update(struct nk_context* ctx) {
      if (nk_begin(ctx, "OpenCraft Launcher", nk_rect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT),0)) {
          nk_menubar_begin(ctx);
-         nk_layout_row_begin(ctx, NK_STATIC, 25, 2);
+         nk_layout_row_begin(ctx, NK_STATIC, 30, 2);
          nk_layout_row_push(ctx, 45);
-         if (nk_menu_begin_label(ctx, "FILE", NK_TEXT_LEFT, nk_vec2(120, 200))) {
-             nk_layout_row_dynamic(ctx, 30, 1);
-             nk_menu_item_label(ctx, "OPEN", NK_TEXT_LEFT);
-             nk_menu_item_label(ctx, "CLOSE", NK_TEXT_LEFT);
+         if (nk_menu_begin_label(ctx, "File", NK_TEXT_LEFT, nk_vec2(160, 200))) {
+             nk_layout_row_dynamic(ctx, 12, 1);
+             nk_menu_item_label(ctx, "Updates:", NK_TEXT_LEFT);
+             nk_menu_item_label(ctx, "  Check for updates", NK_TEXT_LEFT);
+             nk_menu_item_label(ctx, "  Install all updates", NK_TEXT_LEFT);
              nk_menu_end(ctx);
          }
-         nk_layout_row_push(ctx, 45);
-         if (nk_menu_begin_label(ctx, "EDIT", NK_TEXT_LEFT, nk_vec2(120, 200))) {
-             nk_layout_row_dynamic(ctx, 30, 1);
-             nk_menu_item_label(ctx, "COPY", NK_TEXT_LEFT);
-             nk_menu_item_label(ctx, "CUT", NK_TEXT_LEFT);
-             nk_menu_item_label(ctx, "PASTE", NK_TEXT_LEFT);
+         nk_layout_row_push(ctx, 60);
+         if (nk_menu_begin_label(ctx, "Profile", NK_TEXT_LEFT, nk_vec2(160, 200))) {
+             nk_layout_row_dynamic(ctx, 14, 1);
+             nk_menu_item_label(ctx, "Select profile:", NK_TEXT_LEFT);
+             nk_menu_item_label(ctx, "  Default", NK_TEXT_LEFT);
+             nk_menu_item_label(ctx, "Edit profiles", NK_TEXT_LEFT);
              nk_menu_end(ctx);
          }
          nk_layout_row_end(ctx);
          nk_menubar_end(ctx);
-        }
-        nk_end(ctx);
+     }
+     nk_end(ctx);
 }
 
 int main(int argc, char **argv) {
