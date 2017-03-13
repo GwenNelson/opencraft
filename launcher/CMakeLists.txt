@@ -46,5 +46,7 @@ ADD_CUSTOM_COMMAND( OUTPUT ${CMAKE_SOURCE_DIR}/include/version.h
 add_custom_target(autogen_headers
                   DEPENDS ${CMAKE_SOURCE_DIR}/include/version.h)
 
+ADD_LIBRARY(dummy_plugin SHARED ${CMAKE_SOURCE_DIR}/plugins/dummy/dummy_plugin.c)
+
 add_dependencies(launcher autogen_headers)
 
