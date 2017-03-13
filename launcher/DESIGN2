@@ -30,8 +30,10 @@ Module API
     Check if a newer version is available
 
 Client module API
-  Get available versions
-    Check what versions are available from remote server
+  Get available compatible versions
+    Check what versions are both available from remote server and supported by this module
+  Get all available versions
+    Check what versions are available from remote server including incompatible versions
   Get downloaded versions
     Check what versions have been downloaded to local cache
   Get installed versions
@@ -54,9 +56,12 @@ Client module API
     Configure an installed version with specified settings
   Check supported API servers
     Return a list of supported API servers, or a single "*" URL to indicate all supported
+  Check online play supported
+    Return true/false indicating if online play is supported
+  Check supported protocol versions
+    Return supported protocol versions for each installed version
   Launch installation
-    Start an installed version in online or offline mode with the provided authentication details
-
+    Start an installed version in online or offline mode with the provided authentication details and server
 
 API Servers
   Part of core
