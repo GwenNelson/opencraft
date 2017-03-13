@@ -28,4 +28,9 @@
 #include <nuklear.h>
 #include <nuklear_sdl_gl3.h>
 
-void init_nuklear(const char* wintitle);
+struct nk_context *init_nuklear(const char* wintitle);
+void render_nuklear();
+
+// TODO - put this into init params
+#define WINDOW_WIDTH  1280
+#define WINDOW_HEIGHT 720

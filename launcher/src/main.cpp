@@ -30,15 +30,65 @@
 #include <unistd.h>
 
 #include <nuklear_cpp.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_opengl.h>
 
 using std::cerr;
 using std::cout;
 using std::endl;
 using std::string;
 
+bool running;
+
+void handle_input(struct nk_context* ctx) {
+     SDL_Event e;
+     nk_input_begin(ctx);
+     while (SDL_PollEvent(&e)) {
+        if (e.type == SDL_QUIT) {
+           running=false;
+           return; // do nothing more
+        } else {
+            nk_sdl_handle_event(&e);
+        }
+     }
+     nk_input_end(ctx);
+}
+
+void ntk_update(struct nk_context* ctx) {
+     if (nk_begin(ctx, "OpenCraft Launcher", nk_rect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT),0)) {
+         nk_menubar_begin(ctx);
+         nk_layout_row_begin(ctx, NK_STATIC, 25, 2);
+         nk_layout_row_push(ctx, 45);
+         if (nk_menu_begin_label(ctx, "FILE", NK_TEXT_LEFT, nk_vec2(120, 200))) {
+             nk_layout_row_dynamic(ctx, 30, 1);
+             nk_menu_item_label(ctx, "OPEN", NK_TEXT_LEFT);
+             nk_menu_item_label(ctx, "CLOSE", NK_TEXT_LEFT);
+             nk_menu_end(ctx);
+         }
+         nk_layout_row_push(ctx, 45);
+         if (nk_menu_begin_label(ctx, "EDIT", NK_TEXT_LEFT, nk_vec2(120, 200))) {
+             nk_layout_row_dynamic(ctx, 30, 1);
+             nk_menu_item_label(ctx, "COPY", NK_TEXT_LEFT);
+             nk_menu_item_label(ctx, "CUT", NK_TEXT_LEFT);
+             nk_menu_item_label(ctx, "PASTE", NK_TEXT_LEFT);
+             nk_menu_end(ctx);
+         }
+         nk_layout_row_end(ctx);
+         nk_menubar_end(ctx);
+        }
+        nk_end(ctx);
+}
+
 int main(int argc, char **argv) {
     int i;
     cout << OPENCRAFT_LAUNCHER_LONG_VER << endl << "Built on " << OPENCRAFT_LAUNCHER_BUILDDATE << endl;
    
-    init_nuklear("OpenCraft Launcher ");
+    struct nk_context* nk_ctx = init_nuklear("OpenCraft Launcher ");
+    running = true;
+
+    while(running) {
+       handle_input(nk_ctx);
+       ntk_update(nk_ctx);
+       render_nuklear();
+    }
 }
