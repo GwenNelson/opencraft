@@ -1,13 +1,15 @@
 cmake_minimum_required(VERSION 2.8.3)
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
+
 cmake_policy(SET CMP0004 OLD)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/CMakeFiles")
 
 FIND_PACKAGE(Boost COMPONENTS system program_options thread log log_setup)
-
-
+find_package(jsoncpp REQUIRED)
 find_package(SDL2 REQUIRED)
+find_package(CURL REQUIRED)
 INCLUDE(FindPkgConfig)
 
 set (CMAKE_CXX_STANDARD 11)
@@ -27,7 +29,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-narrowing")
 
 ADD_DEFINITIONS(-DBOOST_LOG_DYN_LINK)
 
-INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/include )
+INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS} ${CURL_INCLUDE_DIRS} ${JSONCPP_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/include )
 
 FILE(GLOB launcher_src     ${CMAKE_SOURCE_DIR}/src/*.cpp)
 
@@ -38,7 +40,7 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 endif()
 
 
-TARGET_LINK_LIBRARIES(launcher dl ${EXTRA_GL} ${SDL2_LIBRARIES} pthread ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(launcher dl ${CURL_LIBRARIES} ${JSONCPP_LIBRARIES} ${EXTRA_GL} ${SDL2_LIBRARIES} pthread ${Boost_LIBRARIES})
 
 ADD_CUSTOM_COMMAND( OUTPUT ${CMAKE_SOURCE_DIR}/include/version.h
                     COMMAND ${CMAKE_SOURCE_DIR}/autogen.sh

@@ -23,6 +23,7 @@
 //-----------------------------------------------------------------------------
 
 #include <plugin_api.h>
+#include <curl/curl.h>
 #include <unistd.h>
 
 #define MOJANG_CLIENT_NAME        "Official Mojang Client"
