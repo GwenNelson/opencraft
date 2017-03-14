@@ -19,6 +19,12 @@ CLI server tool
 Local cache
   Stores modules, clients, servers and profiles
 
+Module implementation
+  std::map of plugin filename to module_info struct
+  std::map of plugin filename to dlopen handle
+  std::vector of client module filenames
+  std::vector of server module filenames
+
 Module API
   All modules dynamic libs
   Provide a symbol module_info with the type of module and basic info

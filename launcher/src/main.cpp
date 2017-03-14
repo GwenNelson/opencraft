@@ -45,6 +45,9 @@
 #include <common.h>
 #include <plugin_api.h>
 
+#include <map>
+#include <vector>
+
 using namespace std;
 using namespace boost::filesystem;
 
@@ -52,6 +55,11 @@ namespace logging = boost::log;
 
 bool running;
 bool debug;
+
+map<string,module_info_t*> loaded_modules_info;
+map<string,void*>          loaded_modules_handles;
+vector<string>             loaded_client_modules;
+vector<string>             loaded_server_modules;
 
 void configure_logging(bool debug_mode) {
      if(debug_mode) {
@@ -130,7 +138,24 @@ void load_plugin(std::string filename) {
         return;
      }
 
-     LOG(info) << "Loaded " << basename((char*)filename.c_str()) << ": " << mod_info->module_name << ", " << mod_info->module_copyright;
+     std::string base_filename = std::string((char*)filename.c_str());
+
+     if(mod_info->module_type == MODTYPE_CLIENT) {
+        LOG(info) << "Loaded client module " << base_filename << ": " << mod_info->module_name << ", " << mod_info->module_copyright;
+        LOG(info) << mod_info->module_name << ": Version " << mod_info->module_version;
+        loaded_client_modules.push_back(base_filename);
+     } else if(mod_info->module_type == MODTYPE_SERVER) {
+        LOG(info) << "Loaded server module " << base_filename << ": " << mod_info->module_name << ", " << mod_info->module_copyright;
+        LOG(info) << mod_info->module_name << ": Version " << mod_info->module_version;
+        loaded_server_modules.push_back(base_filename);
+     } else {
+        LOG(error) << "Unknown module type, unloading " << base_filename;
+        dlclose(handle);
+        return;
+     }
+     loaded_modules_info[base_filename]    = mod_info;
+     loaded_modules_handles[base_filename] = handle;
+
 }
 
 void load_plugins() {
@@ -138,11 +163,13 @@ void load_plugins() {
 
      glob_t glob_result;
      glob("plugins/*.so",GLOB_TILDE,NULL,&glob_result); // TODO: make this cross-platform - e.g dylib on OS X, dll on that shitty OS we all know and hate
-     for(unsigned int i=0; i<glob_result.gl_pathc; ++i){
+     unsigned int i;
+     for(i=0; i<glob_result.gl_pathc; ++i){
          LOG(debug) << "Found plugin file " << glob_result.gl_pathv[i];
          load_plugin(std::string(glob_result.gl_pathv[i]));
      }
      globfree(&glob_result);
+     LOG(info) << "Located " << i << " plugins";
 }
 
 int main(int argc, char **argv) {

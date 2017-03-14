@@ -29,5 +29,6 @@ module_info_t module_info = {
   .module_name      = "Dummy client module",
   .module_author    = "Gareth Nelson",
   .module_copyright = "Copyright (C) 2017 Gareth Nelson",
-  .module_license   = "GPLv2"
+  .module_license   = "GPLv2",
+  .module_version   = "0.1"
 };

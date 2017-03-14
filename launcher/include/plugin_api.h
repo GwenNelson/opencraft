@@ -34,4 +34,5 @@ typedef struct {
    const char*   module_author;
    const char*   module_copyright;
    const char*   module_license;
+   const char*   module_version;
 } module_info_t;
