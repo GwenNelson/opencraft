@@ -41,14 +41,23 @@ typedef struct {
    bool          (*check_for_update)(); // should query remote server and return true if an update is available, if not supported this should be set to NULL
 } module_info_t;
 
-// used for client version information
+// =============================================================================================================
+//   CLIENT STUFF HERE
+// =============================================================================================================
+
+// used for client version information - ALL fields must be set unless stated otherwise, if not applicable use a 0-length string("")
+// note that the client_name field should be identical for all versions of the same client software
+// the same plugin can support multiple pieces of software, but in practice different plugins should be used
 typedef struct {
-   bool        is_free;         // if the client version is free software or not
-   bool        is_compatible;   // is this version compatible with this module?
-   bool        is_installed;    // has this version been configured in a profile?
-   const char* client_license;  // if the client is free software, what license is it under?
-   const char* version_id;      // a unique version string
-   const char* source_repo_url; // a git URL or NULL if no source is available
+   bool        is_free;            // if the client version is free software or not
+   bool        is_compatible;      // is this version compatible with this module?
+   bool        is_installed;       // has this version been configured in a profile?
+   const char* client_name;        // if the client has a specific name (e.g "Mojang official" or whatever), stick it here
+   const char* client_license;     // if the client is free software, what license is it under? If not, ("")
+   const char* version_id;         // a unique version string
+   const char* source_repo_url;    // a git URL or NULL if nonfree
+   const char* source_repo_branch; // a git branch/tag for this exact version or NULL if nonfree
+   const char* protocol_versions;  // a comma-seperated list of supported protocol versions
 } client_version_info_t;
 
 // client plugins specify their API via this struct, which must be in the client_api symbol
@@ -57,4 +66,23 @@ typedef struct {
    void (*update_version_data)(); // query remote server(s) and update internal list of available versions
 } client_api_t;
 
+// =============================================================================================================
+//   SERVER STUFF HERE
+// =============================================================================================================
 
+// used for server version information
+typedef struct {
+   bool        is_free;           // if the server version is free software or not
+   bool        is_compatible;     // is this version compatible with this module?
+   bool        is_installed;      // has this version been configured in a profile?
+   const char* client_license;    // if the server is free software, what license is it under?
+   const char* version_id;        // a unique version string
+   const char* source_repo_url;   // a git URL or NULL if no source is available
+   const char* protocol_versions; // a comma-seperated list of supported protocol versions
+} server_version_info_t;
+
+// server plugins specify their API via this struct, which should be used for the server_api symbol
+// as with client_api, if a particular API function is not implemented it should be set to NULL
+typedef struct {
+   void (*update_version_data)(); // query remote server(s) and update internal list of available versions
+} server_api_t;

@@ -48,10 +48,16 @@ ADD_CUSTOM_COMMAND( OUTPUT ${CMAKE_SOURCE_DIR}/include/version.h
 add_custom_target(autogen_headers
                   DEPENDS ${CMAKE_SOURCE_DIR}/include/version.h)
 
-ADD_LIBRARY(dummy_plugin SHARED ${CMAKE_SOURCE_DIR}/plugins/dummy/dummy_plugin.cpp)
-set_target_properties(dummy_plugin PROPERTIES PREFIX ""
+ADD_LIBRARY(dummy_client_plugin SHARED ${CMAKE_SOURCE_DIR}/plugins/dummy_client/dummy_client.cpp)
+set_target_properties(dummy_client_plugin PROPERTIES PREFIX ""
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/plugins")
 
-add_dependencies(dummy_plugin autogen_headers)
+
+ADD_LIBRARY(dummy_server_plugin SHARED ${CMAKE_SOURCE_DIR}/plugins/dummy_server/dummy_server.cpp)
+set_target_properties(dummy_server_plugin PROPERTIES PREFIX ""
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/plugins")
+
+add_dependencies(dummy_server_plugin autogen_headers)
+add_dependencies(dummy_client_plugin autogen_headers)
 add_dependencies(launcher autogen_headers)
 

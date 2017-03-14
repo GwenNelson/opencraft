@@ -155,13 +155,13 @@ void load_plugin(std::string filename) {
         LOG(debug) << "Automatic updates not supported for module " << filename;
      }
 
-     std::string base_filename = std::string((char*)filename.c_str());
+     std::string base_filename = std::string(basename((char*)filename.c_str()));
      void* api_ptr = NULL;
 
      if(mod_info->module_type == MODTYPE_CLIENT) {
         LOG(info) << "Loaded client module " << base_filename << ": " << mod_info->module_name << ", " << mod_info->module_copyright;
         LOG(info) << mod_info->module_name << ": Version " << mod_info->module_version;
-        void* api_ptr = dlsym(handle,"client_api");
+        api_ptr = dlsym(handle,"client_api");
 
         if(api_ptr==NULL) {
            LOG(error) << "Missing client_api in " << filename << ", dlerror() returned " << std::string(dlerror());
@@ -172,7 +172,7 @@ void load_plugin(std::string filename) {
      } else if(mod_info->module_type == MODTYPE_SERVER) {
         LOG(info) << "Loaded server module " << base_filename << ": " << mod_info->module_name << ", " << mod_info->module_copyright;
         LOG(info) << mod_info->module_name << ": Version " << mod_info->module_version;
-        void* api_ptr = dlsym(handle,"server_api");
+        api_ptr = dlsym(handle,"server_api");
 
         if(api_ptr==NULL) {
            LOG(error) << "Missing server_api in " << filename << ", dlerror() returned " << std::string(dlerror());
@@ -205,6 +205,29 @@ void load_plugins() {
      LOG(info) << "Located " << i << " plugins";
 }
 
+void update_versions() {
+     LOG(info) << "Updating client+server version information...";
+
+     for (auto& kv : loaded_modules_info) {
+         std::string plugin_filename = kv.first;
+         module_info_t* mod_info     = kv.second;
+
+         if(mod_info->module_type == MODTYPE_CLIENT) {
+           client_api_t *client_api = (client_api_t*)loaded_modules_apis[plugin_filename];
+           if(client_api->update_version_data != NULL) {
+              client_api->update_version_data();
+           }
+         } else if (mod_info->module_type == MODTYPE_SERVER) {
+           server_api_t *server_api = (server_api_t*)loaded_modules_apis[plugin_filename];
+           if(server_api->update_version_data != NULL) {
+              server_api->update_version_data();
+           }
+
+         }
+         
+     }
+}
+
 int main(int argc, char **argv) {
     int i;
     cout << OPENCRAFT_LAUNCHER_LONG_VER << endl << "Built on " << OPENCRAFT_LAUNCHER_BUILDDATE << endl;
@@ -214,4 +237,6 @@ int main(int argc, char **argv) {
     configure_logging(debug);
 
     load_plugins();   
+
+    update_versions();
 }
