@@ -228,10 +228,10 @@ void update_versions() {
      }
 }
 
-void dump_client_versions() {
+void dump_supported_client_versions() {
     for(auto plugin_filename : loaded_client_modules) {
         client_api_t *client_api               =  (client_api_t*)loaded_modules_apis[plugin_filename];
-        client_version_info_t** avail_versions = client_api->get_available_versions();
+        client_version_info_t** avail_versions = client_api->get_supported_versions();
         client_version_info_t** client_ver     = avail_versions;
         for(client_ver;*client_ver != NULL;++client_ver) {
            LOG(debug) << "Got support for client " << (*client_ver)->client_name << " version " << (*client_ver)->version_id;
@@ -252,6 +252,6 @@ int main(int argc, char **argv) {
     update_versions();
 
     if(debug) {
-      dump_client_versions();
+      dump_supported_client_versions();
     }
 }

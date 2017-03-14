@@ -91,6 +91,9 @@ client_version_info_t new_versions[] = {
 // before init_module() is run this is null, init_module() sets it up
 client_version_info_t **available_versions = NULL;
 
+// we also keep track of available+supported versions in the same format
+client_version_info_t **supported_versions = NULL;
+
 void dummy_update_versions() {
      // in a real plugin, we'd talk to the server and get updated version info here
      // instead, we'll simulate the lag using sleep()
@@ -108,12 +111,23 @@ void dummy_update_versions() {
      int new_version_count    = sizeof(new_versions)    / sizeof(client_version_info_t);
 
      available_versions = (client_version_info_t**)malloc(sizeof(client_version_info_t*)*(static_version_count+new_version_count+1));
-     int i=0;
+
+     // we also update the supported versions
+
+     free((void*)supported_versions);
+     supported_versions = (client_version_info_t**)malloc(sizeof(client_version_info_t*)*(static_version_count+new_version_count+1)); // yeah, i know, wasteful
+
+     int i   = 0;
+     int s_i = 0;
 
      // first shove the static versions into place
      for(i=0; i<static_version_count; i++) {
          LOG(debug) << "dummy_client_plugin: Adding version update: " << static_versions[i].client_name << ", version " << static_versions[i].version_id;
          available_versions[i] = &(static_versions[i]);
+         if(static_versions[i].is_compatible) {
+            supported_versions[s_i] = &(static_versions[i]);
+            s_i++;
+         }
      }
      
      // and now the new versions
@@ -122,8 +136,13 @@ void dummy_update_versions() {
          n_i = i-static_version_count;
          LOG(debug) << "dummy_client_plugin: Adding version update: " << new_versions[n_i].client_name << ", version " << new_versions[n_i].version_id;
          available_versions[i] = &(new_versions[n_i]);
+         if(new_versions[n_i].is_compatible) {
+            supported_versions[s_i] = &(new_versions[n_i]);
+            s_i++;
+         }
      }
      available_versions[i] = NULL;
+     supported_versions[i] = NULL;
 }
 
 client_version_info_t **dummy_get_avail_versions() {
@@ -131,20 +150,36 @@ client_version_info_t **dummy_get_avail_versions() {
      return available_versions;
 }
 
+client_version_info_t **dummy_get_supported_versions() {
+     return supported_versions;
+}
+
 void dummy_init() {
      // this will be called as soon as the plugin is loaded and is where we should setup any tables and structs
      // in this dummy, we update available_versions with static_versions
-     int static_version_count = sizeof(static_versions) / sizeof(client_version_info_t);
 
+     int static_version_count    = sizeof(static_versions) / sizeof(client_version_info_t);
+     int supported_version_count = 0; // updated in loop below
+
+     // allocate memory for all available versions
      available_versions = (client_version_info_t**)malloc(sizeof(client_version_info_t*)*(static_version_count+1)); // we allocate 1 extra for the terminating NULL
+
+     // we also allocate memory for the supported versions, which we can resize later if needed
+     supported_versions = (client_version_info_t**)malloc(sizeof(client_version_info_t*)*(static_version_count+1));
 
      // normally a plugin should only output errors to the log in this function, but it helps with debugging to see some info here
      int i=0;
+     int s_i=0; // supported versions iterator
      for(i=0; i<static_version_count; i++) {
          LOG(debug) << "dummy_client_plugin: Adding static version: " << static_versions[i].client_name << ", version " << static_versions[i].version_id;
          available_versions[i] = &(static_versions[i]);
+         if(static_versions[i].is_compatible) {
+            supported_versions[s_i] = &(static_versions[i]);
+            s_i++;
+         }
      }
-     available_versions[i] = NULL;
+     supported_versions[s_i] = NULL;
+     available_versions[i]   = NULL;
 
 }
 
@@ -165,5 +200,6 @@ module_info_t module_info = {
 
 client_api_t client_api = {
   .update_version_data    = dummy_update_versions,
-  .get_available_versions = dummy_get_avail_versions
+  .get_available_versions = dummy_get_avail_versions,
+  .get_supported_versions = dummy_get_supported_versions
 };

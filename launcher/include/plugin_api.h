@@ -65,6 +65,7 @@ typedef struct {
 typedef struct {
    void                    (*update_version_data)();    // query remote server(s) and update internal list of available versions
    client_version_info_t** (*get_available_versions)(); // get known list of available versions as a NULL-terminated array
+   client_version_info_t** (*get_supported_versions)(); // get known list of available+supported versions as a NULL-terminated array
 } client_api_t;
 
 // =============================================================================================================
