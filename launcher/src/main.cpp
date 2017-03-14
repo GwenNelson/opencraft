@@ -85,6 +85,7 @@ void handle_input(struct nk_context* ctx) {
      nk_input_end(ctx);
 }
 
+// TODO: Switch GUI stuff to use FSM/appstate design
 void ntk_update(struct nk_context* ctx) {
      if (nk_begin(ctx, "OpenCraft Launcher", nk_rect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT),0)) {
          nk_menubar_begin(ctx);
@@ -192,6 +193,8 @@ void load_plugin(std::string filename) {
 }
 
 void load_plugins() {
+     // TODO: Switch this to use cache and check module versions (load most up to date version)
+     // TODO: Abstract out all the plugin loading code to some kind of plugin manager
      LOG(info) << "Searching for plugins...";
 
      glob_t glob_result;
@@ -228,8 +231,8 @@ void update_versions() {
      }
 }
 
-void dump_supported_client_versions() {
-    for(int i=0; i < loaded_client_modules.size(); i++) {
+void get_supported_client_versions() {
+     for(int i=0; i < loaded_client_modules.size(); i++) {
         std::string plugin_filename = loaded_client_modules[i];
         LOG(debug) << "Dumping versions from plugin " << plugin_filename;
         client_api_t *client_api               = (client_api_t*)loaded_modules_apis[plugin_filename];
@@ -237,9 +240,12 @@ void dump_supported_client_versions() {
         int v=0;
         for(v=0;avail_versions[v]!=NULL;v++) {
            LOG(debug) << "Got support for client " << avail_versions[v]->client_name << " version " << avail_versions[v]->version_id;
+           if(client_api->download_version != NULL) {
+              LOG(info) << "Downloading binary for " << avail_versions[v]->client_name << " " << avail_versions[v]->version_id;
+              client_api->download_version(avail_versions[v],""); // TODO: Use cache manager to obtain the cache path and confirm versions
+           }
         }
-
-    }
+     }
 }
 
 int main(int argc, char **argv) {
@@ -254,7 +260,5 @@ int main(int argc, char **argv) {
 
     update_versions();
 
-    if(debug) {
-      dump_supported_client_versions();
-    }
+    get_supported_client_versions();
 }

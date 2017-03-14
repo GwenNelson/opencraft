@@ -27,6 +27,19 @@
 #include <version.h>
 #include <common.h>  // although dynamically loaded, plugins might need the logger etc
 
+// =============================================================================================================
+//   PLUGIN-USABLE API HERE
+// =============================================================================================================
+
+// these functions are usable by loaded plugins and are implemented in the main launcher
+// TODO: move this stuff into a seperate library
+
+
+
+// =============================================================================================================
+//   MODULE INFO STUFF HERE
+// =============================================================================================================
+
 typedef enum {MODTYPE_CLIENT,MODTYPE_SERVER} module_type_t;
 
 // every module MUST include a module_info symbol of this struct type
@@ -36,7 +49,7 @@ typedef struct {
    const char*   module_author;
    const char*   module_copyright;      // copyright and other legalese for the module itself, NOT supported clients/servers
    const char*   module_license;        // license for the module itself
-   const char*   module_version;
+   const char*   module_version;        // module version - later versions override earlier versions
    void          (*init_module)();      // this may be NULL if no init code is needed, otherwise it should be used to setup the client_api and other structs
    bool          (*check_for_update)(); // should query remote server and return true if an update is available, if not supported this should be set to NULL
 } module_info_t;
@@ -68,7 +81,7 @@ typedef struct {
    void                    (*update_version_data)();    // query remote server(s) and update internal list of available versions
    client_version_info_t** (*get_available_versions)(); // get known list of available versions as a NULL-terminated array
    client_version_info_t** (*get_supported_versions)(); // get known list of available+supported versions as a NULL-terminated array
-   void                    (*download_version)(client_version_info_t ver, const char* cache_path); // download specified client version into cache_path
+   void                    (*download_version)(client_version_info_t *ver, const char* cache_path); // download specified client version into cache_path
 } client_api_t;
 
 // =============================================================================================================

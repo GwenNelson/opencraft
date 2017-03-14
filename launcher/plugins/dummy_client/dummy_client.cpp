@@ -205,5 +205,6 @@ module_info_t module_info = {
 client_api_t client_api = {
   .update_version_data    = dummy_update_versions,
   .get_available_versions = dummy_get_avail_versions,
-  .get_supported_versions = dummy_get_supported_versions
+  .get_supported_versions = dummy_get_supported_versions,
+  .download_version       = NULL
 };

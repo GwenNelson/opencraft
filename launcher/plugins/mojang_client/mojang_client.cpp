@@ -77,6 +77,9 @@ void mojang_init() {
      supported_versions[i] = NULL;
 }
 
+void mojang_download_version(client_version_info_t *ver, const char* cache_path) {
+}
+
 bool mojang_update() {
      return false; // we're always gonna be the latest version - at least for now
 }
@@ -95,5 +98,6 @@ module_info_t module_info = {
 client_api_t client_api = {
   .update_version_data    = mojang_update_versions,
   .get_available_versions = mojang_get_avail_versions,
-  .get_supported_versions = mojang_get_supported_versions
+  .get_supported_versions = mojang_get_supported_versions,
+  .download_version       = mojang_download_version
 };
