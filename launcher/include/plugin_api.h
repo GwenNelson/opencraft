@@ -63,7 +63,8 @@ typedef struct {
 // client plugins specify their API via this struct, which must be in the client_api symbol
 // if a particular API function is not implemented it should be set to NULL
 typedef struct {
-   void (*update_version_data)(); // query remote server(s) and update internal list of available versions
+   void                    (*update_version_data)();    // query remote server(s) and update internal list of available versions
+   client_version_info_t** (*get_available_versions)(); // get known list of available versions as a NULL-terminated array
 } client_api_t;
 
 // =============================================================================================================

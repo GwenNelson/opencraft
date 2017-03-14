@@ -96,7 +96,7 @@ void dummy_update_versions() {
      // instead, we'll simulate the lag using sleep()
      LOG(info) << "dummy_client_plugin: " << sizeof(static_versions)/sizeof(client_version_info_t) << " currently known versions";
      LOG(info) << "dummy_client_plugin: pretending to download latest version data...";
-     sleep(2);
+     sleep(1);
      // when downloading version data, we should get ALL available versions, including those we already know about
      LOG(info) << "dummy_client_plugin: downloaded version data for " << (sizeof(static_versions)+sizeof(new_versions))/sizeof(client_version_info_t) << " versions";
 
@@ -118,12 +118,17 @@ void dummy_update_versions() {
      
      // and now the new versions
      int n_i=0;
-     for(; i<(new_version_count+static_version_count); i++) {
+     for(n_i=0; i<(new_version_count+static_version_count); i++) {
          n_i = i-static_version_count;
          LOG(debug) << "dummy_client_plugin: Adding version update: " << new_versions[n_i].client_name << ", version " << new_versions[n_i].version_id;
          available_versions[i] = &(new_versions[n_i]);
      }
      available_versions[i] = NULL;
+}
+
+client_version_info_t **dummy_get_avail_versions() {
+     // this function returns an array that should NOT be modified by the caller
+     return available_versions;
 }
 
 void dummy_init() {
@@ -159,5 +164,6 @@ module_info_t module_info = {
 };
 
 client_api_t client_api = {
-  .update_version_data = dummy_update_versions
+  .update_version_data    = dummy_update_versions,
+  .get_available_versions = dummy_get_avail_versions
 };
