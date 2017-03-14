@@ -34,10 +34,10 @@ typedef struct {
    module_type_t module_type;
    const char*   module_name;
    const char*   module_author;
-   const char*   module_copyright;
-   const char*   module_license;
+   const char*   module_copyright;      // copyright and other legalese for the module itself, NOT supported clients/servers
+   const char*   module_license;        // license for the module itself
    const char*   module_version;
-   void          (*init_module)();      // this may be NULL if no init code is needed, otherwise it should be used to setup the client_api and other structs only
+   void          (*init_module)();      // this may be NULL if no init code is needed, otherwise it should be used to setup the client_api and other structs
    bool          (*check_for_update)(); // should query remote server and return true if an update is available, if not supported this should be set to NULL
 } module_info_t;
 
@@ -47,6 +47,7 @@ typedef struct {
 
 // used for client version information - ALL fields must be set unless stated otherwise, if not applicable use a 0-length string("")
 // note that the client_name field should be identical for all versions of the same client software
+// binary_repo_url can be anything and is used only by the plugin itself to derive a list of URLs to download
 // the same plugin can support multiple pieces of software, but in practice different plugins should be used
 typedef struct {
    bool        is_free;            // if the client version is free software or not
@@ -55,6 +56,7 @@ typedef struct {
    const char* client_name;        // if the client has a specific name (e.g "Mojang official" or whatever), stick it here
    const char* client_license;     // if the client is free software, what license is it under? If not, ("")
    const char* version_id;         // a unique version string
+   const char* binary_repo_url;    // used by the plugin internally, actual format of the content of this URL depends on client+plugin
    const char* source_repo_url;    // a git URL or NULL if nonfree
    const char* source_repo_branch; // a git branch/tag for this exact version or NULL if nonfree
    const char* protocol_versions;  // a comma-seperated list of supported protocol versions

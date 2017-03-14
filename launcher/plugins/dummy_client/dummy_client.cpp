@@ -36,6 +36,7 @@ client_version_info_t static_versions[] = {
      .client_name        = "Dummy free software client",
      .client_license     = "GPLv2",
      .version_id         = "1.0",
+     .binary_repo_url    = "http://example.com/free-dummyclient-1.0.tgz",
      .source_repo_url    = "http://github.com/GarethNelson/ThisRepoDoesNotExist",
      .source_repo_branch = "1.0",
      .protocol_versions  = "47,107"
@@ -46,6 +47,7 @@ client_version_info_t static_versions[] = {
      .client_name        = "Dummy free software client",
      .client_license     = "GPLv2",
      .version_id         = "2.0",
+     .binary_repo_url    = "http://example.com/free-dummyclient-2.0.tgz",
      .source_repo_url    = "http://github.com/GarethNelson/ThisRepoDoesNotExist",
      .source_repo_branch = "2.0",
      .protocol_versions  = "47,107,315"
@@ -56,6 +58,7 @@ client_version_info_t static_versions[] = {
      .client_name        = "Dummy proprietary client",
      .client_license     = "",
      .version_id         = "1.8",
+     .binary_repo_url    = "http://example.com/dummyclient-1.8.tgz",
      .source_repo_url    = NULL,
      .source_repo_branch = NULL,
      .protocol_versions  = "47"
@@ -71,6 +74,7 @@ client_version_info_t new_versions[] = {
      .client_name        = "Dummy free software client",
      .client_license     = "GPLv2",
      .version_id         = "2.1",
+     .binary_repo_url    = "http://example.com/free-dummyclient-2.1.tgz",
      .source_repo_url    = "http://github.com/GarethNelson/ThisRepoDoesNotExist",
      .source_repo_branch = "2.1",
      .protocol_versions  = "47,107,315"
@@ -81,6 +85,7 @@ client_version_info_t new_versions[] = {
      .client_name        = "Dummy proprietary client",
      .client_license     = "",
      .version_id         = "1.11.2",
+     .binary_repo_url    = "http://example.com/dummyclient-1.11.2.tgz",
      .source_repo_url    = NULL,
      .source_repo_branch = NULL,
      .protocol_versions  = "316"
@@ -167,7 +172,6 @@ void dummy_init() {
      // we also allocate memory for the supported versions, which we can resize later if needed
      supported_versions = (client_version_info_t**)malloc(sizeof(client_version_info_t*)*(static_version_count+1));
 
-     // normally a plugin should only output errors to the log in this function, but it helps with debugging to see some info here
      int i=0;
      int s_i=0; // supported versions iterator
      for(i=0; i<static_version_count; i++) {

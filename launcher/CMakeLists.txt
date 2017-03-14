@@ -52,6 +52,9 @@ ADD_LIBRARY(dummy_client_plugin SHARED ${CMAKE_SOURCE_DIR}/plugins/dummy_client/
 set_target_properties(dummy_client_plugin PROPERTIES PREFIX ""
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/plugins")
 
+ADD_LIBRARY(mojang_client_plugin SHARED ${CMAKE_SOURCE_DIR}/plugins/mojang_client/mojang_client.cpp)
+set_target_properties(mojang_client_plugin PROPERTIES PREFIX ""
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/plugins")
 
 ADD_LIBRARY(dummy_server_plugin SHARED ${CMAKE_SOURCE_DIR}/plugins/dummy_server/dummy_server.cpp)
 set_target_properties(dummy_server_plugin PROPERTIES PREFIX ""
