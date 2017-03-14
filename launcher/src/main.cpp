@@ -58,6 +58,7 @@ bool debug;
 
 map<string,module_info_t*> loaded_modules_info;
 map<string,void*>          loaded_modules_handles;
+map<string,void*>          loaded_modules_apis;
 vector<string>             loaded_client_modules;
 vector<string>             loaded_server_modules;
 
@@ -138,15 +139,47 @@ void load_plugin(std::string filename) {
         return;
      }
 
+     if(mod_info->init_module != NULL) {
+        LOG(debug) << "Initializing module " << filename;
+        mod_info->init_module(); // this must be called if defined so that plugins can setup their structs and tables
+     }
+
+     if(mod_info->check_for_update != NULL) { // TODO: move this update check to somewhere else or stick it into a background thread so we don't lag like mad at startup
+        LOG(debug) << "Checking for available update for module " << filename;
+        if(mod_info->check_for_update()) {
+          LOG(info) << "Update is available for module " << filename; // TODO: implement getting latest version, changelog and other crap
+        } else {
+          LOG(info) << "No available updates for module " << filename;
+        }
+     } else {
+        LOG(debug) << "Automatic updates not supported for module " << filename;
+     }
+
      std::string base_filename = std::string((char*)filename.c_str());
+     void* api_ptr = NULL;
 
      if(mod_info->module_type == MODTYPE_CLIENT) {
         LOG(info) << "Loaded client module " << base_filename << ": " << mod_info->module_name << ", " << mod_info->module_copyright;
         LOG(info) << mod_info->module_name << ": Version " << mod_info->module_version;
+        void* api_ptr = dlsym(handle,"client_api");
+
+        if(api_ptr==NULL) {
+           LOG(error) << "Missing client_api in " << filename << ", dlerror() returned " << std::string(dlerror());
+           dlclose(handle); // without an API we can't do anything, so close and return
+           return;
+        }
         loaded_client_modules.push_back(base_filename);
      } else if(mod_info->module_type == MODTYPE_SERVER) {
         LOG(info) << "Loaded server module " << base_filename << ": " << mod_info->module_name << ", " << mod_info->module_copyright;
         LOG(info) << mod_info->module_name << ": Version " << mod_info->module_version;
+        void* api_ptr = dlsym(handle,"server_api");
+
+        if(api_ptr==NULL) {
+           LOG(error) << "Missing server_api in " << filename << ", dlerror() returned " << std::string(dlerror());
+           dlclose(handle); // without an API we can't do anything, so close and return
+           return;
+        }
+
         loaded_server_modules.push_back(base_filename);
      } else {
         LOG(error) << "Unknown module type, unloading " << base_filename;
@@ -155,7 +188,7 @@ void load_plugin(std::string filename) {
      }
      loaded_modules_info[base_filename]    = mod_info;
      loaded_modules_handles[base_filename] = handle;
-
+     loaded_modules_apis[base_filename]    = api_ptr;
 }
 
 void load_plugins() {

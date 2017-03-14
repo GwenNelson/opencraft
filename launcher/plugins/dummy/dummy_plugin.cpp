@@ -24,11 +24,31 @@
 
 #include <plugin_api.h>
 
+void dummy_init() {
+     // this will be called as soon as the plugin is loaded
+     // normally plugins should NOT spit anything out to the logger other than errors, but this is just an example
+     LOG(info) << "Hello from dummy_plugin";
+}
+
+bool dummy_update() {
+     return false; // we're always gonna be the latest version
+}
+
+void dummy_update_versions() {
+     LOG(debug) << "dummy_plugin is updating version info, w00t";
+}
+
 module_info_t module_info = {
   .module_type      = MODTYPE_CLIENT,
   .module_name      = "Dummy client module",
   .module_author    = "Gareth Nelson",
   .module_copyright = "Copyright (C) 2017 Gareth Nelson",
   .module_license   = "GPLv2",
-  .module_version   = "0.1"
+  .module_version   = "0.1",
+  .init_module      = dummy_init,
+  .check_for_update = dummy_update
+};
+
+client_api_t client_api = {
+  .update_version_data = dummy_update_versions
 };

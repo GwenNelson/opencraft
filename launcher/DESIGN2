@@ -22,8 +22,12 @@ Local cache
 Module implementation
   std::map of plugin filename to module_info struct
   std::map of plugin filename to dlopen handle
+  std::map of plugin filename to relevant API (as void* - cast as appropriate, fuck off C++ OOP purists)
   std::vector of client module filenames
   std::vector of server module filenames
+
+Plugins are responsible for managing install paths of client/server versions
+  An install path for a particular profile might be a single file with configuration settings
 
 Module API
   All modules dynamic libs
@@ -35,7 +39,11 @@ Module API
   Check for update
     Check if a newer version is available
 
-Client module API
+Minecraft client module
+  Get versions from https://launchermeta.mojang.com/mc/game/version_manifest.json
+  Hardcoded compatible versions
+
+Client module API - documented in code (include/plugin_api.h)
   Get available compatible versions
     Check what versions are both available from remote server and supported by this module
   Get all available versions
