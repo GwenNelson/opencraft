@@ -115,12 +115,12 @@ void dummy_update_versions() {
      int static_version_count = sizeof(static_versions) / sizeof(client_version_info_t);
      int new_version_count    = sizeof(new_versions)    / sizeof(client_version_info_t);
 
-     available_versions = (client_version_info_t**)malloc(sizeof(client_version_info_t*)*(static_version_count+new_version_count+1));
+     available_versions = (client_version_info_t**)calloc(sizeof(client_version_info_t*),(static_version_count+new_version_count+1));
 
      // we also update the supported versions
 
      free((void*)supported_versions);
-     supported_versions = (client_version_info_t**)malloc(sizeof(client_version_info_t*)*(static_version_count+new_version_count+1)); // yeah, i know, wasteful
+     supported_versions = (client_version_info_t**)calloc(sizeof(client_version_info_t*),(static_version_count+new_version_count+1)); // yeah, i know, wasteful
 
      int i   = 0;
      int s_i = 0;
@@ -167,7 +167,7 @@ void dummy_init() {
      int supported_version_count = 0; // updated in loop below
 
      // allocate memory for all available versions
-     available_versions = (client_version_info_t**)malloc(sizeof(client_version_info_t*)*(static_version_count+1)); // we allocate 1 extra for the terminating NULL
+     available_versions = (client_version_info_t**)calloc(sizeof(client_version_info_t*),(static_version_count+1)); // we allocate 1 extra for the terminating NULL
 
      // we also allocate memory for the supported versions, which we can resize later if needed
      supported_versions = (client_version_info_t**)malloc(sizeof(client_version_info_t*)*(static_version_count+1));

@@ -125,7 +125,7 @@ void run_gui() {
 
 void load_plugin(std::string filename) {
      LOG(debug) << "Attempting to load " << filename;
-     void* handle=dlopen(filename.c_str(),RTLD_LAZY);
+     void* handle=dlopen(filename.c_str(),RTLD_NOW|RTLD_LOCAL);
 
      if(handle==NULL) {
         LOG(error) << "Failed to load " << filename << ", dlerror() returned " << std::string(dlerror());
@@ -229,13 +229,16 @@ void update_versions() {
 }
 
 void dump_supported_client_versions() {
-    for(auto plugin_filename : loaded_client_modules) {
-        client_api_t *client_api               =  (client_api_t*)loaded_modules_apis[plugin_filename];
+    for(int i=0; i < loaded_client_modules.size(); i++) {
+        std::string plugin_filename = loaded_client_modules[i];
+        LOG(debug) << "Dumping versions from plugin " << plugin_filename;
+        client_api_t *client_api               = (client_api_t*)loaded_modules_apis[plugin_filename];
         client_version_info_t** avail_versions = client_api->get_supported_versions();
-        client_version_info_t** client_ver     = avail_versions;
-        for(client_ver;*client_ver != NULL;++client_ver) {
-           LOG(debug) << "Got support for client " << (*client_ver)->client_name << " version " << (*client_ver)->version_id;
+        int v=0;
+        for(v=0;avail_versions[v]!=NULL;v++) {
+           LOG(debug) << "Got support for client " << avail_versions[v]->client_name << " version " << avail_versions[v]->version_id;
         }
+
     }
 }
 
