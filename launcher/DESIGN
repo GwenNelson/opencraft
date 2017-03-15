@@ -22,7 +22,6 @@ Downloads:
   For each client/server an installer may be provided that downloads a binary and installs it
    Optional compile from source option
 
-
 Split core/UI:
   Per-platform UI module + header file
   Core in main code
