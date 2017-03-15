@@ -23,7 +23,7 @@
 //-----------------------------------------------------------------------------
 
 #include <plugin_api.h>
-#include <curl/curl.h>
+
 #include <unistd.h>
 
 #define MOJANG_CLIENT_NAME        "Official Mojang Client"
@@ -78,6 +78,13 @@ void mojang_init() {
 }
 
 void mojang_download_version(client_version_info_t *ver, const char* cache_path) {
+     LOG(debug) << "mojang_client_plugin: reading manifest from " << ver->binary_repo_url;
+
+     // download and parse the JSON
+     std::string manifest_json = read_url(ver->binary_repo_url);
+     Json::Value manifest_data = json_from_string(manifest_json);
+
+     
 }
 
 bool mojang_update() {

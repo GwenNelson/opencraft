@@ -27,14 +27,24 @@
 #include <version.h>
 #include <common.h>  // although dynamically loaded, plugins might need the logger etc
 
+#include <string>
+
 // =============================================================================================================
 //   PLUGIN-USABLE API HERE
 // =============================================================================================================
 
-// these functions are usable by loaded plugins and are implemented in the main launcher
+// these functions are usable by loaded plugins and are implemented in the main launcher in plugin_api.cpp
+// plugins should rely on these functions rather than reimplementing basic stuff like HTTP and JSON
+
 // TODO: move this stuff into a seperate library
 
+#include <cpr/cpr.h>
+#include <jsoncpp/json/json.h>
+#include <jsoncpp/json/reader.h>
+#include <jsoncpp/json/value.h>
 
+std::string read_url(std::string url);       // read the contents of a URL into memory, returns NULL on error
+Json::Value json_from_string(std::string s); // parse a string into a JSON value
 
 // =============================================================================================================
 //   MODULE INFO STUFF HERE
