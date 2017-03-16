@@ -2,14 +2,14 @@
 //
 // Copyright (C) 2017 by Gareth Nelson (gareth@garethnelson.com)
 //
-// This file is part of the OpenCraft launcher.
+// This file is part of the OpenCraft client.
 //
 // The OpenCraft client is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 2 of the License, or
 // (at your option) any later version.
 //
-// The OpenCraft launcher is distributed in the hope that it will be useful,
+// The OpenCraft client is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
@@ -18,14 +18,11 @@
 // along with OpenCraft.  If not, see <http://www.gnu.org/licenses/>.
 //
 // DESCRIPTION:
-//     Get runtime version
+//     Common includes everything needs to use
 //
 //-----------------------------------------------------------------------------
 
-#include <opencraft/versiondefs.h>
+#pragma once
 
-const char* opencraft_framework_version()   {return OPENCRAFT_FRAMEWORK_VERSION;};
-const char* opencraft_framework_build()     {return OPENCRAFT_FRAMEWORK_BUILD;};
-const char* opencraft_framework_builddate() {return OPENCRAFT_FRAMEWORK_BUILDDATE;};
-const char* opencraft_framework_shortver()  {return OPENCRAFT_FRAMEWORK_SHORT_VER;};
-const char* opencraft_framework_longver()   {return OPENCRAFT_FRAMEWORK_LONG_VER;};
+#include <opencraft/version.h>
+#include <opencraft/init_common.h>

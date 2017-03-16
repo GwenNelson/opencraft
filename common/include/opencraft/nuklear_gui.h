@@ -18,14 +18,21 @@
 // along with OpenCraft.  If not, see <http://www.gnu.org/licenses/>.
 //
 // DESCRIPTION:
-//     Get runtime version
+//     C++ wrapper and app framework for nuklear
+//     Based heavily on the demo code that comes with Nuklear
 //
 //-----------------------------------------------------------------------------
 
-#include <opencraft/versiondefs.h>
+#include <opencraft/common.h>
 
-const char* opencraft_framework_version()   {return OPENCRAFT_FRAMEWORK_VERSION;};
-const char* opencraft_framework_build()     {return OPENCRAFT_FRAMEWORK_BUILD;};
-const char* opencraft_framework_builddate() {return OPENCRAFT_FRAMEWORK_BUILDDATE;};
-const char* opencraft_framework_shortver()  {return OPENCRAFT_FRAMEWORK_SHORT_VER;};
-const char* opencraft_framework_longver()   {return OPENCRAFT_FRAMEWORK_LONG_VER;};
+#include <opencraft/nuklear.h>
+#include <opencraft/nuklear_sdl_gl3.h>
+
+#include <string>
+
+namespace opencraft { namespace nuklear {
+  class App {
+     public:
+       App(std::string app_name);
+  };
+}}

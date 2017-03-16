@@ -18,14 +18,17 @@
 // along with OpenCraft.  If not, see <http://www.gnu.org/licenses/>.
 //
 // DESCRIPTION:
-//     Get runtime version
+//     Handy init and setup tools for use by apps
 //
 //-----------------------------------------------------------------------------
 
+#include <opencraft/common.h>
 #include <opencraft/versiondefs.h>
+#include <iostream>
+#include <string>
 
-const char* opencraft_framework_version()   {return OPENCRAFT_FRAMEWORK_VERSION;};
-const char* opencraft_framework_build()     {return OPENCRAFT_FRAMEWORK_BUILD;};
-const char* opencraft_framework_builddate() {return OPENCRAFT_FRAMEWORK_BUILDDATE;};
-const char* opencraft_framework_shortver()  {return OPENCRAFT_FRAMEWORK_SHORT_VER;};
-const char* opencraft_framework_longver()   {return OPENCRAFT_FRAMEWORK_LONG_VER;};
+void opencraft::init_common(std::string app_name) {
+     std::cout << app_name << " compiled with " << opencraft_framework_longver()  << std::endl;
+     std::cout             << "Running on "     << OPENCRAFT_FRAMEWORK_LONG_VER   << std::endl;
+     
+}

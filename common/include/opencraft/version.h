@@ -22,10 +22,11 @@
 //
 //-----------------------------------------------------------------------------
 
-#include <opencraft/versiondefs.h>
+#pragma once
 
-const char* opencraft_framework_version()   {return OPENCRAFT_FRAMEWORK_VERSION;};
-const char* opencraft_framework_build()     {return OPENCRAFT_FRAMEWORK_BUILD;};
-const char* opencraft_framework_builddate() {return OPENCRAFT_FRAMEWORK_BUILDDATE;};
-const char* opencraft_framework_shortver()  {return OPENCRAFT_FRAMEWORK_SHORT_VER;};
-const char* opencraft_framework_longver()   {return OPENCRAFT_FRAMEWORK_LONG_VER;};
+const char* opencraft_framework_version();
+const char* opencraft_framework_build();
+const char* opencraft_framework_builddate();
+const char* opencraft_framework_shortver();
+const char* opencraft_framework_longver();
+

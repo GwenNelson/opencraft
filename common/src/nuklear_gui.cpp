@@ -18,14 +18,34 @@
 // along with OpenCraft.  If not, see <http://www.gnu.org/licenses/>.
 //
 // DESCRIPTION:
-//     Get runtime version
+//     C++ wrapper for nuklear
 //
 //-----------------------------------------------------------------------------
 
-#include <opencraft/versiondefs.h>
+#include <GL/glew.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_opengl.h>
 
-const char* opencraft_framework_version()   {return OPENCRAFT_FRAMEWORK_VERSION;};
-const char* opencraft_framework_build()     {return OPENCRAFT_FRAMEWORK_BUILD;};
-const char* opencraft_framework_builddate() {return OPENCRAFT_FRAMEWORK_BUILDDATE;};
-const char* opencraft_framework_shortver()  {return OPENCRAFT_FRAMEWORK_SHORT_VER;};
-const char* opencraft_framework_longver()   {return OPENCRAFT_FRAMEWORK_LONG_VER;};
+#include <opencraft/common.h>
+
+#define NK_INCLUDE_FIXED_TYPES
+#define NK_INCLUDE_STANDARD_IO
+#define NK_INCLUDE_STANDARD_VARARGS
+#define NK_INCLUDE_DEFAULT_ALLOCATOR
+#define NK_INCLUDE_VERTEX_BUFFER_OUTPUT
+#define NK_INCLUDE_FONT_BAKING
+#define NK_INCLUDE_DEFAULT_FONT
+#define NK_IMPLEMENTATION
+#define NK_SDL_GL3_IMPLEMENTATION
+
+#include <opencraft/nuklear_gui.h>
+
+#define MAX_VERTEX_MEMORY 512 * 1024
+#define MAX_ELEMENT_MEMORY 128 * 1024
+
+#define UNUSED(a) (void)a
+#define MIN(a,b) ((a) < (b) ? (a) : (b))
+#define MAX(a,b) ((a) < (b) ? (b) : (a))
+#define LEN(a) (sizeof(a)/sizeof(a)[0])
+
+using namespace opencraft::nuklear;
