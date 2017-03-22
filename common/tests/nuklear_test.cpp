@@ -23,11 +23,31 @@
 //-----------------------------------------------------------------------------
 
 #include <opencraft/common.h>
+#include <opencraft/nuklear_gui.h>
 
 using namespace opencraft;
 
+#define APPNAME    "Nuklear test"
+#define WIN_WIDTH  1280
+#define WIN_HEIGHT 720
+
+class test_app : public nuklear::app {
+   public:
+      test_app(std::string window_title, int win_width, int win_height) : app(window_title,win_width,win_height) {}
+      void draw_gui() {
+           int WIN_FLAGS = NK_WINDOW_BORDER|NK_WINDOW_MOVABLE|NK_WINDOW_SCALABLE|NK_WINDOW_MINIMIZABLE|NK_WINDOW_TITLE;
+           if (nk_begin(ctx, "Nuklear test", nk_rect(200, 200, 210, 250),WIN_FLAGS)) {
+           }
+           nk_end(ctx);
+     }
+};
+
 int main(int argc, char** argv) {
-    init_common("Nuklear test");
+    init_common(APPNAME);
+
+    test_app TestApp(APPNAME,WIN_WIDTH,WIN_HEIGHT);
+    TestApp.init();
+    for(;;) TestApp.iter_loop();
 
 }
 

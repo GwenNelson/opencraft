@@ -27,12 +27,36 @@
 
 #include <opencraft/nuklear.h>
 #include <opencraft/nuklear_sdl_gl3.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_opengl.h>
 
 #include <string>
 
+// simple usage instructions:
+//  1 - create subclass of app class
+//  2 - override draw_gui() with nuklear commands reflecting current app state
+//  3 - call init() to spawn the window
+//  4 - run iter_loop() repeatedly, if the user closes the main window it'll cleanup and close the program for you
+
+// to handle button presses etc, see the nuklear examples
+
 namespace opencraft { namespace nuklear {
-  class App {
+  class app {
      public:
-       App(std::string app_name);
+       app(std::string window_title, int win_width, int win_height);
+       void init();
+       void iter_loop();
+
+       // OVERRIDE THIS STUFF
+       virtual void draw_gui() = 0;
+     protected:
+        bool               running;
+        SDL_Window         *sdl_window;
+        SDL_GLContext      glContext;
+        std::string        _win_title;
+        int                _win_width;
+        int                _win_height;
+        struct nk_color    background;
+        struct nk_context  *ctx;
   };
 }}
