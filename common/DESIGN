@@ -1,0 +1,72 @@
+App framework:
+    App class
+        Contains instances of various required components
+        Has methods for setting/adding components or getting them
+
+    App state
+       FSM states
+         Init/Shutdown functions for each state
+         Init with params (for example, a connecting state needs a server endpoint to connect to)
+         FSM API for switching states
+             Can pass params to new state
+         Update function
+             Called from main loop, updates local state or does nothing
+         Handle event functions
+             Called from main loop, updates local state to reflect event if required
+             Should have callbacks for SDL events, network packets, etc
+         Special states
+             EndProgramState state - cleans up resources and then simply terminates the program
+             IdleState state  - if no other states exist, this one is used, states can be dynamically added via the UI and other means, so this is not in fact pointless as it may seem
+       Collection of variables accessible from console
+         Pure console variables or bound to a set of get/set functions in code
+       Global state
+         Stuff like debug mode etc
+         Read-only version strings etc
+         Other stuff like paused flag etc
+       Local state
+         Accessible only while within a particular (local) FSM state
+         Stuff like avatar position inworld etc
+       Both global and local state are merged into one, local state overrides global state on read queries, write queries update both
+    Interfaces
+       Nuklear (GUI)
+       CLI
+       Web
+         websockets/RPC etc - could be handy for bots and servers
+    Configuration
+       Generate default configurations and save
+       Load config from command line params and .cfg files
+       Bound to console variables and available at runtime
+    Console + logging
+       Dynamic console commands
+       Boost logging output
+       Retained output buffer (so console can be rendered in GUI if required)
+          If console is cleared, the scrollback is lost unless preserved by the UI or another component
+    Plugin manager
+       dlopen-based for now
+       Add Python/Lua/etc later
+       App specifies API for different plugin types as a pointer to a struct
+
+namespaces:
+   opencraft::                root namespace
+       appfw::                app framework - includes base app class
+          appstate::          app state code
+              fsm::           Finite State Machine code
+              appvars::       console variables etc, classes for both global+local state, stored inside FSM class as members
+          configuration::     configuration loading - classes for loading+saving config and binding to appvars
+              shellopts::     shell options: command line switches etc, parsing code and such
+              configfiles::   code for loading and saving from config files in various formats
+                  json::      JSON support for configuration files
+                  ini::       .ini type configuration files
+          console::           console code - includes BaseConsole class
+              cmdshell::      dynamic console command support, magic for calling console commands as functions from code
+              logging::       logging setup code including support for file rotation etc
+          interfaces::        user interface code including base classes
+              graphical::     graphical UI code including base
+                  nuklear::   nuklear GUI implementation
+              cli::           Command Line UI, provides a stdio interface to the console and nothing else
+              curses::        possible future implementation: add a CURSES interface
+              web::           web frontend
+          plugins::           plugin manager code
+              api::           API base classes for plugins
+              loaders::       plugin loaders
+                  dlopen::    dlopen() based plugin loader

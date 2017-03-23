@@ -36,7 +36,7 @@ add_custom_command( OUTPUT ${CMAKE_SOURCE_DIR}/include/opencraft/versiondefs.h
 add_custom_target(autogen_headers
                   DEPENDS ${CMAKE_SOURCE_DIR}/include/opencraft/versiondefs.fake.h)
 
-file(GLOB OC_COMMON_SRC "src/*.cpp")
+file(GLOB OC_COMMON_SRC "src/*.cpp" "src/appfw/*.cpp")
 
 add_library(opencraft-common SHARED ${OC_COMMON_SRC})
 
@@ -49,5 +49,7 @@ file(STRINGS ${CMAKE_SOURCE_DIR}/build/version.txt VERSION_NUMBER)
 set_target_properties(opencraft-common PROPERTIES
                        VERSION ${VERSION_NUMBER}.${BUILD_NUMBER})
 
-add_executable(nuklear_test ${CMAKE_SOURCE_DIR}/tests/nuklear_test.cpp)
-target_link_libraries(nuklear_test opencraft-common)
+add_executable(appfw_simple ${CMAKE_SOURCE_DIR}/appfw_examples/appfw_simple.cpp)
+target_link_libraries(appfw_simple opencraft-common)
+
+
