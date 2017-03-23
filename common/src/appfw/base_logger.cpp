@@ -18,18 +18,24 @@
 // along with OpenCraft.  If not, see <http://www.gnu.org/licenses/>.
 //
 // DESCRIPTION:
-//     BaseInterface class
+//     BaseLogger class
 //
 //-----------------------------------------------------------------------------
 
-#pragma once
+#include <opencraft/common.h>
 
-namespace opencraft { namespace appfw { namespace interfaces {
+#include <opencraft/appfw/console/base_console.h>
+#include <opencraft/appfw/console/logging/base_logger.h>
 
-   class BaseInterface {
-      public:
-         BaseInterface();
+namespace opencraft { namespace appfw { namespace console { namespace logging {
 
-   };
+// this class pretty much does nothing beyond setup logging via boost
 
-}}};
+BaseLogger::BaseLogger(opencraft::appfw::console::BaseConsole *_Console) {
+}
+
+void BaseLogger::SetDebugMode(bool debug) {
+}
+
+
+}}}};

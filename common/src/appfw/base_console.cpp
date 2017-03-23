@@ -18,18 +18,41 @@
 // along with OpenCraft.  If not, see <http://www.gnu.org/licenses/>.
 //
 // DESCRIPTION:
-//     BaseInterface class
+//     BaseConsole class
 //
 //-----------------------------------------------------------------------------
 
-#pragma once
+#include <opencraft/common.h>
+#include <vector>
+#include <string>
 
-namespace opencraft { namespace appfw { namespace interfaces {
+#include <opencraft/appfw/console/base_console.h>
 
-   class BaseInterface {
-      public:
-         BaseInterface();
+namespace opencraft { namespace appfw { namespace console {
 
-   };
+BaseConsole::BaseConsole() {
+}
+
+void BaseConsole::clear_output() {
+}
+
+void BaseConsole::add_output(std::string s) {
+}
+
+std::string BaseConsole::get_output() {
+     return std::string("");
+}
+
+void BaseConsole::clear_input() {
+}
+
+void BaseConsole::add_input(std::string s) {
+}
+
+std::vector<std::string> BaseConsole::get_input() {
+     std::vector<std::string> retval;
+     return retval;
+}
+
 
 }}};

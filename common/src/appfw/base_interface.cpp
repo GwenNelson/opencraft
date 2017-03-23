@@ -22,14 +22,13 @@
 //
 //-----------------------------------------------------------------------------
 
-#pragma once
+
+#include <opencraft/appfw/interfaces/base_interface.h>
 
 namespace opencraft { namespace appfw { namespace interfaces {
 
-   class BaseInterface {
-      public:
-         BaseInterface();
+BaseInterface::BaseInterface() {
+}
 
-   };
 
 }}};
