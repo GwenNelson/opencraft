@@ -18,20 +18,29 @@
 // along with OpenCraft.  If not, see <http://www.gnu.org/licenses/>.
 //
 // DESCRIPTION:
-//     BaseInterface class
+//     BaseState class
 //
 //-----------------------------------------------------------------------------
 
 #pragma once
 
-#include <opencraft/appfw/appfw.h>
+#include <opencraft/common.h>
 
-namespace opencraft { namespace appfw { namespace interfaces {
+#include <map>
+#include <string>
 
-   class BaseInterface {
+#include <opencraft/appfw/appstate/fsm/base_fsm.h>
+
+namespace opencraft { namespace appfw { namespace appstate { namespace fsm {
+   class BaseFSM;
+   class BaseState {
       public:
-         BaseInterface();
+         BaseState(BaseFSM *_FSM);
 
+         virtual void        Init();
+         virtual void        Update();
+         virtual const char* GetName();
+         BaseFSM *FSM;
    };
 
-}}};
+}}}};

@@ -18,20 +18,21 @@
 // along with OpenCraft.  If not, see <http://www.gnu.org/licenses/>.
 //
 // DESCRIPTION:
-//     BaseInterface class
+//     BaseLogger class
 //
 //-----------------------------------------------------------------------------
 
 #pragma once
 
-#include <opencraft/appfw/appfw.h>
+#include <opencraft/common.h>
 
-namespace opencraft { namespace appfw { namespace interfaces {
+#include <opencraft/appfw/console/base_console.h>
 
-   class BaseInterface {
-      public:
-         BaseInterface();
+namespace opencraft { namespace appfw { namespace console { namespace logging {
 
+   class SimpleLogger : public BaseLogger {
+         public:
+            SimpleLogger(opencraft::appfw::console::BaseConsole *_Console) : BaseLogger(_Console) {}
    };
 
-}}};
+}}}};

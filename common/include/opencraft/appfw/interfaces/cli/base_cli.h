@@ -18,7 +18,7 @@
 // along with OpenCraft.  If not, see <http://www.gnu.org/licenses/>.
 //
 // DESCRIPTION:
-//     BaseInterface class
+//     BaseCLI class
 //
 //-----------------------------------------------------------------------------
 
@@ -26,12 +26,12 @@
 
 #include <opencraft/appfw/appfw.h>
 
-namespace opencraft { namespace appfw { namespace interfaces {
+#include <opencraft/appfw/interfaces/base_interface.h>
 
-   class BaseInterface {
-      public:
-         BaseInterface();
+namespace opencraft { namespace appfw { namespace interfaces { namespace cli {
+
+   class BaseCLI : public BaseInterface {
 
    };
 
-}}};
+}}}};

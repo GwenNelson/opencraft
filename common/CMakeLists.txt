@@ -40,7 +40,7 @@ file(GLOB OC_COMMON_SRC "src/*.cpp" "src/appfw/*.cpp")
 
 add_library(opencraft-common SHARED ${OC_COMMON_SRC})
 
-target_link_libraries(opencraft-common ${CPR_LIBRARIES} SDL2 GL GLEW GLU)
+target_link_libraries(opencraft-common ${CPR_LIBRARIES} pthread SDL2 GL GLEW GLU)
 add_dependencies(opencraft-common autogen_headers)
 
 file(STRINGS ${CMAKE_SOURCE_DIR}/build/buildno.txt BUILD_NUMBER)

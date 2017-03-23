@@ -26,3 +26,9 @@
 
 #include <opencraft/version.h>
 #include <opencraft/init_common.h>
+
+#include <boost/log/core.hpp>
+#include <boost/log/trivial.hpp>
+
+#define LOG BOOST_LOG_TRIVIAL
+

@@ -22,22 +22,21 @@
 //
 //-----------------------------------------------------------------------------
 
-#pragma once
-
 #include <opencraft/appfw/appfw.h>
 
 #include <opencraft/versiondefs.h>
 #include <iostream>
 
-#include <opencraft/console/logging/simple_logger.h>
-#include <opencraft/console/base_console.h>
-#include <opencraft/appstate/fsm/base_fsm.h>
+#include <opencraft/appfw/console/logging/simple_logger.h>
+#include <opencraft/appfw/console/base_console.h>
+#include <opencraft/appfw/appstate/fsm/base_fsm.h>
+#include <opencraft/appfw/appstate/fsm/idle_state.h>
 
 namespace opencraft { namespace appfw {
 
 App::App() {
-     std::cout "OpenCraft App framework compiled with " << opencraft_framework_longver()  << std::endl;
-     std::cout "Running on "                            << OPENCRAFT_FRAMEWORK_LONG_VER   << std::endl;
+     std::cout << "OpenCraft App framework compiled with " << opencraft_framework_longver()  << std::endl;
+     std::cout << "Running on "                            << OPENCRAFT_FRAMEWORK_LONG_VER   << std::endl;
 
      std::cout << OPENCRAFT_FRAMEWORK_COPYRIGHT << std::endl;
 
@@ -50,7 +49,7 @@ App::App() {
 
      // create the FSM and add default idle state
      this->FSM     = new appstate::fsm::BaseFSM();
-     this->FSM->AddState(new appstate::fsm::IdleState());
+     this->FSM->AddState(new appstate::fsm::IdleState(this->FSM));
 }
 
 void App::run() {

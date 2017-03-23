@@ -23,12 +23,17 @@
 //-----------------------------------------------------------------------------
 
 #include <opencraft/appfw/appfw.h>
-#include <opencraft/appfw/interfaces/cli/simple
+#include <opencraft/appfw/interfaces/cli/simple_cli.h>
+#include <opencraft/appfw/appstate/fsm/base_state.h>
+
+#include <opencraft/appfw/appstate/fsm/base_fsm.h>
+
 
 using namespace opencraft;
 
 class SimpleStartState : public appfw::appstate::fsm::BaseState {
    public:
+      SimpleStartState(appfw::appstate::fsm::BaseFSM *_FSM) : BaseState(_FSM) {};
       void        Init();   // override the Init() - this is NOT the same as the C++ constructor and you should NOT override the constructor
       void        Update(); // override the Update()
       const char* GetName() { return "SimpleStartState";}
@@ -54,16 +59,16 @@ int main(int argc, char** argv) {
     // setup CLI for the user interface - this is NOT added by default since some apps might not want it
     // without a CLI interface the console buffer won't be sent to stdout and that means we'll not see logs
     // we don't reconfigure logging here as the default (SimpleLogger) works fine
-    SimpleApp.AddInterface(new appfw::interfaces::cli::SimpleCLIInterface());
+    SimpleApp->AddInterface(new appfw::interfaces::cli::SimpleCLI());
 
     // at this point the CLI interface will dump the current console buffer to stdout, this is by design and is intended to allow CLI
     // users to see debug logs from before the CLI was created - in practice this is usually pretty empty
 
     // add an FSM state - not doing this means the main loop will simply idle forever
-    SimpleApp->FSM->AddState(new MyStartState());
+    SimpleApp->FSM->AddState(new SimpleStartState(SimpleApp->FSM));
 
     // set the initial state (which is by default an instance of appfw::appstate::fsm::IdleState) and then run the app
     SimpleApp->FSM->Switch("SimpleStartState"); // to set initial state we just switch to it, this will cause switch from idle to start state
-    SimpleApp.run();
+    SimpleApp->run();
 }
 
