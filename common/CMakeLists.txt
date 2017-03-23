@@ -5,7 +5,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 set (CMAKE_CXX_STANDARD 11)
 
 
-#cmake_policy(SET CMP0004 OLD)
+FIND_PACKAGE(Boost COMPONENTS system program_options thread log log_setup)
 
 find_package(SDL2 REQUIRED)
 
@@ -22,7 +22,8 @@ endif()
 
 add_subdirectory(cpr)
 
-include_directories(${CMAKE_SOURCE_DIR}/include )
+ADD_DEFINITIONS(-DBOOST_LOG_DYN_LINK)
+include_directories(${Boost_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/include )
 
 # silly hack below to ensure we always rebuild version header
 add_custom_command( OUTPUT ${CMAKE_SOURCE_DIR}/include/opencraft/versiondefs.h
@@ -40,7 +41,7 @@ file(GLOB OC_COMMON_SRC "src/*.cpp" "src/appfw/*.cpp")
 
 add_library(opencraft-common SHARED ${OC_COMMON_SRC})
 
-target_link_libraries(opencraft-common ${CPR_LIBRARIES} pthread SDL2 GL GLEW GLU)
+target_link_libraries(opencraft-common ${CPR_LIBRARIES} pthread ${Boost_LIBRARIES} SDL2 GL GLEW GLU)
 add_dependencies(opencraft-common autogen_headers)
 
 file(STRINGS ${CMAKE_SOURCE_DIR}/build/buildno.txt BUILD_NUMBER)

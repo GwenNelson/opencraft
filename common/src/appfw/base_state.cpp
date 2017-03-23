@@ -22,24 +22,29 @@
 //
 //-----------------------------------------------------------------------------
 
-#pragma once
-
 #include <opencraft/common.h>
-
-#include <map>
-#include <string>
 
 #include <opencraft/appfw/appstate/fsm/base_state.h>
 #include <opencraft/appfw/appstate/fsm/base_fsm.h>
 
+
 namespace opencraft { namespace appfw { namespace appstate { namespace fsm {
 
-   class IdleState : public BaseState {
-      public:
-         IdleState(BaseFSM *_FSM) : BaseState(_FSM) {};
-         void        Init();
-         void        Update();
-         const char* GetName();
-   };
+BaseState::BaseState(BaseFSM *_FSM) {
+    this->FSM = _FSM;
+}
+
+void BaseState::Init() {
+     LOG(debug) << "Default BaseState::init for state " << this->GetName();
+}
+
+void BaseState::Update() {
+     
+}
+
+const char* BaseState::GetName() {
+    return "BaseState";
+}
+
 
 }}}};

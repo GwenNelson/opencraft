@@ -18,28 +18,29 @@
 // along with OpenCraft.  If not, see <http://www.gnu.org/licenses/>.
 //
 // DESCRIPTION:
-//     BaseState class
+//     IdleState class
 //
 //-----------------------------------------------------------------------------
 
-#pragma once
-
 #include <opencraft/common.h>
 
-#include <map>
-#include <string>
-
-#include <opencraft/appfw/appstate/fsm/base_state.h>
+#include <opencraft/appfw/appstate/fsm/idle_state.h>
 #include <opencraft/appfw/appstate/fsm/base_fsm.h>
+
 
 namespace opencraft { namespace appfw { namespace appstate { namespace fsm {
 
-   class IdleState : public BaseState {
-      public:
-         IdleState(BaseFSM *_FSM) : BaseState(_FSM) {};
-         void        Init();
-         void        Update();
-         const char* GetName();
-   };
+void IdleState::Init() {
+     LOG(debug) << "IdleState::init for state " << this->GetName();
+}
+
+void IdleState::Update() {
+     
+}
+
+const char* IdleState::GetName() {
+    return "IdleState";
+}
+
 
 }}}};
