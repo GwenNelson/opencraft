@@ -26,6 +26,7 @@
 #include <opencraft/appfw/appfw.h>
 
 #include <opencraft/appfw/appstate/appvars/base_appvars.h>
+#include <opencraft/appfw/console/logging/base_logger.h>
 namespace opencraft { namespace appfw { namespace appstate { namespace fsm {
 
 BaseFSM::BaseFSM(opencraft::appfw::App* _app) {
@@ -37,20 +38,30 @@ BaseFSM::BaseFSM(opencraft::appfw::App* _app) {
 void BaseFSM::Update() {
      if(this->cur_state != NULL) {
        this->cur_state->Update();
+     } else {
+       this->Switch("IdleState");
      }
 }
 
 void BaseFSM::Switch(std::string state_name) {
      if(this->states.find(state_name) != this->states.end()) {
         if(this->cur_state == NULL) {
-          this->app->Logger->info(std::string("Starting with state ") + state_name);
+          OC_LOG_INFO(this->app,std::string("Starting with state ") + state_name);
         } else {
-          this->app->Logger->info(std::string("Switching state from") + this->cur_state->GetName() + std::string(" to ") + state_name);
+          OC_LOG_INFO(this->app,std::string("Switching state from ") + this->cur_state->GetName() + std::string(" to ") + state_name);
 //        this->cur_state->Shutdown(); // TODO: implement this
         }
         this->cur_state = this->states[state_name];
      } else {
-        this->app->Logger->info(std::string("Could not switch to unknown state: ") + state_name);
+        OC_LOG_INFO(this->app,std::string("Could not switch to unknown state: ") + state_name);
+     }
+}
+
+std::string BaseFSM::GetStateName() {
+     if(this->cur_state != NULL) {
+        return this->cur_state->GetName();
+     } else {
+        return "NULL";
      }
 }
 

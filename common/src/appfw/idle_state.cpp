@@ -32,7 +32,7 @@
 namespace opencraft { namespace appfw { namespace appstate { namespace fsm {
 
 void IdleState::Init() {
-     this->FSM->app->Logger->debug(std::string("IdleState::init for state ") + std::string(this->GetName()));
+     OC_LOG_DEBUG(this->FSM->app,std::string("IdleState::init for state ") + std::string(this->GetName()));
 }
 
 void IdleState::Update() {

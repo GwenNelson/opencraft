@@ -32,11 +32,11 @@
 namespace opencraft { namespace appfw { namespace appstate { namespace fsm {
 
 void EndProgramState::Init() {
-     this->FSM->app->Logger->debug(std::string("EndProgramState::init for state ") + std::string(this->GetName()));
+     OC_LOG_DEBUG(this->FSM->app,std::string("EndProgramState::init for state ") + std::string(this->GetName()));
 }
 
 void EndProgramState::Update() {
-     this->FSM->app->Logger->info("Closing program"); 
+     OC_LOG_INFO(this->FSM->app,"Closing program");
      exit(0);
 }
 

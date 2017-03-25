@@ -27,6 +27,8 @@
 #include <opencraft/appfw/appstate/fsm/base_state.h>
 #include <opencraft/appfw/appstate/fsm/base_fsm.h>
 
+#include <opencraft/appfw/console/logging/base_logger.h>
+#include <opencraft/appfw/appfw.h>
 
 namespace opencraft { namespace appfw { namespace appstate { namespace fsm {
 
@@ -35,7 +37,7 @@ BaseState::BaseState(BaseFSM *_FSM) {
 }
 
 void BaseState::Init() {
-     LOG(debug) << "Default BaseState::init for state " << this->GetName();
+     OC_LOG_DEBUG(this->FSM->app, std::string("Default BaseState::init for state ") + this->GetName());
 }
 
 void BaseState::Update() {

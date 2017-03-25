@@ -40,12 +40,12 @@ class SimpleStartState : public appfw::appstate::fsm::BaseState {
 };
 
 void SimpleStartState::Init() {
-     this->FSM->app->Logger->info("Hello from SimpleStartState");
-     this->FSM->app->Logger->info("On my first update i'll just die");
+     OC_LOG_INFO(this->FSM->app,"Hello from SimpleStartState");
+     OC_LOG_INFO(this->FSM->app,"On my first update i'll just die");
 }
 
 void SimpleStartState::Update() {
-     this->FSM->app->Logger->info("Now i'm just gonna die");
+     OC_LOG_INFO(this->FSM->app,"Now i'm just gonna die");
      this->FSM->Switch("EndProgramState"); // EndProgramState is a state that is setup for us by the framework
 }
 

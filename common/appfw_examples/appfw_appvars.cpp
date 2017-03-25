@@ -28,6 +28,7 @@
 
 #include <opencraft/appfw/appstate/fsm/base_fsm.h>
 
+#include <opencraft/appfw/console/logging/base_logger.h>
 
 using namespace opencraft;
 
@@ -46,11 +47,11 @@ class AppVarSetState : public appfw::appstate::fsm::BaseState {
 
 void AppVarSetState::Init() {
      this->FSM->GlobalVars->set("testvar","hello there");
-     this->FSM->app->Logger->info("AppVarSetState::Init() - I just set testvar to \"hello there\"");
+     OC_LOG_INFO(FSM->app,"I just set testvar to \"hello there\"");
 }
 
 void AppVarSetState::Update() {
-     this->FSM->app->Logger->info("AppVarSetState::Update() - Now let's read that variable using AppVarGetState");
+     OC_LOG_INFO(FSM->app,"Now let's read that variable using AppVarGetState");
      this->FSM->Switch("AppVarGetState");
 }
 
@@ -64,13 +65,13 @@ class AppVarGetState : public appfw::appstate::fsm::BaseState {
 
 void AppVarGetState::Init() {
      // remember, Init() is only called when added to the FSM
-     this->FSM->app->Logger->info("AppVarGetState::Init() - I just got added to the FSM, but i'm probably not running yet");
+     OC_LOG_INFO(this->FSM->app,"AppVarGetState::Init() - I just got added to the FSM, but i'm probably not running yet");
 }
 
 void AppVarGetState::Update() {
      std::string val = this->FSM->GlobalVars->get("testvar");
-     this->FSM->app->Logger->info(std::string("AppVarGetState::Update() - it looks like the contents of the variable are: \"") + val + std::string("\""));
-     this->FSM->app->Logger->info("Now i'm going to kill the program");
+     OC_LOG_INFO(this->FSM->app,std::string("AppVarGetState::Update() - it looks like the contents of the variable are: \"") + val + std::string("\""));
+     OC_LOG_INFO(this->FSM->app,"Now i'm going to kill the program");
      this->FSM->Switch("EndProgramState");
 }
 

@@ -44,6 +44,8 @@ namespace opencraft { namespace appfw {
          void Update();
          void Switch(std::string state_name);
          void AddState(BaseState *State);
+
+         std::string GetStateName();
          opencraft::appfw::App* app;
          opencraft::appfw::appstate::appvars::BaseAppVars *GlobalVars;
      protected:

@@ -36,6 +36,7 @@ namespace opencraft { namespace appfw { namespace console { namespace logging {
       public:
          BaseLogger(opencraft::appfw::console::BaseConsole *_Console);
          void fmt_output(std::string sev_s, std::string msg);
+         void fmt_output(std::string sev_s, std::string other, std::string msg);
          void info(std::string s);
          void debug(std::string s);
 
@@ -53,4 +54,8 @@ enum log_severity {
      warn
 };
 
-
+// convenience macros
+// a is for app
+#define OC_LOG_INFO(a,msg) a->Logger->fmt_output("INFO",a->FSM->GetStateName(),std::string(msg))
+// TODO make the below check for debug mode
+#define OC_LOG_DEBUG(a,msg) a->Logger->fmt_output("DEBUG",a->FSM->GetStateName(),std::string(msg))
