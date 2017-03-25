@@ -18,33 +18,28 @@
 // along with OpenCraft.  If not, see <http://www.gnu.org/licenses/>.
 //
 // DESCRIPTION:
-//     BaseCLI class
+//     BaseState class
 //
 //-----------------------------------------------------------------------------
 
 #pragma once
 
-#include <opencraft/appfw/appfw.h>
+#include <opencraft/common.h>
 
-#include <opencraft/appfw/interfaces/base_interface.h>
-
-#include <opencraft/appfw/console/console_event_listener.h>
-
+#include <map>
 #include <string>
 
-namespace opencraft { namespace appfw { namespace interfaces { namespace cli {
+#include <opencraft/appfw/appstate/fsm/base_state.h>
+#include <opencraft/appfw/appstate/fsm/base_fsm.h>
 
-   class BaseCLI : public BaseInterface,opencraft::appfw::console::ConsoleEventListener {
-       public:
-          BaseCLI(opencraft::appfw::App *_app) : BaseInterface(_app) {};
-          void Update();
-          void on_output(std::string s);
-          void on_output_clear() {};
-          void on_input(std::string s) {};
-          void on_input_clear() {};
-       protected:
-          bool first_update = true;
+namespace opencraft { namespace appfw { namespace appstate { namespace fsm {
 
+   class EndProgramState : public BaseState {
+      public:
+         EndProgramState(BaseFSM *_FSM) : BaseState(_FSM) {};
+         void        Init();
+         void        Update();
+         const char* GetName();
    };
 
 }}}};

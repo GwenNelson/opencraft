@@ -28,10 +28,10 @@
 #include <opencraft/versiondefs.h>
 #include <iostream>
 
-#include <opencraft/appfw/console/logging/simple_logger.h>
 #include <opencraft/appfw/console/base_console.h>
 #include <opencraft/appfw/appstate/fsm/base_fsm.h>
 #include <opencraft/appfw/appstate/fsm/idle_state.h>
+#include <opencraft/appfw/appstate/fsm/end_program_state.h>
 
 namespace opencraft { namespace appfw {
 
@@ -48,9 +48,10 @@ App::App() {
      this->Logger  = new console::logging::BaseLogger(this->Console); // spits out logs to the console only
      this->Logger->info("Logging begins");
 
-     // create the FSM and add default idle state
+     // create the FSM and add default states
      this->FSM     = new appstate::fsm::BaseFSM(this);
      this->FSM->AddState(new appstate::fsm::IdleState(this->FSM));
+     this->FSM->AddState(new appstate::fsm::EndProgramState(this->FSM));
      this->FSM->Switch("IdleState");
 }
 

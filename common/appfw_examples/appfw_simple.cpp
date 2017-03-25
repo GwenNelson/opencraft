@@ -46,7 +46,7 @@ void SimpleStartState::Init() {
 
 void SimpleStartState::Update() {
      this->FSM->app->Logger->info("Now i'm just gonna die");
-     this->FSM->Switch("EndProgram"); // EndProgram is a state that is setup for us by the framework
+     this->FSM->Switch("EndProgramState"); // EndProgramState is a state that is setup for us by the framework
 }
 
 int main(int argc, char** argv) {
