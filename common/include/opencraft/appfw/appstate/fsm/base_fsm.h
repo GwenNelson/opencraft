@@ -31,17 +31,21 @@
 
 #include <opencraft/appfw/appstate/fsm/base_state.h>
 
-namespace opencraft { namespace appfw { namespace appstate { namespace fsm {
+namespace opencraft { namespace appfw {
+   class App;
+   namespace appstate { namespace fsm {
 
    class BaseState;
    class BaseFSM {
       public:
-         BaseFSM();
+         BaseFSM(opencraft::appfw::App* _app);
 
          void Update();
          void Switch(std::string state_name);
          void AddState(BaseState *State);
-     private:
+         opencraft::appfw::App* app;
+     protected:
+         BaseState* cur_state;
          std::map<std::string,BaseState*> states; // maps known states with string IDs to actual state instances
    };
 

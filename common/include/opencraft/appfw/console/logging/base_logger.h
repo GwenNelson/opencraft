@@ -35,8 +35,10 @@ namespace opencraft { namespace appfw { namespace console { namespace logging {
    class BaseLogger {
       public:
          BaseLogger(opencraft::appfw::console::BaseConsole *_Console);
+         void fmt_output(std::string sev_s, std::string msg);
          void info(std::string s);
-         
+         void debug(std::string s);
+
       private:
          opencraft::appfw::console::BaseConsole *Console;
          bool debug_mode;

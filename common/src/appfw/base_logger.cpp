@@ -42,11 +42,17 @@ BaseLogger::BaseLogger(opencraft::appfw::console::BaseConsole *_Console) {
      this->Console = _Console;
 }
 
+void BaseLogger::fmt_output(std::string sev_s, std::string msg) {
+     this->Console->add_output(pt::to_iso_extended_string(pt::second_clock::local_time()) +
+                               " [" + sev_s + "]  \t" + msg + "\n");
+}
+
 void BaseLogger::info(std::string s) {
-     this->Console->add_output(pt::to_iso_extended_string(pt::second_clock::local_time()));
-     this->Console->add_output(" [INFO] ");
-     this->Console->add_output(s);
-     this->Console->add_output("\n");
+     this->fmt_output("INFO",s);
+}
+
+void BaseLogger::debug(std::string s) {
+     this->fmt_output("DEBUG",s);
 }
 
 }}}};

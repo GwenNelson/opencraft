@@ -31,8 +31,11 @@
 namespace opencraft { namespace appfw { namespace interfaces { namespace cli {
 
    class BaseCLI : public BaseInterface {
-
-       void Update();
+       public:
+          BaseCLI(opencraft::appfw::App *_app) : BaseInterface(_app) {};
+          void Update();
+       protected:
+          bool first_update = true;
 
    };
 

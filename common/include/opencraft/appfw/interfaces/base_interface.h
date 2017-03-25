@@ -26,14 +26,18 @@
 
 #include <string>
 
-namespace opencraft { namespace appfw { namespace interfaces {
+namespace opencraft { namespace appfw { 
+   class App;
+   namespace interfaces {
 
    class BaseInterface {
       public:
-         BaseInterface();
+         BaseInterface(opencraft::appfw::App *_app);
 
          virtual void Update();
          virtual void Render();
+      protected:
+         opencraft::appfw::App *app;
 
    };
 

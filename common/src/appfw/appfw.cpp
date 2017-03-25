@@ -23,6 +23,7 @@
 //-----------------------------------------------------------------------------
 
 #include <opencraft/appfw/appfw.h>
+#include <opencraft/appfw/interfaces/base_interface.h>
 
 #include <opencraft/versiondefs.h>
 #include <iostream>
@@ -48,8 +49,9 @@ App::App() {
      this->Logger->info("Logging begins");
 
      // create the FSM and add default idle state
-     this->FSM     = new appstate::fsm::BaseFSM();
+     this->FSM     = new appstate::fsm::BaseFSM(this);
      this->FSM->AddState(new appstate::fsm::IdleState(this->FSM));
+     this->FSM->Switch("IdleState");
 }
 
 void App::run() {

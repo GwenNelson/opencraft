@@ -40,12 +40,12 @@ class SimpleStartState : public appfw::appstate::fsm::BaseState {
 };
 
 void SimpleStartState::Init() {
-     LOG(info) << "Hello from SimpleStartState";
-     LOG(info) << "On my first update i'll just die";
+     this->FSM->app->Logger->info("Hello from SimpleStartState");
+     this->FSM->app->Logger->info("On my first update i'll just die");
 }
 
 void SimpleStartState::Update() {
-     LOG(info) << "Now i'm just gonna die";
+     this->FSM->app->Logger->info("Now i'm just gonna die");
      this->FSM->Switch("EndProgram"); // EndProgram is a state that is setup for us by the framework
 }
 
@@ -59,7 +59,7 @@ int main(int argc, char** argv) {
     // setup CLI for the user interface - this is NOT added by default since some apps might not want it
     // without a CLI interface the console buffer won't be sent to stdout and that means we'll not see logs
     // we don't reconfigure logging here as the default (SimpleLogger) works fine
-    SimpleApp->AddInterface(new appfw::interfaces::cli::SimpleCLI());
+    SimpleApp->AddInterface(new appfw::interfaces::cli::BaseCLI(SimpleApp));
 
     // at this point the CLI interface will dump the current console buffer to stdout, this is by design and is intended to allow CLI
     // users to see debug logs from before the CLI was created - in practice this is usually pretty empty

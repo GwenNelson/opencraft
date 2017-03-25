@@ -27,7 +27,8 @@
 
 namespace opencraft { namespace appfw { namespace interfaces {
 
-BaseInterface::BaseInterface() {
+BaseInterface::BaseInterface(opencraft::appfw::App *_app) {
+     this->app = _app;
 }
 
 void BaseInterface::Update() {

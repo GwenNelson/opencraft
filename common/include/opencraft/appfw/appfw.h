@@ -30,11 +30,12 @@
 
 #include <opencraft/appfw/console/logging/base_logger.h>
 #include <opencraft/appfw/console/base_console.h>
-#include <opencraft/appfw/interfaces/base_interface.h>
+
 #include <opencraft/appfw/appstate/fsm/base_fsm.h>
 
-namespace opencraft { namespace appfw {
 
+namespace opencraft { namespace appfw {
+   namespace interfaces { class BaseInterface; };
    class App {
       public:
          App();

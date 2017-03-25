@@ -45,7 +45,6 @@ void BaseConsole::clear_output() {
 }
 
 void BaseConsole::add_output(std::string s) {
-     std::cout << s;
      this->outputbuf.append(s);
      for(auto const& l: this->listeners) {
             l->on_output(s);

@@ -26,12 +26,13 @@
 
 #include <opencraft/appfw/appstate/fsm/idle_state.h>
 #include <opencraft/appfw/appstate/fsm/base_fsm.h>
+#include <opencraft/appfw/appfw.h>
 
 
 namespace opencraft { namespace appfw { namespace appstate { namespace fsm {
 
 void IdleState::Init() {
-     LOG(debug) << "IdleState::init for state " << this->GetName();
+     this->FSM->app->Logger->debug(std::string("IdleState::init for state ") + std::string(this->GetName()));
 }
 
 void IdleState::Update() {
