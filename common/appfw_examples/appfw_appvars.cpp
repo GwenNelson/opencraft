@@ -47,7 +47,7 @@ class AppVarSetState : public appfw::appstate::fsm::BaseState {
 
 void AppVarSetState::Init() {
      this->FSM->GlobalVars->set("testvar","hello there");
-     OC_LOG_INFO(FSM->app,"I just set global variable testvar to \"hello there\"");
+     OC_LOG_INFO(FSM->app,"AppVarSetState::Init() - I just set global variable testvar to \"hello there\"");
 
 }
 
