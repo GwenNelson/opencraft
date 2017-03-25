@@ -28,7 +28,10 @@
 
 #include <iostream>
 
+#include <libconfig.h++>
+
 using namespace opencraft;
+using namespace libconfig;
 
 // this program reads configuration settings from either the command line or a file named appfw_config.cfg
 // the command line overrides the config file
@@ -47,7 +50,13 @@ int main(int argc, char** argv) {
     appfw::App *SimpleApp = new appfw::App();
     SimpleApp->AddInterface(new appfw::interfaces::cli::BaseCLI(SimpleApp));
 
-    appfw::configuration *ConfigManager cfg = new appfw::configuration::ConfigManager(SimpleApp);
+    Config cfg;
+    Setting &root = cfg.getRoot();
+    root.add("username",    Setting::TypeString) = "SirGareth";
+    root.add("listen_port", Setting::TypeInt)    = 25565;
+    cfg.writeFile("./appfw_config.cfg");
+
+/*    appfw::configuration *ConfigManager cfg = new appfw::configuration::ConfigManager(SimpleApp);
 
     // specify our settings
     cfg->add_option("username",     // variable name
@@ -71,6 +80,6 @@ int main(int argc, char** argv) {
 
     // dump the settings
     std::cout << "username:    " << SimpleApp->FSM->GlobalVars->get("username")    << std::endl;
-    std::cout << "listen port: " << SimpleApp->FSM->GlobalVars->get("listen_port") << std::endl;
+    std::cout << "listen port: " << SimpleApp->FSM->GlobalVars->get("listen_port") << std::endl;*/
 }
 

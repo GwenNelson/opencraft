@@ -8,6 +8,7 @@ set (CMAKE_CXX_STANDARD 14)
 FIND_PACKAGE(Boost COMPONENTS system program_options thread log log_setup)
 
 find_package(SDL2 REQUIRED)
+find_package(Config++ REQUIRED)
 
 include(CheckCXXCompilerFlag)
 CHECK_CXX_COMPILER_FLAG("-std=c++14" COMPILER_SUPPORTS_CXX14)
@@ -23,7 +24,7 @@ endif()
 add_subdirectory(cpr)
 
 ADD_DEFINITIONS(-DBOOST_LOG_DYN_LINK)
-include_directories(${Boost_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/include )
+include_directories(${CONFIG++_INCLUDE_DIR} ${Boost_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/include )
 
 # silly hack below to ensure we always rebuild version header
 add_custom_command( OUTPUT ${CMAKE_SOURCE_DIR}/include/opencraft/versiondefs.h
@@ -41,7 +42,7 @@ file(GLOB OC_COMMON_SRC "src/*.cpp" "src/appfw/*.cpp")
 
 add_library(opencraft-common SHARED ${OC_COMMON_SRC})
 
-target_link_libraries(opencraft-common ${CPR_LIBRARIES} pthread ${Boost_LIBRARIES} SDL2 GL GLEW GLU)
+target_link_libraries(opencraft-common ${CPR_LIBRARIES} pthread ${Boost_LIBRARIES} ${CONFIG++_LIBRARY} SDL2 GL GLEW GLU)
 add_dependencies(opencraft-common autogen_headers)
 
 file(STRINGS ${CMAKE_SOURCE_DIR}/build/buildno.txt BUILD_NUMBER)
@@ -59,3 +60,5 @@ target_link_libraries(appfw_appvars opencraft-common)
 add_executable(appfw_shell ${CMAKE_SOURCE_DIR}/appfw_examples/appfw_shell.cpp)
 target_link_libraries(appfw_shell opencraft-common)
 
+add_executable(appfw_config ${CMAKE_SOURCE_DIR}/appfw_examples/appfw_config.cpp)
+target_link_libraries(appfw_config opencraft-common)

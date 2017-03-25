@@ -29,6 +29,7 @@
 #include <opencraft/appfw/appstate/fsm/base_fsm.h>
 
 #include <opencraft/appfw/console/logging/base_logger.h>
+#include <string>
 
 using namespace opencraft;
 
@@ -46,16 +47,16 @@ class AppVarSetState : public appfw::appstate::fsm::BaseState {
 };
 
 void AppVarSetState::Init() {
-     this->FSM->GlobalVars->set("testvar","hello there");
+     this->FSM->GlobalVars->set("testvar",std::string("hello there"));
      OC_LOG_INFO(FSM->app,"AppVarSetState::Init() - I just set global variable testvar to \"hello there\"");
 
 }
 
 void AppVarSetState::Update() {
-     this->FSM->LocalVars->set("testvar","a different value!");
+     this->FSM->LocalVars->set("testvar",std::string("a different value!"));
      OC_LOG_INFO(FSM->app,"I just set local variable testvar to \"a different value!\"");
-     OC_LOG_INFO(FSM->app,std::string("global testvar=\"") + this->FSM->GlobalVars->get("testvar") + std::string("\""));
-     OC_LOG_INFO(FSM->app,std::string("local testvar=\"")  + this->FSM->LocalVars->get("testvar") + std::string("\""));
+     OC_LOG_INFO(FSM->app,std::string("global testvar=\"") + this->FSM->GlobalVars->get_str("testvar") + std::string("\""));
+     OC_LOG_INFO(FSM->app,std::string("local testvar=\"")  + this->FSM->LocalVars->get_str("testvar") + std::string("\""));
      OC_LOG_INFO(FSM->app,"Now let's read that variable using AppVarGetState");
      this->FSM->Switch("AppVarGetState");
 }
@@ -74,8 +75,8 @@ void AppVarGetState::Init() {
 }
 
 void AppVarGetState::Update() {
-     OC_LOG_INFO(FSM->app,std::string("global testvar=\"") + this->FSM->GlobalVars->get("testvar") + std::string("\""));
-     OC_LOG_INFO(FSM->app,std::string("local testvar=\"")  + this->FSM->LocalVars->get("testvar") + std::string("\""));
+     OC_LOG_INFO(FSM->app,std::string("global testvar=\"") + this->FSM->GlobalVars->get_str("testvar") + std::string("\""));
+     OC_LOG_INFO(FSM->app,std::string("local testvar=\"")  + this->FSM->LocalVars->get_str("testvar") + std::string("\""));
      OC_LOG_INFO(this->FSM->app,"Now i'm going to kill the program");
      this->FSM->Switch("EndProgramState");
 }

@@ -54,12 +54,8 @@ namespaces:
               fsm::           Finite State Machine code
               appvars::       console variables etc, classes for both global+local state
           configuration::     configuration loading - classes for loading+saving config and binding to appvars
-              shellopts::     shell options: command line switches etc, parsing code and such
-              configfiles::   code for loading and saving from config files in various formats
-                  json::      JSON support for configuration files
-                  ini::       .ini type configuration files
           console::           console code - includes BaseConsole class
-              cmdshell::      dynamic console command support, magic for calling console commands as functions from code
+              cmdshell::      dynamic console command support
               logging::       logging setup code including support for file rotation etc
           interfaces::        user interface code including base classes
               graphical::     graphical UI code including base
@@ -85,6 +81,20 @@ configuration:
    integrate with plugin manager
        each plugin can specify its own settings including default values etc stored in seperate namespace in config files (sections in .ini, or a seperate plugins dict in JSON etc)
 
+configuration via libconfig:
+   app specifies:
+       config file name and search paths
+       default values for each setting
+       command-line switches (or NULL)
+       optional usage/description for each setting
+   configuration manager searches for config file, if not found config file is written to ~/
+
+   configuration manager methods:
+      add_bool(setting_name,default_val,cmdline_switch,description)
+      add_int(...)
+      add_string(...)
+
+
 rendering / game loop:
    when ingame, current FSM state should be added as a listener on GUI
    nuklear GUI for launcher:
@@ -106,11 +116,6 @@ rendering / game loop:
           subclasses of a generic progress state
       texture cache
           global appvars with pointer to a texture cache class
-
-
-cmdshell:
-   dynamic commands specified by adding with name and getopts-style params
-   calling from C/C++ code: std::initializer_list variadic methods
 
 plugins:
    plugin manager maintains a list of plugins for each API type
