@@ -53,4 +53,7 @@ set_target_properties(opencraft-common PROPERTIES
 add_executable(appfw_simple ${CMAKE_SOURCE_DIR}/appfw_examples/appfw_simple.cpp)
 target_link_libraries(appfw_simple opencraft-common)
 
+add_executable(appfw_appvars ${CMAKE_SOURCE_DIR}/appfw_examples/appfw_appvars.cpp)
+target_link_libraries(appfw_appvars opencraft-common)
+
 

@@ -51,7 +51,7 @@ namespaces:
        appfw::                app framework - includes base app class
           appstate::          app state code
               fsm::           Finite State Machine code
-              appvars::       console variables etc, classes for both global+local state, stored inside FSM class as members
+              appvars::       console variables etc, classes for both global+local state
           configuration::     configuration loading - classes for loading+saving config and binding to appvars
               shellopts::     shell options: command line switches etc, parsing code and such
               configfiles::   code for loading and saving from config files in various formats

@@ -18,7 +18,7 @@
 // along with OpenCraft.  If not, see <http://www.gnu.org/licenses/>.
 //
 // DESCRIPTION:
-//     BaseFSM class
+//     BaseAppVars class
 //
 //-----------------------------------------------------------------------------
 
@@ -29,26 +29,31 @@
 #include <map>
 #include <string>
 
-#include <opencraft/appfw/appstate/fsm/base_state.h>
-#include <opencraft/appfw/appstate/appvars/base_appvars.h>
+// getters and setters to bind to an appvar
+typedef void        (*s_setter_t)(std::string s);
+typedef std::string (*s_getter_t)();
 
 namespace opencraft { namespace appfw {
-   class App;
-   namespace appstate { namespace fsm {
+   namespace appstate { namespace appvars {
 
-   class BaseState;
-   class BaseFSM {
+   class BaseAppVar {
       public:
-         BaseFSM(opencraft::appfw::App* _app);
+         BaseAppVar(std::string val);
+//         BaseAppVar(s_setter_t setter, s_getter_t getter); // TODO: implement function binding
+         std::string get();
+         void        set(std::string s);
+      protected:
+         std::string s_val;
+   };
 
-         void Update();
-         void Switch(std::string state_name);
-         void AddState(BaseState *State);
-         opencraft::appfw::App* app;
-         opencraft::appfw::appstate::appvars::BaseAppVars *GlobalVars;
-     protected:
-         BaseState* cur_state;
-         std::map<std::string,BaseState*> states; // maps known states with string IDs to actual state instances
+   class BaseAppVars {
+      public:
+         BaseAppVars();
+         std::string get(std::string k);
+         void set(std::string k, std::string v);
+
+      protected:
+         std::map<std::string,BaseAppVar*> vars;
    };
 
 }}}};

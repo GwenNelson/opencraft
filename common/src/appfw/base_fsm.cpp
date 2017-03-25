@@ -25,10 +25,12 @@
 #include <opencraft/appfw/appstate/fsm/base_fsm.h>
 #include <opencraft/appfw/appfw.h>
 
+#include <opencraft/appfw/appstate/appvars/base_appvars.h>
 namespace opencraft { namespace appfw { namespace appstate { namespace fsm {
 
 BaseFSM::BaseFSM(opencraft::appfw::App* _app) {
      this->app = _app;
+     this->GlobalVars = new opencraft::appfw::appstate::appvars::BaseAppVars();
      this->cur_state = NULL;
 }
 

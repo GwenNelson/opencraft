@@ -18,37 +18,51 @@
 // along with OpenCraft.  If not, see <http://www.gnu.org/licenses/>.
 //
 // DESCRIPTION:
-//     BaseFSM class
+//     BaseAppVars class
 //
 //-----------------------------------------------------------------------------
 
-#pragma once
 
 #include <opencraft/common.h>
 
 #include <map>
 #include <string>
 
-#include <opencraft/appfw/appstate/fsm/base_state.h>
 #include <opencraft/appfw/appstate/appvars/base_appvars.h>
 
+
 namespace opencraft { namespace appfw {
-   class App;
-   namespace appstate { namespace fsm {
+   namespace appstate { namespace appvars {
 
-   class BaseState;
-   class BaseFSM {
-      public:
-         BaseFSM(opencraft::appfw::App* _app);
+BaseAppVar::BaseAppVar(std::string val) {
+    this->set(val);
+}
 
-         void Update();
-         void Switch(std::string state_name);
-         void AddState(BaseState *State);
-         opencraft::appfw::App* app;
-         opencraft::appfw::appstate::appvars::BaseAppVars *GlobalVars;
-     protected:
-         BaseState* cur_state;
-         std::map<std::string,BaseState*> states; // maps known states with string IDs to actual state instances
-   };
+std::string BaseAppVar::get() {
+    return this->s_val;
+}
+
+void BaseAppVar::set(std::string s) {
+     this->s_val = s;
+}
+
+BaseAppVars::BaseAppVars() {
+}
+
+std::string BaseAppVars::get(std::string k) {
+    if(this->vars.find(k) != this->vars.end()) {
+       return this->vars[k]->get();
+    }
+    return "";
+}
+
+void BaseAppVars::set(std::string k, std::string v) {
+     if(this->vars.find(k) != this->vars.end()) {
+        this->vars[k]->set(v);
+        return;
+     }
+     this->vars[k] = new BaseAppVar(v);
+}
+
 
 }}}};
