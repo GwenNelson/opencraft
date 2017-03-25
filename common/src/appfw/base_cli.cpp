@@ -55,7 +55,7 @@ void BaseCLI::GrabEvents() {
      int retval = select(1, &rfds,NULL,NULL,&tv);
      if(FD_ISSET(0,&rfds)) {
         std::string s;
-        std::cin >> s;
+        std::getline(std::cin, s);
         this->app->Console->add_input(s);
      }
 }
