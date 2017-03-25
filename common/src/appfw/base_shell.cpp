@@ -22,6 +22,9 @@
 //
 //-----------------------------------------------------------------------------
 
+// TODO: implement dynamic command magic
+// TODO: basic commands: set,help,quit
+
 
 #include <opencraft/common.h>
 #include <vector>

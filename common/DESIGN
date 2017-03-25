@@ -36,6 +36,7 @@ App framework:
        Generate default configurations and save
        Load config from command line params and .cfg files
        Bound to console variables and available at runtime
+       plugin-specific settings
     Console + logging
        Dynamic console commands
        Boost logging output
@@ -70,3 +71,55 @@ namespaces:
               api::           API base classes for plugins
               loaders::       plugin loaders
                   dlopen::    dlopen() based plugin loader
+
+configuration:
+   app specifies configuration variables:
+       data type
+       optional command-line switch
+       optional environment variable
+       optional bind to global variables (as read/write or read-only)
+       default values
+       required values
+       load/save settings
+       generate default config file
+   integrate with plugin manager
+       each plugin can specify its own settings including default values etc stored in seperate namespace in config files (sections in .ini, or a seperate plugins dict in JSON etc)
+
+rendering / game loop:
+   when ingame, current FSM state should be added as a listener on GUI
+   nuklear GUI for launcher:
+      only one FSM state
+      some nuklear widgets bound to global variables
+      nuklear GUI sends click events for buttons etc to FSM state, FSM state uses this to open/close windows etc
+      nuklear GUI handles some events itself (such as widget changes for bound variables, switching tabs etc)
+      FSM state tracks currently running external programs via appvars
+   nuklear GUI for game client:
+      FSM states for splash and menus
+          base menu class?
+      settings menu uses bound widgets
+      ingame FSM state
+          nuklear GUI provides OpenGL widget backed by a texture (i.e render to texture to display inside GUI)
+          nuklear GUI sends click events and keyboard events when focus is on game rendering widget
+          local paused flag etc
+          appvars bound to getter functions for speed (as opposed to avatar position reading from appvars, appvars reads from some kind of avatar instance until FSM state shutdown)
+      loading / connecting FSM state
+          subclasses of a generic progress state
+      texture cache
+          global appvars with pointer to a texture cache class
+
+
+cmdshell:
+   dynamic commands specified by adding with name and getopts-style params
+   calling from C/C++ code: std::initializer_list variadic methods
+
+plugins:
+   plugin manager maintains a list of plugins for each API type
+   API type instances returned from functions specified in plugin
+       plugin loader is responsible for obtaining the API types and creating instances of them
+       for dlopen, plugin simply has an array of structs with API type, version and reference to a function that can create an instance of that API
+           instance function must not take any parameters and should return either a struct or a class compatible with the specified version and API type
+   API types specified as strings and version numbers
+   each plugin can implement 1 or more API types
+   app asks plugin manager for all APIs of a particular type or for all loaded plugins etc
+   standard ModuleInfo API
+   potentially add RPC APIs?
