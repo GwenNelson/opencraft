@@ -56,4 +56,6 @@ target_link_libraries(appfw_simple opencraft-common)
 add_executable(appfw_appvars ${CMAKE_SOURCE_DIR}/appfw_examples/appfw_appvars.cpp)
 target_link_libraries(appfw_appvars opencraft-common)
 
+add_executable(appfw_shell ${CMAKE_SOURCE_DIR}/appfw_examples/appfw_shell.cpp)
+target_link_libraries(appfw_shell opencraft-common)
 

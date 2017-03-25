@@ -18,28 +18,31 @@
 // along with OpenCraft.  If not, see <http://www.gnu.org/licenses/>.
 //
 // DESCRIPTION:
-//     BaseInterface class
+//     BaseShell class
 //
 //-----------------------------------------------------------------------------
 
 #pragma once
 
+#include <opencraft/common.h>
+#include <vector>
 #include <string>
 
-namespace opencraft { namespace appfw { 
-   class App;
-   namespace interfaces {
+#include <opencraft/appfw/console/console_event_listener.h>
+#include <opencraft/appfw/appfw.h>
 
-   class BaseInterface {
+namespace opencraft { namespace appfw { namespace console { namespace cmdshell {
+
+   class BaseShell : public opencraft::appfw::console::ConsoleEventListener {
       public:
-         BaseInterface(opencraft::appfw::App *_app);
+         BaseShell(opencraft::appfw::App* _app);
+         void on_output(std::string s);
+         void on_output_clear();
+         void on_input(std::string s);
+         void on_input_clear();
 
-         virtual void GrabEvents();
-         virtual void Update();
-         virtual void Render();
       protected:
-         opencraft::appfw::App *app;
-
+         opencraft::appfw::App* app;
    };
 
-}}};
+}}}};

@@ -56,14 +56,28 @@ App::App() {
 }
 
 void App::run() {
+     // basic main loop overview:
+     // 1 - ask all active UIs to grab events (user input comes in here)
+     //     TODO: network I/O stuff
+     // 2 - each UI grabs events and processes them, updating relevant state directly if needed
+     //     some UIs have listeners and will send updates to their listeners instead of touching state depending on the event
+     // 3 - current FSM state is asked to update
+     // 4 - each UI in turn is asked to update any required state
+     // 5 - each UI in turn is asked to render
      for(;;) { // run forever!
-        // TODO: Grab input from UIs here and turn into events for the app state
-        this->FSM->Update(); // update the current app state
+
         for(auto const& ui: this->UserInterfaces) {
-            ui->Update();
+            ui->GrabEvents(); // ask UIs to grab events and update listeners
         }
+
+        this->FSM->Update(); // update the current app state
+
         for(auto const& ui: this->UserInterfaces) {
-            ui->Render();
+            ui->Update(); // ask UIs to update their own internal state
+        }
+
+        for(auto const& ui: this->UserInterfaces) {
+            ui->Render(); // ask UIs to render their internal state to the user
         }
      }
 }

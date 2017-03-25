@@ -31,6 +31,9 @@ BaseInterface::BaseInterface(opencraft::appfw::App *_app) {
      this->app = _app;
 }
 
+void BaseInterface::GrabEvents() {
+}
+
 void BaseInterface::Update() {
 }
 

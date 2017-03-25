@@ -38,6 +38,7 @@ namespace opencraft { namespace appfw { namespace interfaces { namespace cli {
        public:
           BaseCLI(opencraft::appfw::App *_app) : BaseInterface(_app) {};
           void Update();
+          void GrabEvents();
           void on_output(std::string s);
           void on_output_clear() {};
           void on_input(std::string s) {};

@@ -27,6 +27,12 @@
 
 #include <iostream>
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <unistd.h>
+
 namespace opencraft { namespace appfw { namespace interfaces { namespace cli {
 
 void BaseCLI::Update() {
@@ -34,6 +40,23 @@ void BaseCLI::Update() {
         std::cout << this->app->Console->get_output();
         this->app->Console->add_listener(this);
         first_update = false;
+     }
+}
+
+void BaseCLI::GrabEvents() {
+     // this is a bit of a hack - basically we check using select() if stdin is open for reading and if so call readline, readline then handles passing full lines to the console
+     fd_set rfds;
+     struct timeval tv;
+     tv.tv_sec  = 0;
+     tv.tv_usec = 10;
+
+     FD_ZERO(&rfds);
+     FD_SET(0, &rfds);
+     int retval = select(1, &rfds,NULL,NULL,&tv);
+     if(FD_ISSET(0,&rfds)) {
+        std::string s;
+        std::cin >> s;
+        this->app->Console->add_input(s);
      }
 }
 
