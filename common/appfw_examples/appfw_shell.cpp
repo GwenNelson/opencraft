@@ -46,9 +46,9 @@ int main(int argc, char** argv) {
     // create our command-line shell, BaseShell class will handle adding itself to the console etc
     appfw::console::cmdshell::BaseShell *SimpleShell = new appfw::console::cmdshell::BaseShell(SimpleApp);
 
-    // tell the user to start using the shell with a welcome message sent to the console
+    // tell the user to start using the shell with a welcome message and a prompt sent to the console
     SimpleApp->Console->add_output("\nShell is ready! type help for help\n\n");
-
+    SimpleApp->Console->add_output("\n> ");
     // no need to set a state, IdleState is fine
     SimpleApp->run();
 }

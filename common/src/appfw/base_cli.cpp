@@ -57,7 +57,9 @@ void BaseCLI::GrabEvents() {
         std::string s;
         std::getline(std::cin, s);
         this->app->Console->add_input(s);
+
      }
+     std::cout << std::flush;
 }
 
 void BaseCLI::on_output(std::string s) {

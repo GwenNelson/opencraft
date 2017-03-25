@@ -82,6 +82,10 @@ void quit_func(po::variables_map vm, opencraft::appfw::App *app, BaseShell* shel
      app->FSM->Switch("EndProgramState");
 }
 
+void set_func(po::variables_map vm, opencraft::appfw::App *app, BaseShell* shell) {
+
+}
+
 BaseShell::BaseShell(opencraft::appfw::App* _app) {
     this->app = _app;
     this->app->Console->add_listener(this);
@@ -89,19 +93,40 @@ BaseShell::BaseShell(opencraft::appfw::App* _app) {
     // add builtin help command
     po::options_description *help_opts = new po::options_description("");
     help_opts->add_options()
-       ("cmd", po::value< std::string>(), "command to get help for");
+       ("cmd", po::value<std::string>(), "command to get help for");
     po::positional_options_description *help_pos_opts = new po::positional_options_description();
     help_pos_opts->add("cmd", 1);
     this->add_cmd("help","Displays help for commands",
-                  "help [cmdname]\n"
-                  "     [cmdname] command to get help for, optional",
+                  "help <cmdname>\n"
+                  "     <cmdname> command to get help for, optional",
                    help_func,help_opts,help_pos_opts);
     
     // add builtin quit command
     po::options_description             *quit_opts      = new po::options_description("");
     po::positional_options_description  *quit_pos_opts  = new po::positional_options_description();
     this->add_cmd("quit","Closes the program","quit",quit_func,quit_opts,quit_pos_opts);
+    
+    
+    // add builtin set command
+    po::options_description  *set_opts = new po::options_description("");
+    set_opts->add_options()
+       ("l,local","Local AppVars only")
+       ("g,global","Global AppVars only")
+       ("key", po::value<std::string>(),"Key to set")
+       ("val", po::value<std::string>(),"Value to set key to");
 
+    po::positional_options_description *set_pos_opts = new po::positional_options_description();
+    set_pos_opts->add("key",1);
+    set_pos_opts->add("val",1);
+    this->add_cmd("set","Sets or displays AppVars values",
+                  "set [-l|--local] [-g|--global] <key> <val>\n"
+                  "    [-l|--local]  Set local AppVars only\n"
+                  "    [-g|--global] Set global AppVars only\n"
+                  "    <key>         Key to set\n"
+                  "    <val>         Value to set that key to\n"
+                  "\n"
+                  "    If no parameters are given, all AppVars will be dumped to the console",
+                  set_func,set_opts,set_pos_opts);
 }
 
 void BaseShell::on_output(std::string s) {
@@ -119,14 +144,19 @@ void BaseShell::add_cmd(std::string cmdname, std::string basic_usage, std::strin
 }
 
 void BaseShell::on_input(std::string s) {
-     if(s.size()==0) return; // ignore empty lines
+     if(s.size()==0) {
+        this->app->Console->add_output("\n> ");
+        return;
+     }
 
      std::vector<std::string> tokens = tokenize(s);
-
+     if(tokens.size()==0) {
+        this->app->Console->add_output("\n> ");
+        return;
+     }
      std::string cmdname = std::string(tokens[0]);
-     tokens.erase(tokens.begin());
 
-     OC_LOG_DEBUG(this->app,std::string("Got command ") + cmdname);
+     tokens.erase(tokens.begin());
 
      if(this->cmd_funcs.find(cmdname) != this->cmd_funcs.end()) {
         po::variables_map vm;
@@ -134,9 +164,12 @@ void BaseShell::on_input(std::string s) {
                 .options(*(this->cmd_opts[cmdname])).positional(*(this->cmd_pos_opts[cmdname])).run(), vm);
         po::notify(vm);
         this->cmd_funcs[cmdname](vm,this->app,this);
+     } else {
+        this->app->Console->add_output(std::string("Unknown command: ") + cmdname);
      }
 
      this->app->Console->clear_input();
+     this->app->Console->add_output("\n> ");
 }
 
 void BaseShell::on_input_clear() {
