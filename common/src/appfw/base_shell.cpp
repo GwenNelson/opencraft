@@ -103,7 +103,7 @@ void set_func(po::variables_map vm, opencraft::appfw::App *app, BaseShell* shell
         if(!vm.count("local")) {  // can dump global
            out << "Global vars:" << std::endl;
            for(auto const& it : app->FSM->GlobalVars->vars) {
-               out << it.first << "=" << it.second->get_str() << std::endl;
+               out << it.first << " = " << it.second->get_str() << std::endl;
            }
            app->Console->add_output(out.str());
         }
