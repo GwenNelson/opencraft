@@ -35,6 +35,7 @@ using namespace opencraft;
 
 // this program only really uses IdleState, this works fine if you're not using the FSM
 // to setup a simple command-line shell we just create an instance of cmdshell and pass the app to the constructor
+// by default the shell comes with a couple of commands: set, help, quit
 
 int main(int argc, char** argv) {
     // boilerplate init stuff
