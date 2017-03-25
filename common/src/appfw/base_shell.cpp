@@ -83,7 +83,7 @@ void quit_func(po::variables_map vm, opencraft::appfw::App *app, BaseShell* shel
 }
 
 void set_func(po::variables_map vm, opencraft::appfw::App *app, BaseShell* shell) {
-
+     // TODO: implement this
 }
 
 BaseShell::BaseShell(opencraft::appfw::App* _app) {
