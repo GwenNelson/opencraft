@@ -25,7 +25,7 @@
 #include <opencraft/common.h>
 #include <vector>
 #include <string>
-
+#include <iostream>
 #include <opencraft/appfw/console/base_console.h>
 
 namespace opencraft { namespace appfw { namespace console {
@@ -33,20 +33,41 @@ namespace opencraft { namespace appfw { namespace console {
 BaseConsole::BaseConsole() {
 }
 
+void BaseConsole::add_listener(ConsoleEventListener *l) {
+     this->listeners.push_back(l);
+}
+
 void BaseConsole::clear_output() {
+     this->outputbuf = "";
+     for(auto const& l: this->listeners) {
+            l->on_output_clear();
+     }
 }
 
 void BaseConsole::add_output(std::string s) {
+     std::cout << s;
+     this->outputbuf.append(s);
+     for(auto const& l: this->listeners) {
+            l->on_output(s);
+     }
 }
 
 std::string BaseConsole::get_output() {
-     return std::string("");
+     return std::string(this->outputbuf);
 }
 
 void BaseConsole::clear_input() {
+     this->inputbuf.clear();
+     for(auto const& l: this->listeners) {
+            l->on_input_clear();
+     }
 }
 
 void BaseConsole::add_input(std::string s) {
+     this->inputbuf.push_back(s);
+     for(auto const& l: this->listeners) {
+            l->on_input(s);
+     }
 }
 
 std::vector<std::string> BaseConsole::get_input() {

@@ -38,14 +38,14 @@ App::App() {
      std::cout << "OpenCraft App framework compiled with " << opencraft_framework_longver()  << std::endl;
      std::cout << "Running on "                            << OPENCRAFT_FRAMEWORK_LONG_VER   << std::endl;
 
-     std::cout << OPENCRAFT_FRAMEWORK_COPYRIGHT << std::endl;
+     std::cout << OPENCRAFT_FRAMEWORK_COPYRIGHT << std::endl << std::endl;
 
      this->SetDebugMode(false);
 
      // create the console and logger
      this->Console = new console::BaseConsole();
-     this->Logger  = new console::logging::SimpleLogger(this->Console); // spits out logs to the console only
-     this->Logger->SetDebugMode(this->debug_mode);
+     this->Logger  = new console::logging::BaseLogger(this->Console); // spits out logs to the console only
+     this->Logger->info("Logging begins");
 
      // create the FSM and add default idle state
      this->FSM     = new appstate::fsm::BaseFSM();
@@ -54,20 +54,19 @@ App::App() {
 
 void App::run() {
      for(;;) { // run forever!
-        // TODO: Gareth input from UIs here and turn into events for the app state
+        // TODO: Grab input from UIs here and turn into events for the app state
         this->FSM->Update(); // update the current app state
         for(auto const& ui: this->UserInterfaces) {
-            // TODO: Update UI states here
+            ui->Update();
         }
         for(auto const& ui: this->UserInterfaces) {
-            // TODO: render UI states here (where relevant)
+            ui->Render();
         }
      }
 }
 
 void App::SetDebugMode(bool _debug_mode) {
      this->debug_mode = _debug_mode;
-     this->Logger->SetDebugMode(_debug_mode);
 }
 
 bool App::GetDebugMode() {

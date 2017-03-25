@@ -18,23 +18,26 @@
 // along with OpenCraft.  If not, see <http://www.gnu.org/licenses/>.
 //
 // DESCRIPTION:
-//     BaseInterface class
+//     ConsoleEventListener class
 //
 //-----------------------------------------------------------------------------
 
 #pragma once
 
+#include <opencraft/common.h>
+#include <vector>
 #include <string>
 
-namespace opencraft { namespace appfw { namespace interfaces {
+namespace opencraft { namespace appfw { namespace console {
 
-   class BaseInterface {
+   // inherit from this class and override stuff
+   class ConsoleEventListener {
       public:
-         BaseInterface();
-
-         virtual void Update();
-         virtual void Render();
-
+         // override all these
+         virtual void on_output(std::string s) = 0;
+         virtual void on_output_clear() = 0;
+         virtual void on_input(std::string s) = 0;
+         virtual void on_input_clear() = 0;
    };
 
 }}};

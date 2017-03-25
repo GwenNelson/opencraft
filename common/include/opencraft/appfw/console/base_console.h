@@ -28,12 +28,17 @@
 #include <vector>
 #include <string>
 
+#include <opencraft/appfw/console/console_event_listener.h>
+
 namespace opencraft { namespace appfw { namespace console {
 
    class BaseConsole {
       public:
          BaseConsole();
-         
+
+         // event listener support
+         void add_listener(ConsoleEventListener *l);
+
          // basic operations on output
          void clear_output();            // clear the output buffer, this will cause scrollback to disappear
          void add_output(std::string s); // append a string to the output buffer
@@ -44,7 +49,10 @@ namespace opencraft { namespace appfw { namespace console {
          void clear_input();                    // clear the input buffer
          void add_input(std::string);           // append a line read from the user to the input buffer where the UI can read it
          std::vector<std::string> get_input();  // return the current contents of the input buffer
-
+      protected:
+         std::string                        outputbuf;
+         std::vector<std::string>           inputbuf;
+         std::vector<ConsoleEventListener*> listeners;
    };
 
 }}};

@@ -28,17 +28,27 @@
 
 #include <opencraft/appfw/console/base_console.h>
 
-namespace opencraft { namespace appfw { namespace console { namespace logging {
+#include <string>
 
-// this class pretty much does nothing beyond setup logging via boost
+namespace opencraft { namespace appfw { namespace console { namespace logging {
 
    class BaseLogger {
       public:
          BaseLogger(opencraft::appfw::console::BaseConsole *_Console);
+         void info(std::string s);
          
-         void SetDebugMode(bool debug);
       private:
          opencraft::appfw::console::BaseConsole *Console;
+         bool debug_mode;
    };
 
 }}}};
+
+enum log_severity {
+     info,
+     debug,
+     error,
+     warn
+};
+
+

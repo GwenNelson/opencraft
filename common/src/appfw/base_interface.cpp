@@ -30,5 +30,10 @@ namespace opencraft { namespace appfw { namespace interfaces {
 BaseInterface::BaseInterface() {
 }
 
+void BaseInterface::Update() {
+}
+
+void BaseInterface::Render() {
+}
 
 }}};

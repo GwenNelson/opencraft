@@ -27,15 +27,27 @@
 #include <opencraft/appfw/console/base_console.h>
 #include <opencraft/appfw/console/logging/base_logger.h>
 
+#include <boost/date_time/posix_time/posix_time.hpp>
+
+#include <iostream>
+#include <string>
+
+namespace pt = boost::posix_time;
+
+using namespace std;
+
 namespace opencraft { namespace appfw { namespace console { namespace logging {
 
-// this class pretty much does nothing beyond setup logging via boost
-
 BaseLogger::BaseLogger(opencraft::appfw::console::BaseConsole *_Console) {
+     this->Console = _Console;
 }
 
-void BaseLogger::SetDebugMode(bool debug) {
+void BaseLogger::info(std::string s) {
+     this->Console->add_output(pt::to_iso_extended_string(pt::second_clock::local_time()));
+     this->Console->add_output(" [INFO] ");
+     this->Console->add_output(s);
+     this->Console->add_output("\n");
 }
-
 
 }}}};
+
