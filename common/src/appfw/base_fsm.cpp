@@ -32,6 +32,7 @@ namespace opencraft { namespace appfw { namespace appstate { namespace fsm {
 BaseFSM::BaseFSM(opencraft::appfw::App* _app) {
      this->app = _app;
      this->GlobalVars = new opencraft::appfw::appstate::appvars::BaseAppVars();
+     this->LocalVars  = NULL;
      this->cur_state = NULL;
 }
 
@@ -47,11 +48,15 @@ void BaseFSM::Switch(std::string state_name) {
      if(this->states.find(state_name) != this->states.end()) {
         if(this->cur_state == NULL) {
           OC_LOG_INFO(this->app,std::string("Starting with state ") + state_name);
+          this->LocalVars = new opencraft::appfw::appstate::appvars::BaseAppVars();
         } else {
           OC_LOG_INFO(this->app,std::string("Switching state from ") + this->cur_state->GetName() + std::string(" to ") + state_name);
+          delete this->LocalVars;
+          this->LocalVars = NULL;
 //        this->cur_state->Shutdown(); // TODO: implement this
         }
         this->cur_state = this->states[state_name];
+        this->LocalVars = new opencraft::appfw::appstate::appvars::BaseAppVars();
      } else {
         OC_LOG_INFO(this->app,std::string("Could not switch to unknown state: ") + state_name);
      }

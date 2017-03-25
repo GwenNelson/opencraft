@@ -48,6 +48,7 @@ namespace opencraft { namespace appfw {
          std::string GetStateName();
          opencraft::appfw::App* app;
          opencraft::appfw::appstate::appvars::BaseAppVars *GlobalVars;
+         opencraft::appfw::appstate::appvars::BaseAppVars *LocalVars;
      protected:
          BaseState* cur_state;
          std::map<std::string,BaseState*> states; // maps known states with string IDs to actual state instances

@@ -47,10 +47,15 @@ class AppVarSetState : public appfw::appstate::fsm::BaseState {
 
 void AppVarSetState::Init() {
      this->FSM->GlobalVars->set("testvar","hello there");
-     OC_LOG_INFO(FSM->app,"I just set testvar to \"hello there\"");
+     OC_LOG_INFO(FSM->app,"I just set global variable testvar to \"hello there\"");
+
 }
 
 void AppVarSetState::Update() {
+     this->FSM->LocalVars->set("testvar","a different value!");
+     OC_LOG_INFO(FSM->app,"I just set local variable testvar to \"a different value!\"");
+     OC_LOG_INFO(FSM->app,std::string("global testvar=\"") + this->FSM->GlobalVars->get("testvar") + std::string("\""));
+     OC_LOG_INFO(FSM->app,std::string("local testvar=\"")  + this->FSM->LocalVars->get("testvar") + std::string("\""));
      OC_LOG_INFO(FSM->app,"Now let's read that variable using AppVarGetState");
      this->FSM->Switch("AppVarGetState");
 }
@@ -69,8 +74,8 @@ void AppVarGetState::Init() {
 }
 
 void AppVarGetState::Update() {
-     std::string val = this->FSM->GlobalVars->get("testvar");
-     OC_LOG_INFO(this->FSM->app,std::string("AppVarGetState::Update() - it looks like the contents of the variable are: \"") + val + std::string("\""));
+     OC_LOG_INFO(FSM->app,std::string("global testvar=\"") + this->FSM->GlobalVars->get("testvar") + std::string("\""));
+     OC_LOG_INFO(FSM->app,std::string("local testvar=\"")  + this->FSM->LocalVars->get("testvar") + std::string("\""));
      OC_LOG_INFO(this->FSM->app,"Now i'm going to kill the program");
      this->FSM->Switch("EndProgramState");
 }
