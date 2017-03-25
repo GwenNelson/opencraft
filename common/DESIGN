@@ -90,6 +90,7 @@ configuration via libconfig:
    configuration manager searches for config file, if not found config file is written to ~/
 
    configuration manager methods:
+      constructor(filename,search_path_array)
       add_bool(setting_name,default_val,cmdline_switch,description)
       add_int(...)
       add_string(...)

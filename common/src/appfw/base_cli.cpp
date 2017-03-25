@@ -48,7 +48,7 @@ void BaseCLI::GrabEvents() {
      fd_set rfds;
      struct timeval tv;
      tv.tv_sec  = 0;
-     tv.tv_usec = 10;
+     tv.tv_usec = 0;
 
      FD_ZERO(&rfds);
      FD_SET(0, &rfds);
