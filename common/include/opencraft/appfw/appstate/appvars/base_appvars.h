@@ -74,7 +74,6 @@ namespace opencraft { namespace appfw {
          bool get_bool(std::string k);
          uint64_t get_int(std::string k);
 
-      protected:
          std::map<std::string,BaseAppVar*> vars;
    };
 

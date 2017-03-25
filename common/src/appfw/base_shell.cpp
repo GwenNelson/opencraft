@@ -37,6 +37,8 @@
 
 #include <boost/bind.hpp>
 #include <boost/tokenizer.hpp>
+#include <sstream> 
+#include <boost/lexical_cast.hpp>
 
 // shamelessly ripped from a stackoverflow post
 // attribution in accordance with the CC-By-SA license: http://stackoverflow.com/questions/18378798/use-boost-program-options-to-parse-an-arbitrary-string
@@ -61,21 +63,23 @@ namespace opencraft { namespace appfw { namespace console { namespace cmdshell {
 
 void help_func(po::variables_map vm, opencraft::appfw::App *app, BaseShell* shell) {
      std::string cmdname;
+     std::stringstream out;
      if(vm.count("cmd")==0) {
          for (auto const& it : shell->cmd_basic_usage) {
               cmdname  = it.first;
               std::string cmdusage = it.second;
-              std::cout << cmdname << " \t\t" << cmdusage << std::endl;
+              out << cmdname << " \t\t" << cmdusage << std::endl;
          }
      } else {
          cmdname = vm["cmd"].as<std::string>();
          if(shell->cmd_opts.find(cmdname) != shell->cmd_opts.end()) {
-            std::cout << shell->cmd_basic_usage[cmdname] << std::endl << std::endl;
-            std::cout << shell->cmd_full_usage[cmdname] << std::endl;
+            out << shell->cmd_basic_usage[cmdname] << std::endl << std::endl;
+            out << shell->cmd_full_usage[cmdname] << std::endl;
          } else {
-            std::cout << "Unknown command!" << std::endl;
+            out << "Unknown command!" << std::endl;
          }
      }
+     app->Console->add_output(out.str());
 }
 
 void quit_func(po::variables_map vm, opencraft::appfw::App *app, BaseShell* shell) {
@@ -83,7 +87,45 @@ void quit_func(po::variables_map vm, opencraft::appfw::App *app, BaseShell* shel
 }
 
 void set_func(po::variables_map vm, opencraft::appfw::App *app, BaseShell* shell) {
-     // TODO: implement this
+     std::stringstream out;
+     if(vm.count("local") && vm.count("global")) {
+        app->Console->add_output("Can not specify both local and global!\n");
+        return;
+     }
+
+     if( (vm.count("key") && !vm.count("val")) || (vm.count("val") && !vm.count("key"))) {
+        app->Console->add_output("Need both key and value to set a key!\n");
+        return;
+     }
+
+     if( (!vm.count("key")) && (!vm.count("val"))) { // dump all vars
+
+        if(!vm.count("local")) {  // can dump global
+           out << "Global vars:" << std::endl;
+           for(auto const& it : app->FSM->GlobalVars->vars) {
+               out << it.first << "=" << it.second->get_str() << std::endl;
+           }
+           app->Console->add_output(out.str());
+        }
+
+        if(!vm.count("global")) { // can dump local
+
+        }
+     } else { // set a var!
+        std::string k = vm["key"].as<std::string>();
+        std::string v = vm["val"].as<std::string>();
+        if (v.find_first_not_of( "0123456789" ) == std::string::npos) {
+           app->FSM->GlobalVars->set(k,boost::lexical_cast<uint64_t>(v));
+        } else {
+          if(v=="true") { 
+             app->FSM->GlobalVars->set(k,true);
+          } else if (v=="false") {
+             app->FSM->GlobalVars->set(k,false);
+          } else {
+            app->FSM->GlobalVars->set(k,v);
+          }
+        }
+     }
 }
 
 BaseShell::BaseShell(opencraft::appfw::App* _app) {
@@ -110,8 +152,8 @@ BaseShell::BaseShell(opencraft::appfw::App* _app) {
     // add builtin set command
     po::options_description  *set_opts = new po::options_description("");
     set_opts->add_options()
-       ("l,local","Local AppVars only")
-       ("g,global","Global AppVars only")
+       ("local,l","Local AppVars only")
+       ("global,g","Global AppVars only")
        ("key", po::value<std::string>(),"Key to set")
        ("val", po::value<std::string>(),"Value to set key to");
 

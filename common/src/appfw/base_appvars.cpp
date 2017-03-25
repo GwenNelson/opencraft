@@ -53,10 +53,10 @@ std::string BaseAppVar::get_str() {
     if(this->val_type == APPVAR_STR) {
        return this->s_val;
     } else {
-       if(this->val_type == APPVAR_INT) return std::to_string(this->i_val);
+       if(this->val_type == APPVAR_INT) return std::string("INT(") + std::to_string(this->i_val) + std::string(")");
        if(this->val_type == APPVAR_BOOL) {
-          if(this->b_val) return "true";
-          return "false";
+          if(this->b_val) return "BOOL(true)";
+          return "BOOL(false)";
        }
     }
 }
