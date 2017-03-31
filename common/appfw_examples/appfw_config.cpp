@@ -25,13 +25,15 @@
 #include <opencraft/appfw/appfw.h>
 #include <opencraft/appfw/interfaces/cli/simple_cli.h>
 #include <opencraft/appfw/console/logging/base_logger.h>
+#include <opencraft/appfw/console/cmdshell/base_shell.h>
+
 
 #include <iostream>
 
-#include <libconfig.h++>
+
+#include <opencraft/appfw/configuration/config_manager.h>
 
 using namespace opencraft;
-using namespace libconfig;
 
 // this program reads configuration settings from either the command line or a file named appfw_config.cfg
 // the command line overrides the config file
@@ -41,45 +43,36 @@ using namespace libconfig;
 //    listen_port (-P|--port)  - optional, bound to a read-only GlobalVar
 // a default is provided for both settings
 
-// when run, the program will simply dump the settings to stdout
-
-// for simplicity sake, we don't actually run the app in this example
 
 int main(int argc, char** argv) {
     // boilerplate init stuff
     appfw::App *SimpleApp = new appfw::App();
+
+
+    // create config manager
+    appfw::configuration::ConfigManager *cfg = new appfw::configuration::ConfigManager({"."},SimpleApp);
+    
+    // setup the variables
+    cfg->add_string("username",   "SirGareth","U,username","Username to use");
+    cfg->add_int   ("listen_port",25565,      "P,port","Port to listen on");
+
+    // load the config file if it exists
+    cfg->load("appfw_config.cfg");
+
+    // even if it doesn't exist, save the config file
+    cfg->save("appfw_config.cfg");
+
+
+    // do this just to dump output to stdout
     SimpleApp->AddInterface(new appfw::interfaces::cli::BaseCLI(SimpleApp));
 
-    Config cfg;
-    Setting &root = cfg.getRoot();
-    root.add("username",    Setting::TypeString) = "SirGareth";
-    root.add("listen_port", Setting::TypeInt)    = 25565;
-    cfg.writeFile("./appfw_config.cfg");
 
-/*    appfw::configuration *ConfigManager cfg = new appfw::configuration::ConfigManager(SimpleApp);
+    appfw::console::cmdshell::BaseShell *SimpleShell = new appfw::console::cmdshell::BaseShell(SimpleApp);
 
-    // specify our settings
-    cfg->add_option("username",     // variable name
-                    "U,username",   // command-line switch/flag
-                    true,           // bind to a GlobalVar
-                    false,          // make the GlobalBar read only
-                    "SirGareth",    // default value                  
-                    true);          // required value
-    cfg->add_option("listen_port",  // variable name
-                    "P,port",       // command-line switch/flag
-                    true,           // bind to a GlobalVar
-                    true,           // make the GlobalBar read only
-                    "25565",        // default value                  
-                    false);         // required value
 
-    // load the config file if it exists, otherwise generate it and write it out
-    cfg->load_or_generate("./appfw_config.cfg");
-    
-    // parse command line options
-    cfg->parse_cmdline(argc,argv);
+    SimpleApp->Console->add_output("\nTry typing set to see the loaded settings\n\n");
 
-    // dump the settings
-    std::cout << "username:    " << SimpleApp->FSM->GlobalVars->get("username")    << std::endl;
-    std::cout << "listen port: " << SimpleApp->FSM->GlobalVars->get("listen_port") << std::endl;*/
+    SimpleApp->run();
+
 }
 

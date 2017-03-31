@@ -56,6 +56,7 @@ enum log_severity {
 
 // convenience macros
 // a is for app
-#define OC_LOG_INFO(a,msg) a->Logger->fmt_output("INFO",a->FSM->GetStateName(),std::string(msg))
+#define OC_LOG_INFO(a,msg)  a->Logger->fmt_output("INFO",a->FSM->GetStateName(),std::string(msg))
+#define OC_LOG_ERROR(a,msg) a->Logger->fmt_output("ERROR",a->FSM->GetStateName(),std::string(msg))
 // TODO make the below check for debug mode
 #define OC_LOG_DEBUG(a,msg) a->Logger->fmt_output("DEBUG",a->FSM->GetStateName(),std::string(msg))

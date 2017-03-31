@@ -33,6 +33,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+
 namespace opencraft { namespace appfw { namespace interfaces { namespace cli {
 
 void BaseCLI::Update() {
@@ -54,7 +55,7 @@ void BaseCLI::GrabEvents() {
      FD_SET(0, &rfds);
      int retval = select(1, &rfds,NULL,NULL,&tv);
      if(FD_ISSET(0,&rfds)) {
-        std::string s;
+        std::string s; // TODO - replace this bit with readline, using a callback for completed lines
         std::getline(std::cin, s);
         this->app->Console->add_input(s);
 
