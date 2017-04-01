@@ -1,0 +1,88 @@
+API server endpoints:
+GET /users/profiles/minecraft/<username>
+   see http://wiki.vg/Mojang_API#Username_-.3E_UUID_at_time
+   Returns JSON dict of UserID,UserName from users table or error
+
+GET /user/profiles/<uuid>/names
+   see http://wiki.vg/Mojang_API#UUID_-.3E_Name_history
+   returns only one entry with the name field
+
+POST /profiles/minecraft
+   see http://wiki.vg/Mojang_API#Playernames_-.3E_UUIDs
+   returns JSON list of responses containing (id,name) fields for each entry in the payload
+   name field is set to lowercase
+
+POST /user/profile/<uuid>/skin
+   Requires HTTP header {'Authorization':'Bearer ' + access_token} where access_token is the one returned from /authenticate
+   See wiki for bizarre payload format
+
+PUT /user/profile/<uuid>/skin
+   To implement later: skin uploading
+
+DELETE /user/profile/<uuid>/skin
+   Reset the skin
+
+GET /session/minecraft/profile/<uuid>
+   see http://wiki.vg/Mojang_API#UUID_-.3E_Profile_.2B_Skin.2FCape
+   returns JSON dict of (id,name,properties) fields where properties comes from the user_properties DB table
+
+
+GET /user
+   See http://wiki.vg/Mojang_API#User_Info
+   Requires HTTP header with access token as above
+   Returns json dict of (id,email,username,registerIp,registeredAt,...) etc
+
+Authentication server endpoints:
+/authenticate
+   see http://wiki.vg/Authentication#Authenticate
+   password can be either actual password (not recommended for obvious reasons) or a bcrypt hash (for compatibility with mojang's fail)
+   response may include availableProfiles+selectedProfile
+
+/refresh
+   see http://wiki.vg/Authentication#Refresh
+   if selectedProfile field is given, the id and name must exactly match a valid profile
+
+/validate
+   see http://wiki.vg/Authentication#Validate
+   null response - error status is given by HTTP code (wtf mojang?)
+
+/signout
+   see http://wiki.vg/Authentication#Signout
+   as with /validate, null response and error status given by HTTP code
+
+/invalidate
+   see http://wiki.vg/Authentication#Invalidate
+   similar to signout, again null response
+
+database tables:
+
+users
+  UserID               - UUID, unique per user
+  UserUsername         - string, username (e.g "garethnelson" instead of "Gareth Nelson")
+  UserName             - string, full user's name (e.g "Gareth Nelson" instead of "garethnelson")
+  UserEmail            - string, email address
+  UserDOB              - timestamp of user's birthday
+  UserEmailVerified    - boolean
+  UserEmailVerifyToken - random string for verifying the user's email address
+  UserRegistered       - timestamp of when the user was registered
+  UserPasswordChange   - timestamp of when the user's password was last changed - should NOT be leaked by the API
+  UserPassHash         - bcrypt hash for the user's password
+
+user_profiles
+  ProfileID    - UUID, unique per profile
+  UserID       - which user owns this profile
+  PlayerName   - string, can be customised by the user
+  SkinURL      - string, points to a skin URL, duh
+
+user_properties
+  UserID        - UUID, unique per user
+  PropertyName  - string
+  PropertyValue - string
+
+game_sessions
+  SessionID    - UUID, unique per game session
+  UserID       - which user owns this session
+  ProfileID    - the profile used in this session, used to fill selectedProfile field
+  ClientToken  - hex string sent to the server by the client
+  AccessToken  - hex string used to authorise this session, randomly generated upon authentication
+  LastAccess   - timestamp indicating last time this session was accessed, for timing out sessions
