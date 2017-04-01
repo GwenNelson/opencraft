@@ -1,5 +1,7 @@
 #!/bin/bash
-pushd common/build
+pushd common
+./genversion.sh
+cd build
 cmake ..
 make
 popd
