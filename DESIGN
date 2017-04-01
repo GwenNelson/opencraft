@@ -1,0 +1,10 @@
+apiserver/
+   django app with API to form basis of website etc
+common/
+   common stuff, app framework
+launcher/
+   launcher app
+protocol/
+   protocol library
+examples/
+   misc examples
