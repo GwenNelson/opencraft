@@ -1,16 +1,11 @@
 cmake_minimum_required(VERSION 3.0)
 
-cmake_policy(SET CMP0004 OLD)
-
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
-
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/CMakeFiles")
+set (CMAKE_CXX_STANDARD 14)
 
 FIND_PACKAGE(Boost COMPONENTS system program_options thread log log_setup)
 FIND_PACKAGE(ZLIB REQUIRED)
 find_package(jsoncpp REQUIRED)
-
-set (CMAKE_CXX_STANDARD 11)
 
 include(CheckCXXCompilerFlag)
 CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
@@ -29,24 +24,9 @@ ADD_DEFINITIONS(-DBOOST_LOG_DYN_LINK)
 
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIRS} ${JSONCPP_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/test_data)
 
-FILE(GLOB libopencraft-protocol_src                    ${CMAKE_SOURCE_DIR}/src/*.cpp)
-FILE(GLOB libopencraft-protocol_test_src               ${CMAKE_SOURCE_DIR}/test_src/*.cpp)
-FILE(GLOB libopencraft-protocol_test_packet_reader_src ${CMAKE_SOURCE_DIR}/test_src/packet_reader/*.cpp)
-FILE(GLOB test_client_src                     ${CMAKE_SOURCE_DIR}/test_client/*.cpp)
+FILE(GLOB libopencraft-protocol_src ${CMAKE_SOURCE_DIR}/src/*.cpp)
 
 ADD_LIBRARY(opencraft-protocol SHARED ${libopencraft-protocol_src} ${CMAKE_SOURCE_DIR}/src/packets.autogen.cpp)
-ADD_EXECUTABLE(bin2c ${CMAKE_SOURCE_DIR}/test_src/bin2c.c)
-ADD_EXECUTABLE(test_opencraft ${libopencraft-protocol_test_src} )
-ADD_EXECUTABLE(test_packet_reader ${libopencraft-protocol_test_packet_reader_src} )
-ADD_EXECUTABLE(ping_server ${CMAKE_SOURCE_DIR}/examples/ping_server.cpp)
-ADD_EXECUTABLE(chat_client ${CMAKE_SOURCE_DIR}/examples/chat_client.cpp)
-ADD_EXECUTABLE(test_client ${test_client_src})
-
 
 TARGET_LINK_LIBRARIES(opencraft-protocol pthread ${ZLIB_LIBRARIES} ${Boost_LIBRARIES})
-TARGET_LINK_LIBRARIES(test_opencraft pthread ${Boost_LIBRARIES} ${CMAKE_SOURCE_DIR}/build/libopencraft-protocol.so)
-TARGET_LINK_LIBRARIES(test_packet_reader pthread ${Boost_LIBRARIES} ${CMAKE_SOURCE_DIR}/build/libopencraft-protocol.so)
-TARGET_LINK_LIBRARIES(ping_server pthread ${Boost_LIBRARIES} ${CMAKE_SOURCE_DIR}/build/libopencraft-protocol.so)
-TARGET_LINK_LIBRARIES(chat_client pthread ${Boost_LIBRARIES} ${JSONCPP_LIBRARIES} ${CMAKE_SOURCE_DIR}/build/libopencraft-protocol.so)
-TARGET_LINK_LIBRARIES(test_client pthread ${Boost_LIBRARIES} ${CMAKE_SOURCE_DIR}/build/libopencraft-protocol.so)
 
